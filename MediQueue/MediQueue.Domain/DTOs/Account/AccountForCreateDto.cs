@@ -6,5 +6,6 @@ using System.Threading.Tasks;
 
 namespace MediQueue.Domain.DTOs.Account
 {
-    public record AccountForCreateDto(string login, string password, string phoneNum, string FisrtName, string LastName, DateTime Bithdate, int RoleId);
+    public record AccountForCreateDto(
+        string Login, string Password, string PhoneNumber, string FirstName, string LastName, string SurName, string Email, DateTime Bithdate, int RoleId);
 }

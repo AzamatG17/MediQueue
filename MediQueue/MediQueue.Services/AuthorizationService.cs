@@ -43,14 +43,14 @@ namespace MediQueue.Services
 
         public async Task<string> Register(AccountForCreateDto accountForCreateDto)
         {
-            if (string.IsNullOrWhiteSpace(accountForCreateDto.login) || string.IsNullOrWhiteSpace(accountForCreateDto.password))
+            if (string.IsNullOrWhiteSpace(accountForCreateDto.Login) || string.IsNullOrWhiteSpace(accountForCreateDto.Password))
             {
                 throw new ArgumentException("Login and Password are required");
             }
 
             var existingUser = await _context.Accounts
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Login == accountForCreateDto.login);
+                .FirstOrDefaultAsync(u => u.Login == accountForCreateDto.Login);
 
             if (existingUser != null)
             {
@@ -60,12 +60,12 @@ namespace MediQueue.Services
 
             var newUser = new Account
             {
-                Login = accountForCreateDto.login,
-                Password = accountForCreateDto.password,
+                Login = accountForCreateDto.Login,
+                Password = accountForCreateDto.Password,
                 Bithdate = accountForCreateDto.Bithdate,
-                FirstName = accountForCreateDto.FisrtName,
+                FirstName = accountForCreateDto.FirstName,
                 LastName = accountForCreateDto.LastName,
-                PhoneNumber = accountForCreateDto.phoneNum,
+                PhoneNumber = accountForCreateDto.PhoneNumber,
                 RoleId = accountForCreateDto.RoleId
             };
 

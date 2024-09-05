@@ -1,7 +1,9 @@
 ﻿using MediQueue.Domain.Interfaces.Auth;
+using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.JwtToken;
 using MediQueue.Infrastructure.Persistence;
+using MediQueue.Infrastructure.Persistence.Repositories;
 using MediQueue.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +20,19 @@ namespace MediQueue.Extensions
             AddAuthentication(services, configuration);
             AddAuthorization(services);
             AddServices(services);
+            AddRepositories(services);
             AddAutoMapper(services);
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
+
             return services;
         }
 
@@ -43,6 +57,12 @@ namespace MediQueue.Extensions
         {
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
+            services.AddScoped<IAccountService, AccountService>();
+        }
+
+        private static void AddRepositories(IServiceCollection services)
+        {
+            services.AddScoped<IAccountRepository, AccountRepository>();
         }
 
         private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
