@@ -63,6 +63,11 @@ namespace MediQueue.Extensions
         private static void AddRepositories(IServiceCollection services)
         {
             services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IGroupCategoryRepository, GroupCategoryRepository>();
+            services.AddScoped<IGroupRepository, GroupRepository>();
+            services.AddScoped<IQuestionnaireRepository, QuestionnaireRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
         }
 
         private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
