@@ -19,6 +19,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .HasMaxLength(255)
                 .IsRequired();
 
+            builder.Property(a => a.Passport)
+                .HasMaxLength(255)
+                .IsRequired();
+
             builder.Property(a => a.FirstName)
                 .HasMaxLength(255)
                 .IsRequired();
@@ -42,6 +46,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasOne(a => a.Role)
                 .WithMany(r => r.Accounts)
                 .HasForeignKey(a => a.RoleId);
+
+            builder.HasOne(a => a.Questionnaire)
+                .WithOne(q => q.Account)
+                .HasForeignKey<Questionnaire>(q => q.AccountId);
         }
     }
 }
