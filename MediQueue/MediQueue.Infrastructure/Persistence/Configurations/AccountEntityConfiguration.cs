@@ -27,6 +27,14 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .HasMaxLength(255)
                 .IsRequired();
 
+            builder.Property(a => a.SurName)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            builder.Property(a => a.Email)
+                .HasMaxLength(255)
+                .IsRequired();
+
             builder.Property(a => a.PhoneNumber)
                 .HasMaxLength(255)
                 .IsRequired();

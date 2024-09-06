@@ -11,6 +11,14 @@ namespace MediQueue
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
             // Add services to the container.
+            builder.Services.AddCors(options =>
+             {
+                 options.AddPolicy("AllowSpecificOrigins", policy =>
+                 {
+                     policy.WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                           .WithHeaders("X-Requested-With", "Content-Type", "Origin", "Accept");
+                 });
+             });
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -31,6 +39,8 @@ namespace MediQueue
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("AllowAll");
 
             app.UseAuthorization();
 

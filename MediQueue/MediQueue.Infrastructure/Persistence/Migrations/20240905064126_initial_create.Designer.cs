@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediQueue.Infrastructure.persistence.Migrations
 {
     [DbContext(typeof(MediQueueDbContext))]
-    [Migration("20240904062307_initial_create")]
+    [Migration("20240905064126_initial_create")]
     partial class initial_create
     {
         /// <inheritdoc />
@@ -35,6 +35,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<DateTime>("Bithdate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -63,6 +68,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<string>("SurName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
 
