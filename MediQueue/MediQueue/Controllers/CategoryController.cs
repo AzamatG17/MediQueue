@@ -1,5 +1,7 @@
 ﻿using MediQueue.Domain.DTOs.Account;
+using MediQueue.Domain.DTOs.Category;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,23 +9,23 @@ namespace MediQueue.Controllers;
 
 //[Authorize(Policy = "Admin")]
 [ApiController]
-[Route("api/accounts")]
+[Route("api/category")]
 [EnableCors("AllowSpecificOrigins")]
-public class AccountController : ControllerBase
+public class CategoryController : ControllerBase
 {
-    private readonly IAccountService _accountService;
+    private readonly ICategoryService _categoryService;
 
-    public AccountController(IAccountService accountService)
+    public CategoryController(ICategoryService categoryService)
     {
-        _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
+        _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetAccountsAsync()
+    public async Task<ActionResult> GetCategoryAsync()
     {
         try
         {
-            var accounts = await _accountService.GetAllAccountsAsync();
+            var accounts = await _categoryService.GetAllCategoriesAsync();
             return Ok(accounts);
         }
         catch (Exception ex)
@@ -33,14 +35,14 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetAccountByIdAsync(int id)
+    public async Task<ActionResult> GetCategoryByIdAsync(int id)
     {
         try
         {
-            var account = await _accountService.GetAccountByIdAsync(id);
+            var account = await _categoryService.GetCategoryByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Account with id: {id} does not exist.");
+                return NotFound($"Category with id: {id} does not exist.");
 
             return Ok(account);
         }
@@ -55,16 +57,16 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> PostAsync([FromBody] AccountForCreateDto accountForCreateDto)
+    public async Task<ActionResult> PostAsync([FromBody] CategoryForCreateDto categoryForCreateDto)
     {
-        if (accountForCreateDto == null)
+        if (categoryForCreateDto == null)
         {
-            return BadRequest("Account data is null.");
+            return BadRequest("Category data is null.");
         }
 
         try
         {
-            var createdAccount = await _accountService.CreateAccountAsync(accountForCreateDto);
+            var createdAccount = await _categoryService.CreateCategoryAsync(categoryForCreateDto);
             return Ok(createdAccount);
         }
         catch (Exception ex)
@@ -74,23 +76,23 @@ public class AccountController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> PutAsync(int id, [FromBody] AccountForUpdateDto accountForUpdateDto)
+    public async Task<ActionResult> PutAsync(int id, [FromBody] CategoryForUpdateDto categoryForUpdateDto)
     {
-        if (accountForUpdateDto == null)
+        if (categoryForUpdateDto == null)
         {
-            return BadRequest("Account data is null.");
+            return BadRequest("Category data is null.");
         }
 
-        if (id != accountForUpdateDto.Id)
+        if (id != categoryForUpdateDto.Id)
         {
             return BadRequest(
-                $"Route id: {id} does not match with parameter id: {accountForUpdateDto.Id}.");
+                $"Route id: {id} does not match with parameter id: {categoryForUpdateDto.Id}.");
         }
 
         try
         {
-            
-            var updatedAccount = await _accountService.UpdateAccountAsync(accountForUpdateDto);
+
+            var updatedAccount = await _categoryService.UpdateCategoryAsync(categoryForUpdateDto);
             return Ok(updatedAccount);
         }
         catch (KeyNotFoundException ex)
@@ -104,11 +106,11 @@ public class AccountController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteAccount(int id)
+    public async Task<ActionResult> DeleteCategory(int id)
     {
         try
         {
-            await _accountService.DeleteAccountAsync(id);
+            await _categoryService.DeleteCategoryAsync(id);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

@@ -58,6 +58,11 @@ namespace MediQueue.Extensions
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<ICategoryService, CategoriesService>();
+            services.AddScoped<IGroupCategoryService, GroupCategoryService>();
+            services.AddScoped<IGroupService, GroupService>();
+            services.AddScoped<IQuestionnaireService, QuestionnaireService>();
+            services.AddScoped<IRoleService, RoleService>();
         }
 
         private static void AddRepositories(IServiceCollection services)

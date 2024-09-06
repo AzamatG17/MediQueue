@@ -10,23 +10,25 @@ namespace MediQueue.Services
     {
         private readonly IMapper _mapper;
         private readonly IAccountRepository _accountRepository;
+        private readonly IRoleRepository _roleRepository;
 
-        public AccountService(IAccountRepository accountRepository, IMapper mapper)
+        public AccountService(IAccountRepository accountRepository, IMapper mapper, IRoleRepository roleRepository)
         {
             _accountRepository = accountRepository ?? throw new ArgumentNullException(nameof(accountRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _roleRepository = roleRepository ?? throw new ArgumentNullException(nameof(roleRepository));
         }
 
         public async Task<IEnumerable<AccountDto>> GetAllAccountsAsync()
         {
-            var accounts =  await _accountRepository.FindAllAsync();
+            var accounts =  await _accountRepository.FindAllWithRoleIdAsync();
 
             return _mapper.Map<IEnumerable<AccountDto>>(accounts);
         }
 
         public async Task<AccountDto> GetAccountByIdAsync(int id)
         {
-            var account = await _accountRepository.FindByIdAsync(id);
+            var account = await _accountRepository.FindByIdWithRoleAsync(id);
 
             if (account == null)
             {
@@ -43,7 +45,15 @@ namespace MediQueue.Services
                 throw new ArgumentNullException(nameof(accountForCreateDto));
             }
 
+            var role = await _roleRepository.FindByIdAsync(accountForCreateDto.RoleId);
+            if (role == null)
+            {
+                throw new ArgumentException("Role not found.");
+            }
+
             var accountEntity = _mapper.Map<Account>(accountForCreateDto);
+
+            accountEntity.Role = role;
 
             await _accountRepository.CreateAsync(accountEntity);
 
@@ -60,8 +70,6 @@ namespace MediQueue.Services
             var account = _mapper.Map<Account>(accountForUpdateDto);
 
             await _accountRepository.UpdateAsync(account);
-
-            var accountDto = _mapper.Map<AccountDto>(account);
 
             return _mapper.Map<AccountDto>(account);      
         }

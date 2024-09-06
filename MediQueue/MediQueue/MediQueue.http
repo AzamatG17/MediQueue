@@ -1,4 +1,4 @@
-@MediQueue_HostAddress = http://192.168.0.143:7054
+@MediQueue_HostAddress = http://192.168.0.112:7054
 
 GET {{MediQueue_HostAddress}}/weatherforecast/
 Accept: application/json
