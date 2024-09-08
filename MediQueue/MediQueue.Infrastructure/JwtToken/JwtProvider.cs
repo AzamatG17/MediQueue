@@ -1,5 +1,7 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Auth;
+using MediQueue.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -8,9 +10,10 @@ using System.Text;
 
 namespace MediQueue.Infrastructure.JwtToken
 {
-    public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
+    public class JwtProvider(IOptions<JwtOptions> options, MediQueueDbContext mediQueueDbContext) : IJwtProvider
     {
         private readonly JwtOptions _options = options.Value;
+        private readonly MediQueueDbContext _context = mediQueueDbContext;
 
         public string GenerateToken(Account account)
         {
@@ -20,26 +23,18 @@ namespace MediQueue.Infrastructure.JwtToken
                 new Claim(ClaimTypes.Role, account.RoleId.ToString())
             };
 
-            switch (account.RoleId)
+            var role = _context.Roles
+                .Include(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+                .FirstOrDefault(r => r.Id == account.RoleId);
+
+            if (role == null)
             {
-                case 1:
-                    claimForToken.Add(new Claim("Admin", "true"));
-                    break;
-                case 2:
-                    claimForToken.Add(new Claim("Driver", "true"));
-                    break;
-                case 3:
-                    claimForToken.Add(new Claim("Doctor", "true"));
-                    break;
-                case 4:
-                    claimForToken.Add(new Claim("Operator", "true"));
-                    break;
-                case 5:
-                    claimForToken.Add(new Claim("Dispatcher", "true"));
-                    break;
-                case 6:
-                    claimForToken.Add(new Claim("Mechanic", "true"));
-                    break;
+                foreach(var rolePermision in role.RolePermissions)
+                {
+                    var permission = rolePermision.Permission;
+                    claimForToken.Add(new Claim("Permission", $"{permission.Controller}:{permission.Action}"));
+                }
             }
 
             var securityKey = new SymmetricSecurityKey(

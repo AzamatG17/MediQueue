@@ -1,30 +1,31 @@
-﻿using MediQueue.Domain.DTOs.Account;
+﻿using MediQueue.Domain.DTOs.Group;
+using MediQueue.Domain.DTOs.Role;
 using MediQueue.Domain.Interfaces.Services;
-using Microsoft.AspNetCore.Authorization;
+using MediQueue.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize(Policy = "IsRequirePermission")]
+//[Authorize(Policy = "Admin")]
 [ApiController]
-[Route("api/accounts")]
+[Route("api/role")]
 [EnableCors("AllowSpecificOrigins")]
-public class AccountController : ControllerBase
+public class RoleController : ControllerBase
 {
-    private readonly IAccountService _accountService;
+    private readonly IRoleService _roleService;
 
-    public AccountController(IAccountService accountService)
+    public RoleController(IRoleService roleService)
     {
-        _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
+        _roleService = roleService ?? throw new ArgumentNullException(nameof(roleService));
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetAccountsAsync()
+    public async Task<ActionResult> GetRolesAsync()
     {
         try
         {
-            var accounts = await _accountService.GetAllAccountsAsync();
+            var accounts = await _roleService.GetAllRolesAsync();
             return Ok(accounts);
         }
         catch (Exception ex)
@@ -34,14 +35,14 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetAccountByIdAsync(int id)
+    public async Task<ActionResult> GetRoleByIdAsync(int id)
     {
         try
         {
-            var account = await _accountService.GetAccountByIdAsync(id);
+            var account = await _roleService.GetRoleByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Account with id: {id} does not exist.");
+                return NotFound($"Role with id: {id} does not exist.");
 
             return Ok(account);
         }
@@ -56,16 +57,16 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> PostAsync([FromBody] AccountForCreateDto accountForCreateDto)
+    public async Task<ActionResult> PostAsync([FromBody] RoleForCreateDto roleForCreateDto)
     {
-        if (accountForCreateDto == null)
+        if (roleForCreateDto == null)
         {
-            return BadRequest("Account data is null.");
+            return BadRequest("Role data is null.");
         }
 
         try
         {
-            var createdAccount = await _accountService.CreateAccountAsync(accountForCreateDto);
+            var createdAccount = await _roleService.CreateRoleAsync(roleForCreateDto);
             return Ok(createdAccount);
         }
         catch (Exception ex)
@@ -75,23 +76,21 @@ public class AccountController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> PutAsync(int id, [FromBody] AccountForUpdateDto accountForUpdateDto)
+    public async Task<ActionResult> PutAsync(int id, [FromBody] RoleForUpdateDto roleForUpdateDto)
     {
-        if (accountForUpdateDto == null)
+        if (roleForUpdateDto == null)
         {
-            return BadRequest("Account data is null.");
+            return BadRequest("Role data is null.");
         }
 
-        if (id != accountForUpdateDto.Id)
+        if (id != roleForUpdateDto.Id)
         {
             return BadRequest(
-                $"Route id: {id} does not match with parameter id: {accountForUpdateDto.Id}.");
+                $"Route id: {id} does not match with parameter id: {roleForUpdateDto.Id}.");
         }
-
         try
         {
-            
-            var updatedAccount = await _accountService.UpdateAccountAsync(accountForUpdateDto);
+            var updatedAccount = await _roleService.UpdateRoleAsync(roleForUpdateDto);
             return Ok(updatedAccount);
         }
         catch (KeyNotFoundException ex)
@@ -105,11 +104,11 @@ public class AccountController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteAccount(int id)
+    public async Task<ActionResult> DeleteGroup(int id)
     {
         try
         {
-            await _accountService.DeleteAccountAsync(id);
+            await _roleService.DeleteRoleAsync(id);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

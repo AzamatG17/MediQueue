@@ -137,6 +137,34 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.ToTable("GroupsCategories");
                 });
 
+            modelBuilder.Entity("MediQueue.Domain.Entities.Permission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Controller")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permission", (string)null);
+                });
+
             modelBuilder.Entity("MediQueue.Domain.Entities.Questionnaire", b =>
                 {
                     b.Property<int>("Id")
@@ -184,6 +212,21 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.ToTable("Role", (string)null);
                 });
 
+            modelBuilder.Entity("MediQueue.Domain.Entities.RolePermission", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermission", (string)null);
+                });
+
             modelBuilder.Entity("MediQueue.Domain.Entities.Account", b =>
                 {
                     b.HasOne("MediQueue.Domain.Entities.Role", "Role")
@@ -225,6 +268,25 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Navigation("Account");
                 });
 
+            modelBuilder.Entity("MediQueue.Domain.Entities.RolePermission", b =>
+                {
+                    b.HasOne("MediQueue.Domain.Entities.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MediQueue.Domain.Entities.Role", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("MediQueue.Domain.Entities.Account", b =>
                 {
                     b.Navigation("Questionnaire")
@@ -244,6 +306,8 @@ namespace MediQueue.Infrastructure.persistence.Migrations
             modelBuilder.Entity("MediQueue.Domain.Entities.Role", b =>
                 {
                     b.Navigation("Accounts");
+
+                    b.Navigation("RolePermissions");
                 });
 #pragma warning restore 612, 618
         }
