@@ -47,9 +47,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .WithMany(r => r.Accounts)
                 .HasForeignKey(a => a.RoleId);
 
-            builder.HasOne(a => a.Questionnaire)
-                .WithOne(q => q.Account)
-                .HasForeignKey<Questionnaire>(q => q.AccountId);
+            builder.HasMany(a => a.QuestionnaireHistories)
+                .WithOne(h => h.Account)
+                .HasForeignKey(h => h.AccountId);
         }
     }
 }

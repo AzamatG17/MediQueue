@@ -14,6 +14,7 @@ namespace MediQueue.Infrastructure.Persistence
         public virtual DbSet<Questionnaire> Questionnaires { get; set; }
         public virtual DbSet<RolePermission> RolePermissions { get; set; }
         public virtual DbSet<Permission> Permissions { get; set; }
+        public virtual DbSet<QuestionnaireHistory> QuestionnaireHistories { get; set; }
 
         public MediQueueDbContext(DbContextOptions<MediQueueDbContext> options)
             :base(options)

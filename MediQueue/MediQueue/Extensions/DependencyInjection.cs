@@ -64,6 +64,7 @@ namespace MediQueue.Extensions
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IQuestionnaireService, QuestionnaireService>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IPermissionService, PermissonService>();
 
             services.AddSingleton<IAuthorizationHandler, JwtPermissionHandler>();
         }
@@ -76,6 +77,7 @@ namespace MediQueue.Extensions
             services.AddScoped<IGroupRepository, GroupRepository>();
             services.AddScoped<IQuestionnaireRepository, QuestionnaireRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
         }
 
         private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
@@ -120,8 +122,22 @@ namespace MediQueue.Extensions
         {
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("IsRequirePermission", policy =>
-                    policy.Requirements.Add(new JwtPermissionRequirement("SomePermission")));
+                options.AddPolicy("CategoryGetAll", policy =>
+                    policy.Requirements.Add(new JwtPermissionRequirement("CategoryGetAll")));
+
+                options.AddPolicy("CategoryGetById", policy =>
+                    policy.Requirements.Add(new JwtPermissionRequirement("CategoryGetById")));
+
+                options.AddPolicy("CategoryPost", policy =>
+                    policy.Requirements.Add(new JwtPermissionRequirement("CategoryPost")));
+
+                options.AddPolicy("CategoryPut", policy =>
+                    policy.Requirements.Add(new JwtPermissionRequirement("CategoryPut")));
+
+                options.AddPolicy("CategoryDelete", policy =>
+                    policy.Requirements.Add(new JwtPermissionRequirement("CategoryDelete")));
+                options.AddPolicy("AllQuestionnaire", policy =>
+                    policy.Requirements.Add(new JwtPermissionRequirement("AllQuestionnaire")));
             });
         }
     }

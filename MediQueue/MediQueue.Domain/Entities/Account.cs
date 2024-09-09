@@ -15,6 +15,7 @@ namespace MediQueue.Domain.Entities
         public DateTime Bithdate { get; set; }
         public int RoleId { get; set; }
         public Role Role { get; set; }
-        public Questionnaire Questionnaire { get; set; }
+
+        public ICollection<QuestionnaireHistory> QuestionnaireHistories { get; set; }
     }
 }

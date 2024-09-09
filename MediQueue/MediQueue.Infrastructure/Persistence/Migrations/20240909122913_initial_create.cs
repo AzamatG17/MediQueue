@@ -53,6 +53,28 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Questionnaire",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    QuestionnaireId = table.Column<int>(type: "int", nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Passport = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    SurName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Region = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Bithdate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Questionnaire", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Role",
                 columns: table => new
                 {
@@ -143,23 +165,28 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Questionnaire",
+                name: "QuestionnaireHistory",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    QuestionnaireId = table.Column<int>(type: "int", nullable: false),
-                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccountId = table.Column<int>(type: "int", nullable: false)
+                    HistoryDiscription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccountId = table.Column<int>(type: "int", nullable: false),
+                    QuestionnaireId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Questionnaire", x => x.Id);
+                    table.PrimaryKey("PK_QuestionnaireHistory", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Questionnaire_Account_AccountId",
+                        name: "FK_QuestionnaireHistory_Account_AccountId",
                         column: x => x.AccountId,
                         principalTable: "Account",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_QuestionnaireHistory_Questionnaire_QuestionnaireId",
+                        column: x => x.QuestionnaireId,
+                        principalTable: "Questionnaire",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -175,10 +202,14 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Questionnaire_AccountId",
-                table: "Questionnaire",
-                column: "AccountId",
-                unique: true);
+                name: "IX_QuestionnaireHistory_AccountId",
+                table: "QuestionnaireHistory",
+                column: "AccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionnaireHistory_QuestionnaireId",
+                table: "QuestionnaireHistory",
+                column: "QuestionnaireId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RolePermission_PermissionId",
@@ -193,7 +224,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 name: "GroupsCategories");
 
             migrationBuilder.DropTable(
-                name: "Questionnaire");
+                name: "QuestionnaireHistory");
 
             migrationBuilder.DropTable(
                 name: "RolePermission");
@@ -206,6 +237,9 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "Account");
+
+            migrationBuilder.DropTable(
+                name: "Questionnaire");
 
             migrationBuilder.DropTable(
                 name: "Permission");

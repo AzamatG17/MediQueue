@@ -3,7 +3,7 @@ using MediQueue.Domain.DTOs.Role;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
-using System;
+using System.Data;
 
 namespace MediQueue.Services
 {
@@ -22,7 +22,13 @@ namespace MediQueue.Services
         {
             var role = await _roleRepository.FindAllAsync();
 
-            return _mapper.Map<IEnumerable<RoleDto>>(role);
+            var roleDtos = role.Select(role => new RoleDto(
+                role.Id,
+                role.Name,
+                role.RolePermissions.Select(rp => rp.PermissionId).ToList()
+                ));
+
+            return roleDtos;
         }
 
         public async Task<RoleDto> GetRoleByIdAsync(int id)
@@ -34,7 +40,13 @@ namespace MediQueue.Services
                 throw new KeyNotFoundException($"Role with {id} not found");
             }
 
-            return _mapper.Map<RoleDto>(role);
+            var roleDto = new RoleDto(
+                role.Id,
+                role.Name,
+                role.RolePermissions.Select(rp => rp.PermissionId).ToList()
+                );
+
+            return roleDto;
         }
 
         public async Task<RoleDto> CreateRoleAsync(RoleForCreateDto roleForCreateDto)
@@ -48,7 +60,13 @@ namespace MediQueue.Services
 
             await _roleRepository.CreateAsync(role);
 
-            return _mapper.Map<RoleDto>(role);
+            var roleDto = new RoleDto(
+                Id: role.Id,
+                Name: role.Name,
+                PermissionId: role.RolePermissions.Select(rp => rp.PermissionId).ToList()
+                );
+
+            return roleDto;
         }
 
         public async Task<RoleDto> UpdateRoleAsync(RoleForUpdateDto roleForUpdateDto)
@@ -62,12 +80,26 @@ namespace MediQueue.Services
 
             await _roleRepository.UpdateAsync(role);
 
-            return _mapper.Map<RoleDto>(role);
+            var roleDto = new RoleDto(
+                Id: role.Id,
+                Name: role.Name,
+                PermissionId: role.RolePermissions.Select(rp => rp.PermissionId).ToList()
+                );
+
+            return roleDto;
         }
 
         public async Task DeleteRoleAsync(int id)
         {
-            await _roleRepository.DeleteAsync(id);
+            try
+            {
+                await _roleRepository.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
     }
 }

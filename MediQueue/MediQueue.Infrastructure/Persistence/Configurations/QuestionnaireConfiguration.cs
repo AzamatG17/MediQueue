@@ -11,15 +11,39 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.ToTable(nameof(Questionnaire));
             builder.HasKey(x => x.Id);
 
+            builder.Property(a => a.Passport)
+                .HasMaxLength(255)
+                .IsRequired();
+
             builder.Property(x => x.Gender)
                 .HasConversion<string>();
+
+            builder.Property(a => a.FirstName)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            builder.Property(a => a.LastName)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            builder.Property(a => a.SurName)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            builder.Property(a => a.PhoneNumber)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            builder.Property(a => a.Region)
+                .IsRequired();
 
             builder.Property(x => x.Balance)
                 .HasColumnType("decimal(18,2)");
 
-            builder.HasOne(x => x.Account)
-                .WithOne(a => a.Questionnaire)
-                .HasForeignKey<Questionnaire>(x => x.AccountId);
+            builder.HasMany(q => q.QuestionnaireHistories)
+                .WithOne(h => h.Questionnaire)
+                .HasForeignKey(h => h.QuestionnaireId);
+  
         }
     }
 }

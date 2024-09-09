@@ -173,13 +173,65 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AccountId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("Bithdate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Passport")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("QuestionnaireId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Region")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SurName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Questionnaire", (string)null);
+                });
+
+            modelBuilder.Entity("MediQueue.Domain.Entities.QuestionnaireHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("HistoryDiscription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -188,10 +240,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId")
-                        .IsUnique();
+                    b.HasIndex("AccountId");
 
-                    b.ToTable("Questionnaire", (string)null);
+                    b.HasIndex("QuestionnaireId");
+
+                    b.ToTable("QuestionnaireHistory", (string)null);
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.Role", b =>
@@ -257,15 +310,23 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Navigation("Group");
                 });
 
-            modelBuilder.Entity("MediQueue.Domain.Entities.Questionnaire", b =>
+            modelBuilder.Entity("MediQueue.Domain.Entities.QuestionnaireHistory", b =>
                 {
                     b.HasOne("MediQueue.Domain.Entities.Account", "Account")
-                        .WithOne("Questionnaire")
-                        .HasForeignKey("MediQueue.Domain.Entities.Questionnaire", "AccountId")
+                        .WithMany("QuestionnaireHistories")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MediQueue.Domain.Entities.Questionnaire", "Questionnaire")
+                        .WithMany("QuestionnaireHistories")
+                        .HasForeignKey("QuestionnaireId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Account");
+
+                    b.Navigation("Questionnaire");
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.RolePermission", b =>
@@ -289,8 +350,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
             modelBuilder.Entity("MediQueue.Domain.Entities.Account", b =>
                 {
-                    b.Navigation("Questionnaire")
-                        .IsRequired();
+                    b.Navigation("QuestionnaireHistories");
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.Category", b =>
@@ -301,6 +361,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
             modelBuilder.Entity("MediQueue.Domain.Entities.Group", b =>
                 {
                     b.Navigation("GroupCategories");
+                });
+
+            modelBuilder.Entity("MediQueue.Domain.Entities.Questionnaire", b =>
+                {
+                    b.Navigation("QuestionnaireHistories");
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.Role", b =>

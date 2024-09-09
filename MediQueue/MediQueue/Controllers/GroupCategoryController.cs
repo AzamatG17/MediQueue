@@ -1,12 +1,12 @@
-﻿using MediQueue.Domain.DTOs.Category;
-using MediQueue.Domain.DTOs.GroupCategory;
+﻿using MediQueue.Domain.DTOs.GroupCategory;
 using MediQueue.Domain.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize(Policy = "Admin")]
+[Authorize(Policy = "AllGroupCategoryPermission")]
 [ApiController]
 [Route("api/groupcategory")]
 [EnableCors("AllowSpecificOrigins")]

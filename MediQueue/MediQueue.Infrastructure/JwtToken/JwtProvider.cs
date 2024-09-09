@@ -19,8 +19,8 @@ namespace MediQueue.Infrastructure.JwtToken
         {
             var claimForToken = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, account.Id.ToString()),
-                new Claim(ClaimTypes.Role, account.RoleId.ToString())
+                new Claim("AccountId", account.Id.ToString()),
+                new Claim("RoleId", account.RoleId.ToString())
             };
 
             var role = _context.Roles
@@ -28,12 +28,12 @@ namespace MediQueue.Infrastructure.JwtToken
                 .ThenInclude(rp => rp.Permission)
                 .FirstOrDefault(r => r.Id == account.RoleId);
 
-            if (role == null)
+            if (role != null)
             {
                 foreach(var rolePermision in role.RolePermissions)
                 {
                     var permission = rolePermision.Permission;
-                    claimForToken.Add(new Claim("Permission", $"{permission.Controller}:{permission.Action}"));
+                    claimForToken.Add(new Claim("Permission", permission.Name));
                 }
             }
 

@@ -1,13 +1,11 @@
-﻿using MediQueue.Domain.DTOs.Group;
-using MediQueue.Domain.DTOs.Role;
+﻿using MediQueue.Domain.DTOs.Role;
 using MediQueue.Domain.Interfaces.Services;
-using MediQueue.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize(Policy = "Admin")]
+//[Authorize(Policy = "AllRolePermission")]
 [ApiController]
 [Route("api/role")]
 [EnableCors("AllowSpecificOrigins")]
