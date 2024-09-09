@@ -12,11 +12,13 @@ namespace MediQueue.Infrastructure.Persistence
         public virtual DbSet<Group> Groups { get; set; }
         public virtual DbSet<GroupCategory> GroupsCategories { get; set; }
         public virtual DbSet<Questionnaire> Questionnaires { get; set; }
+        public virtual DbSet<RolePermission> RolePermissions { get; set; }
+        public virtual DbSet<Permission> Permissions { get; set; }
 
         public MediQueueDbContext(DbContextOptions<MediQueueDbContext> options)
             :base(options)
         {
-            Database.Migrate();
+            //Database.Migrate();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

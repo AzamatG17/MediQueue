@@ -6,6 +6,7 @@ using MediQueue.Infrastructure.Persistence;
 using MediQueue.Infrastructure.Persistence.Repositories;
 using MediQueue.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -56,13 +57,15 @@ namespace MediQueue.Extensions
         private static void AddServices(IServiceCollection services)
         {
             services.AddScoped<IJwtProvider, JwtProvider>();
-            services.AddScoped<IAuthorizationService, AuthorizationService>();
+            services.AddScoped<MediQueue.Domain.Interfaces.Services.IAuthorizationService, AuthorizationService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ICategoryService, CategoriesService>();
             services.AddScoped<IGroupCategoryService, GroupCategoryService>();
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IQuestionnaireService, QuestionnaireService>();
             services.AddScoped<IRoleService, RoleService>();
+
+            services.AddSingleton<IAuthorizationHandler, JwtPermissionHandler>();
         }
 
         private static void AddRepositories(IServiceCollection services)
@@ -115,41 +118,11 @@ namespace MediQueue.Extensions
 
         private static void AddAuthorization(IServiceCollection services)
         {
-            services.AddAuthorizationBuilder()
-                .AddPolicy("Admin", policy =>
-                {
-                    policy.RequireClaim("Admin", "true");
-                })
-                .AddPolicy("AdminOrDriver", policy =>
-                {
-                    policy.RequireAssertion(context =>
-                        context.User.HasClaim(c => c.Type == "Driver" && c.Value == "true") ||
-                        context.User.HasClaim(c => c.Type == "Admin" && c.Value == "true"));
-                })
-                .AddPolicy("AdminOrDoctor", policy =>
-                {
-                    policy.RequireAssertion(context =>
-                        context.User.HasClaim(c => c.Type == "Doctor" && c.Value == "true") ||
-                        context.User.HasClaim(c => c.Type == "Admin" && c.Value == "true"));
-                })
-                .AddPolicy("AdminOrOperator", policy =>
-                {
-                    policy.RequireAssertion(context =>
-                        context.User.HasClaim(c => c.Type == "Operator" && c.Value == "true") ||
-                        context.User.HasClaim(c => c.Type == "Admin" && c.Value == "true"));
-                })
-                .AddPolicy("AdminOrDispatcher", policy =>
-                {
-                    policy.RequireAssertion(context =>
-                        context.User.HasClaim(c => c.Type == "Dispatcher" && c.Value == "true") ||
-                        context.User.HasClaim(c => c.Type == "Admin" && c.Value == "true"));
-                })
-                .AddPolicy("AdminOrMechanic", policy =>
-                {
-                    policy.RequireAssertion(context =>
-                        context.User.HasClaim(c => c.Type == "Mechanic" && c.Value == "true") ||
-                        context.User.HasClaim(c => c.Type == "Admin" && c.Value == "true"));
-                });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("IsRequirePermission", policy =>
+                    policy.Requirements.Add(new JwtPermissionRequirement("SomePermission")));
+            });
         }
     }
 }

@@ -7,5 +7,6 @@ namespace MediQueue.Domain.Entities
         public string Name { get; set; }
 
         public virtual ICollection<Account> Accounts { get; set; }
+        public ICollection<RolePermission> RolePermissions { get; set; }
     }
 }

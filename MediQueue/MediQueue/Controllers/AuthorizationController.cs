@@ -25,23 +25,23 @@ public class AuthorizationController : ControllerBase
             return Unauthorized("Invalid login or password");
         }
 
-        //HttpContext.Response.Cookies.Append("tasty-cookies", token);
+        HttpContext.Response.Cookies.Append("tasty-cookies", token.Token);
 
         return Ok(token);
     }
 
-    [HttpPost("register")]
-    public async Task<ActionResult<string>> Register(AccountForCreateDto accountForLogin)
-    {
-        var token = await _authorizationService.Register(accountForLogin);
+    //[HttpPost("register")]
+    //public async Task<ActionResult<string>> Register(AccountForCreateDto accountForLogin)
+    //{
+    //    var token = await _authorizationService.Register(accountForLogin);
 
-        if (token == null)
-        {
-            return Unauthorized("Invalid login or password");
-        }
+    //    if (token == null)
+    //    {
+    //        return Unauthorized("Invalid login or password");
+    //    }
 
-        //HttpContext.Response.Cookies.Append("tasty-cookies", token);
+    //    //HttpContext.Response.Cookies.Append("tasty-cookies", token);
 
-        return Ok(token);
-    }
+    //    return Ok(token);
+    //}
 }
