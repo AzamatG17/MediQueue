@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-[Authorize]
+//[Authorize]
 [ApiController]
 [Route("api/category")]
 [EnableCors("AllowSpecificOrigins")]
@@ -19,7 +19,7 @@ public class CategoryController : ControllerBase
         _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
     }
 
-    [Authorize(Policy = "CategoryGetAll")]
+    //[Authorize(Policy = "CategoryGetAll")]
     [HttpGet]
     public async Task<ActionResult> GetCategoryAsync()
     {
@@ -34,7 +34,7 @@ public class CategoryController : ControllerBase
         }
     }
 
-    [Authorize(Policy = "CategoryGetById")]
+    //[Authorize(Policy = "CategoryGetById")]
     [HttpGet("{id}")]
     public async Task<ActionResult> GetCategoryByIdAsync(int id)
     {
@@ -57,7 +57,7 @@ public class CategoryController : ControllerBase
         }
     }
 
-    [Authorize(Policy = "CategoryPost")]
+    //[Authorize(Policy = "CategoryPost")]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] CategoryForCreateDto categoryForCreateDto)
     {
@@ -77,7 +77,7 @@ public class CategoryController : ControllerBase
         }
     }
 
-    [Authorize(Policy = "CategoryPut")]
+    //[Authorize(Policy = "CategoryPut")]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] CategoryForUpdateDto categoryForUpdateDto)
     {
@@ -108,7 +108,7 @@ public class CategoryController : ControllerBase
         }
     }
 
-    [Authorize(Policy = "CategoryDelete")]
+    //[Authorize(Policy = "CategoryDelete")]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteCategory(int id)
     {

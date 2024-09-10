@@ -11,39 +11,58 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.ToTable(nameof(Questionnaire));
             builder.HasKey(x => x.Id);
 
-            builder.Property(a => a.Passport)
-                .HasMaxLength(255)
-                .IsRequired();
+            builder.Property(x => x.QuestionnaireId)
+                .HasMaxLength(255);
+
+            builder.Property(a => a.PassportSeria)
+                .HasMaxLength(255);
+
+            builder.Property(a => a.PassportPinfl)
+                .HasMaxLength(255);
 
             builder.Property(x => x.Gender)
                 .HasConversion<string>();
 
             builder.Property(a => a.FirstName)
-                .HasMaxLength(255)
-                .IsRequired();
+                .HasMaxLength(255);
 
             builder.Property(a => a.LastName)
-                .HasMaxLength(255)
-                .IsRequired();
+                .HasMaxLength(255);
 
             builder.Property(a => a.SurName)
-                .HasMaxLength(255)
-                .IsRequired();
+                .HasMaxLength(255);
 
             builder.Property(a => a.PhoneNumber)
-                .HasMaxLength(255)
-                .IsRequired();
+                .HasMaxLength(255);
 
             builder.Property(a => a.Region)
-                .IsRequired();
+                .HasMaxLength(255);
 
-            builder.Property(x => x.Balance)
+            builder.Property(a => a.District)
+                .HasMaxLength(255);
+
+            builder.Property(a => a.Posolos)
+                .HasMaxLength(255);
+
+            builder.Property(a => a.Address)
+                .HasMaxLength(255);
+
+            builder.Property(a => a.DateIssue);
+
+            builder.Property(a => a.DateBefore);
+
+            builder.Property(a => a.Balance)
                 .HasColumnType("decimal(18,2)");
+
+            builder.Property(a => a.SocialSattus)
+                .HasMaxLength(255);
+
+            builder.Property(a => a.AdvertisingChannel)
+                .HasMaxLength(255);
 
             builder.HasMany(q => q.QuestionnaireHistories)
                 .WithOne(h => h.Questionnaire)
                 .HasForeignKey(h => h.QuestionnaireId);
-  
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MediQueue.Domain.DTOs.Account;
 using MediQueue.Domain.DTOs.Questionnaire;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
@@ -37,16 +38,47 @@ namespace MediQueue.Services
 
         public async Task<QuestionnaireDto> CreateQuestionnaireAsync(QuestionnaireForCreateDto questionnaireForCreateDto)
         {
-            if (questionnaireForCreateDto == null)
-            {
-                throw new ArgumentNullException(nameof(questionnaireForCreateDto));
-            }
+            int uniqueQuestionnaireId = await GenerateUniqueQuestionnaireIdAsync();
 
-            var quest = _mapper.Map<Questionnaire>(questionnaireForCreateDto);
+            var quest = new Questionnaire
+            {
+                QuestionnaireId = uniqueQuestionnaireId,
+                Balance = questionnaireForCreateDto.Balance,
+                Gender = questionnaireForCreateDto.Gender,
+                PassportSeria = questionnaireForCreateDto.PassportSeria,
+                PassportPinfl = questionnaireForCreateDto.PassportPinfl,
+                PhoneNumber = questionnaireForCreateDto.PhoneNumber,
+                FirstName = questionnaireForCreateDto.FirstName,
+                LastName = questionnaireForCreateDto.LastName,
+                SurName = questionnaireForCreateDto.SurName,
+                DateIssue = questionnaireForCreateDto.DateIssue ?? default(DateTime),
+                DateBefore = questionnaireForCreateDto.DateBefore ?? default(DateTime),
+                Region = questionnaireForCreateDto.Region,
+                District = questionnaireForCreateDto.District,
+                Posolos = questionnaireForCreateDto.Posolos,
+                Address = questionnaireForCreateDto.Address,
+                Bithdate = questionnaireForCreateDto.Bithdate ?? default(DateTime),
+                SocialSattus = questionnaireForCreateDto.SocialSattus,
+                AdvertisingChannel = questionnaireForCreateDto.AdvertisingChannel
+            };
 
             await _questionnaireRepository.CreateAsync(quest);
 
             return _mapper.Map<QuestionnaireDto>(quest);
+        }
+
+        public async Task<QuestionnaireDto> CreateOrGetBId(QuestionnaireForCreateDto questionnaireForCreateDto)
+        {
+            var question = await _questionnaireRepository.FindByQuestionnaireIdAsync(questionnaireForCreateDto.PassportSeria);
+
+            if (question == null)
+            {
+                var result = await CreateQuestionnaireAsync(questionnaireForCreateDto);
+
+                return result;
+            }
+
+            return _mapper.Map<QuestionnaireDto>(question);
         }
 
         public async Task<QuestionnaireDto> UpdateQuestionnaireAsync(QuestionnaireForUpdateDto questionnaireForUpdateDto)
@@ -66,6 +98,24 @@ namespace MediQueue.Services
         public async Task DeleteQuestionnaireAsync(int id)
         {
             await _questionnaireRepository.DeleteAsync(id);
+        }
+
+        private async Task<int> GenerateUniqueQuestionnaireIdAsync()
+        {
+            // Генерация уникального идентификатора
+            int newId;
+            do
+            {
+                newId = GenerateRandomId();
+            } while (await _questionnaireRepository.ExistsByIdAsync(newId));
+
+            return newId;
+        }
+
+        private int GenerateRandomId()
+        {
+            Random random = new Random();
+            return random.Next(100000000, 999999999);
         }
     }
 }

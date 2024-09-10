@@ -7,6 +7,7 @@ namespace MediQueue.Domain.Interfaces.Services
         Task<IEnumerable<QuestionnaireDto>> GetAllQuestionnairesAsync();
         Task<QuestionnaireDto> GetQuestionnaireByIdAsync(int id);
         Task<QuestionnaireDto> CreateQuestionnaireAsync(QuestionnaireForCreateDto questionnaireForCreateDto);
+        Task<QuestionnaireDto> CreateOrGetBId(QuestionnaireForCreateDto questionnaireForCreateDto);
         Task<QuestionnaireDto> UpdateQuestionnaireAsync(QuestionnaireForUpdateDto questionnaireForUpdateDto);
         Task DeleteQuestionnaireAsync(int id);
     }

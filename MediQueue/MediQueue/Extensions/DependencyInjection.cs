@@ -19,7 +19,7 @@ namespace MediQueue.Extensions
         {
             AddDatabaseContext(services, configuration);
             AddAuthentication(services, configuration);
-            AddAuthorization(services);
+            //AddAuthorization(services);
             AddServices(services);
             AddRepositories(services);
             AddAutoMapper(services);
@@ -60,11 +60,11 @@ namespace MediQueue.Extensions
             services.AddScoped<MediQueue.Domain.Interfaces.Services.IAuthorizationService, AuthorizationService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ICategoryService, CategoriesService>();
-            services.AddScoped<IGroupCategoryService, GroupCategoryService>();
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IQuestionnaireService, QuestionnaireService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IPermissionService, PermissonService>();
+            services.AddScoped<IServicesService, ServicesService>();
 
             services.AddSingleton<IAuthorizationHandler, JwtPermissionHandler>();
         }
@@ -73,11 +73,11 @@ namespace MediQueue.Extensions
         {
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
-            services.AddScoped<IGroupCategoryRepository, GroupCategoryRepository>();
             services.AddScoped<IGroupRepository, GroupRepository>();
             services.AddScoped<IQuestionnaireRepository, QuestionnaireRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IPermissionRepository, PermissionRepository>();
+            services.AddScoped<IServiceRepository, ServiceRepository>();
         }
 
         private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
@@ -136,6 +136,7 @@ namespace MediQueue.Extensions
 
                 options.AddPolicy("CategoryDelete", policy =>
                     policy.Requirements.Add(new JwtPermissionRequirement("CategoryDelete")));
+
                 options.AddPolicy("AllQuestionnaire", policy =>
                     policy.Requirements.Add(new JwtPermissionRequirement("AllQuestionnaire")));
             });

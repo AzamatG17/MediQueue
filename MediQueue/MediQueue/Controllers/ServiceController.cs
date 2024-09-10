@@ -1,30 +1,31 @@
-﻿using MediQueue.Domain.DTOs.Questionnaire;
+﻿using MediQueue.Domain.DTOs.Role;
+using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Interfaces.Services;
-using Microsoft.AspNetCore.Authorization;
+using MediQueue.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize(Policy = "AllQuestionnaire")]
+//[Authorize(Policy = "AllRolePermission")]
 [ApiController]
-[Route("api/questionnaire")]
+[Route("api/service")]
 [EnableCors("AllowSpecificOrigins")]
-public class QuestionnaireController : ControllerBase
+public class ServiceController : ControllerBase
 {
-    private readonly IQuestionnaireService _questionnaireService;
+    private readonly IServicesService _servicesService;
 
-    public QuestionnaireController(IQuestionnaireService questionnaireService)
+    public ServiceController(IServicesService services)
     {
-        _questionnaireService = questionnaireService ?? throw new ArgumentNullException(nameof(questionnaireService));
+            _servicesService = services ?? throw new ArgumentNullException(nameof(services));
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetQuestionnairesAsync()
+    public async Task<ActionResult> GetServicesAsync()
     {
         try
         {
-            var accounts = await _questionnaireService.GetAllQuestionnairesAsync();
+            var accounts = await _servicesService.GetAllServicesAsync();
             return Ok(accounts);
         }
         catch (Exception ex)
@@ -34,14 +35,14 @@ public class QuestionnaireController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetQuestionnaireByIdAsync(int id)
+    public async Task<ActionResult> GetServiceByIdAsync(int id)
     {
         try
         {
-            var account = await _questionnaireService.GetQuestionnaireByIdAsync(id);
+            var account = await _servicesService.GetServiceByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Questionnaire with id: {id} does not exist.");
+                return NotFound($"Service with id: {id} does not exist.");
 
             return Ok(account);
         }
@@ -56,11 +57,16 @@ public class QuestionnaireController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> PostAsync([FromBody] QuestionnaireForCreateDto questionnaireForCreateDto)
+    public async Task<ActionResult> PostAsync([FromBody] ServiceForCreateDto serviceForCreateDto)
     {
+        if (serviceForCreateDto == null)
+        {
+            return BadRequest("Service data is null.");
+        }
+
         try
         {
-            var createdAccount = await _questionnaireService.CreateOrGetBId(questionnaireForCreateDto);
+            var createdAccount = await _servicesService.CreateServiceAsync(serviceForCreateDto);
             return Ok(createdAccount);
         }
         catch (Exception ex)
@@ -70,21 +76,21 @@ public class QuestionnaireController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> PutAsync(int id, [FromBody] QuestionnaireForUpdateDto questionnaireForUpdateDto)
+    public async Task<ActionResult> PutAsync(int id, [FromBody] ServiceForUpdateDto serviceForUpdateDto)
     {
-        if (questionnaireForUpdateDto == null)
+        if (serviceForUpdateDto == null)
         {
-            return BadRequest("Questionnaire data is null.");
+            return BadRequest("Service data is null.");
         }
 
-        if (id != questionnaireForUpdateDto.Id)
+        if (id != serviceForUpdateDto.id)
         {
             return BadRequest(
-                $"Route id: {id} does not match with parameter id: {questionnaireForUpdateDto.Id}.");
+                $"Route id: {id} does not match with parameter id: {serviceForUpdateDto.id}.");
         }
         try
         {
-            var updatedAccount = await _questionnaireService.UpdateQuestionnaireAsync(questionnaireForUpdateDto);
+            var updatedAccount = await _servicesService.UpdateServiceAsync(serviceForUpdateDto);
             return Ok(updatedAccount);
         }
         catch (KeyNotFoundException ex)
@@ -98,11 +104,11 @@ public class QuestionnaireController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteGroup(int id)
+    public async Task<ActionResult> DeleteService(int id)
     {
         try
         {
-            await _questionnaireService.DeleteQuestionnaireAsync(id);
+            await _servicesService.DeleteServiceAsync(id);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

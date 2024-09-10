@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace MediQueue.Infrastructure.Persistence.Configurations
 {
@@ -22,6 +23,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                   .WithMany(a => a.QuestionnaireHistories)
                   .HasForeignKey(qh => qh.AccountId)
                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(qh => qh.Services)
+                  .WithMany(s => s.QuestionnaireHistories)
+                  .UsingEntity(j => j.ToTable("QuestionnaireHistoryService"));
         }
     }
 }

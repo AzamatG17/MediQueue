@@ -15,7 +15,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .HasMaxLength(255)
                 .IsRequired();
 
-            builder.HasMany(c => c.GroupCategories)
+            builder.HasMany(c => c.Groups)
+                .WithMany(g => g.Categories);
+
+            builder.HasMany(c => c.Services)
                 .WithOne(gc => gc.Category)
                 .HasForeignKey(gc => gc.CategoryId);
         }
