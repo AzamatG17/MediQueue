@@ -58,16 +58,24 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    QuestionnaireId = table.Column<int>(type: "int", nullable: false),
-                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Passport = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    SurName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Region = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Bithdate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    QuestionnaireId = table.Column<int>(type: "int", maxLength: 255, nullable: true),
+                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PassportSeria = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    PassportPinfl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    SurName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    DateIssue = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DateBefore = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Region = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    District = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Posolos = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Bithdate = table.Column<DateOnly>(type: "date", nullable: true),
+                    SocialSattus = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    AdvertisingChannel = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -88,25 +96,45 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GroupsCategories",
+                name: "Service",
                 columns: table => new
                 {
-                    GroupId = table.Column<int>(type: "int", nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GroupsCategories", x => new { x.GroupId, x.CategoryId });
+                    table.PrimaryKey("PK_Service", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GroupsCategories_Category_CategoryId",
+                        name: "FK_Service_Category_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Category",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CategoryGroup",
+                columns: table => new
+                {
+                    CategoriesId = table.Column<int>(type: "int", nullable: false),
+                    GroupsId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CategoryGroup", x => new { x.CategoriesId, x.GroupsId });
                     table.ForeignKey(
-                        name: "FK_GroupsCategories_Group_GroupId",
-                        column: x => x.GroupId,
+                        name: "FK_CategoryGroup_Category_CategoriesId",
+                        column: x => x.CategoriesId,
+                        principalTable: "Category",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CategoryGroup_Group_GroupsId",
+                        column: x => x.GroupsId,
                         principalTable: "Group",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -170,7 +198,9 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Historyid = table.Column<int>(type: "int", nullable: false),
                     HistoryDiscription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AccountId = table.Column<int>(type: "int", nullable: false),
                     QuestionnaireId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -191,15 +221,39 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "QuestionnaireHistoryService",
+                columns: table => new
+                {
+                    QuestionnaireHistoriesId = table.Column<int>(type: "int", nullable: false),
+                    ServicesId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionnaireHistoryService", x => new { x.QuestionnaireHistoriesId, x.ServicesId });
+                    table.ForeignKey(
+                        name: "FK_QuestionnaireHistoryService_QuestionnaireHistory_QuestionnaireHistoriesId",
+                        column: x => x.QuestionnaireHistoriesId,
+                        principalTable: "QuestionnaireHistory",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_QuestionnaireHistoryService_Service_ServicesId",
+                        column: x => x.ServicesId,
+                        principalTable: "Service",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Account_RoleId",
                 table: "Account",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GroupsCategories_CategoryId",
-                table: "GroupsCategories",
-                column: "CategoryId");
+                name: "IX_CategoryGroup_GroupsId",
+                table: "CategoryGroup",
+                column: "GroupsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_QuestionnaireHistory_AccountId",
@@ -212,28 +266,44 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 column: "QuestionnaireId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_QuestionnaireHistoryService_ServicesId",
+                table: "QuestionnaireHistoryService",
+                column: "ServicesId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RolePermission_PermissionId",
                 table: "RolePermission",
                 column: "PermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Service_CategoryId",
+                table: "Service",
+                column: "CategoryId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "GroupsCategories");
+                name: "CategoryGroup");
 
             migrationBuilder.DropTable(
-                name: "QuestionnaireHistory");
+                name: "QuestionnaireHistoryService");
 
             migrationBuilder.DropTable(
                 name: "RolePermission");
 
             migrationBuilder.DropTable(
-                name: "Category");
+                name: "Group");
 
             migrationBuilder.DropTable(
-                name: "Group");
+                name: "QuestionnaireHistory");
+
+            migrationBuilder.DropTable(
+                name: "Service");
+
+            migrationBuilder.DropTable(
+                name: "Permission");
 
             migrationBuilder.DropTable(
                 name: "Account");
@@ -242,7 +312,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 name: "Questionnaire");
 
             migrationBuilder.DropTable(
-                name: "Permission");
+                name: "Category");
 
             migrationBuilder.DropTable(
                 name: "Role");

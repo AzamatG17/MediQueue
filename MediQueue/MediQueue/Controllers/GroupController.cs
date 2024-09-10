@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-[Authorize(Policy = "AllGroupPermission")]
+//[Authorize(Policy = "AllGroupPermission")]
 [ApiController]
 [Route("api/group")]
 [EnableCors("AllowSpecificOrigins")]

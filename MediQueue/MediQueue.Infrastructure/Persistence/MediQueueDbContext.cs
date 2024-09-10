@@ -10,7 +10,7 @@ namespace MediQueue.Infrastructure.Persistence
         public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Group> Groups { get; set; }
-        public virtual DbSet<GroupCategory> GroupsCategories { get; set; }
+        public virtual DbSet<Service> Services { get; set; }
         public virtual DbSet<Questionnaire> Questionnaires { get; set; }
         public virtual DbSet<RolePermission> RolePermissions { get; set; }
         public virtual DbSet<Permission> Permissions { get; set; }

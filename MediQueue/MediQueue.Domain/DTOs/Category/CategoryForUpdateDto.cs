@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace MediQueue.Domain.DTOs.Category
 {
-    public record CategoryForUpdateDto(int Id, string CategoryName);
+    public record CategoryForUpdateDto(int Id, string CategoryName, List<int> GroupIds);
 }

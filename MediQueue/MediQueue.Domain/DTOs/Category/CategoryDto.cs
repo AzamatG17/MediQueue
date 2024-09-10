@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MediQueue.Domain.DTOs.Service;
+using MediQueue.Domain.Entities.Responses;
 
 namespace MediQueue.Domain.DTOs.Category
 {
-    public record CategoryDto(int Id, string CategoryName);
+    public record CategoryDto(int Id, string CategoryName, List<GroupInfoResponse> GroupIds, ICollection<ServiceDtos> ServiceDtos);
 }

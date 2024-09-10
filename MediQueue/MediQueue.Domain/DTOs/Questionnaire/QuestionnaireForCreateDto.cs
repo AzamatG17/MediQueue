@@ -3,5 +3,7 @@
 namespace MediQueue.Domain.DTOs.Questionnaire
 {
     public record QuestionnaireForCreateDto(
-        int QuestionnaireId, decimal Balance, Gender Gender, string Passport, string PhoneNumber, string FirstName, string LastName, string SurName, string Region, DateTime Bithdate, string? HistoryDiscription);
+        decimal? Balance, Gender? Gender, string? PassportSeria, string? PassportPinfl,
+        string? PhoneNumber, string? FirstName, string? LastName, string? SurName, DateTime? DateIssue, DateTime? DateBefore,
+        string? Region, string? District, string? Posolos, string? Address, DateTime? Bithdate, string? SocialSattus, string? AdvertisingChannel);
 }
