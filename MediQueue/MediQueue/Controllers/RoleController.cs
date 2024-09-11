@@ -8,7 +8,7 @@ namespace MediQueue.Controllers;
 //[Authorize(Policy = "AllRolePermission")]
 [ApiController]
 [Route("api/role")]
-[EnableCors("AllowSpecificOrigins")]
+//[EnableCors("AllowSpecificOrigins")]
 public class RoleController : ControllerBase
 {
     private readonly IRoleService _roleService;

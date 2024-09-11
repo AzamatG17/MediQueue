@@ -9,7 +9,7 @@ namespace MediQueue.Controllers;
 //[Authorize(Policy = "AllGroupPermission")]
 [ApiController]
 [Route("api/group")]
-[EnableCors("AllowSpecificOrigins")]
+//[EnableCors("AllowSpecificOrigins")]
 public class GroupController : ControllerBase
 {
     private readonly IGroupService _groupService;

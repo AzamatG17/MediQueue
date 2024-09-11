@@ -9,7 +9,7 @@ namespace MediQueue.Controllers;
 //[Authorize]
 [ApiController]
 [Route("api/permission")]
-[EnableCors("AllowSpecificOrigins")]
+//[EnableCors("AllowSpecificOrigins")]
 public class PermissionController : ControllerBase
 {
     private readonly IPermissionService _permissionService;

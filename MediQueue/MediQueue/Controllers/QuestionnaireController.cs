@@ -9,7 +9,7 @@ namespace MediQueue.Controllers;
 //[Authorize(Policy = "AllQuestionnaire")]
 [ApiController]
 [Route("api/questionnaire")]
-[EnableCors("AllowSpecificOrigins")]
+//[EnableCors("AllowSpecificOrigins")]
 public class QuestionnaireController : ControllerBase
 {
     private readonly IQuestionnaireService _questionnaireService;

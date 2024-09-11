@@ -10,7 +10,7 @@ namespace MediQueue.Controllers;
 //[Authorize(Policy = "AllRolePermission")]
 [ApiController]
 [Route("api/service")]
-[EnableCors("AllowSpecificOrigins")]
+//[EnableCors("AllowSpecificOrigins")]
 public class ServiceController : ControllerBase
 {
     private readonly IServicesService _servicesService;

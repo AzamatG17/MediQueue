@@ -9,7 +9,7 @@ namespace MediQueue.Controllers;
 //[Authorize(Policy = "AllAccountPermission")]
 [ApiController]
 [Route("api/accounts")]
-[EnableCors("AllowSpecificOrigins")]
+//[EnableCors("AllowSpecificOrigins")]
 public class AccountController : ControllerBase
 {
     private readonly IAccountService _accountService;

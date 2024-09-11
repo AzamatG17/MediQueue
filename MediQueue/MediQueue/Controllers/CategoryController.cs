@@ -9,7 +9,7 @@ namespace MediQueue.Controllers;
 //[Authorize]
 [ApiController]
 [Route("api/category")]
-[EnableCors("AllowSpecificOrigins")]
+//[EnableCors("AllowSpecificOrigins")]
 public class CategoryController : ControllerBase
 {
     private readonly ICategoryService _categoryService;
