@@ -22,6 +22,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Groups
                                  .Include(c => c.Categories)
+                                 .ThenInclude(c => c.Services)
                                  .ToListAsync();
         }
 
@@ -29,6 +30,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Groups
                     .Include(c => c.Categories)
+                    .ThenInclude(c => c.Services)
                     .SingleOrDefaultAsync(c => c.Id == id);
         }
     }

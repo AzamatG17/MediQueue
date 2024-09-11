@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Category;
 using MediQueue.Domain.DTOs.Group;
+using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
 using MediQueue.Domain.Interfaces.Repositories;
@@ -21,14 +22,14 @@ namespace MediQueue.Services
             _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
         }
 
-        public async Task<IEnumerable<GroupDto>> GetAllGroupsAsync()
+        public async Task<IEnumerable<GroupForAllDateDto>> GetAllGroupsAsync()
         {
             var group = await _groupRepository.GetGroupWithGroupsAsync();
 
-            return group.Select(MapToCategoryDto).ToList();
+            return group.Select(MapToGroupAllDateDto).ToList();
         }
 
-        public async Task<GroupDto> GetGroupByIdAsync(int id)
+        public async Task<GroupForAllDateDto> GetGroupByIdAsync(int id)
         {
             var group = await _groupRepository.FindByIdWithGroupAsync(id);
             if (group == null)
@@ -36,7 +37,7 @@ namespace MediQueue.Services
                 throw new KeyNotFoundException($"Group with {id} not found");
             }
 
-            return MapToCategoryDto(group);
+            return MapToGroupAllDateDto(group);
         }
 
         public async Task<GroupDto> CreateGroupAsync(GroupForCreateDto groupForCreateDto)
@@ -60,20 +61,43 @@ namespace MediQueue.Services
                 throw new ArgumentNullException(nameof(groupForUpdateDto));
             }
 
-            var category = await _groupRepository.FindByIdAsync(groupForUpdateDto.Id);
-            if (category == null)
+            var group = await _groupRepository.FindByIdAsync(groupForUpdateDto.Id);
+            if (group == null)
             {
-                throw new KeyNotFoundException($"Category with {groupForUpdateDto.Id} not found");
+                throw new KeyNotFoundException($"Group with {groupForUpdateDto.Id} not found");
             }
 
-            category.GroupName = groupForUpdateDto.GroupName;
+            group.GroupName = groupForUpdateDto.GroupName;
 
-            var groups = await _categoryRepository.FindByGroupIdsAsync(groupForUpdateDto.CategoryIds);
-            category.Categories = groups.ToList();
+            // Получаем существующие категории
+            var existingCategoryIds = group.Categories.Select(c => c.Id).ToList();
 
-            await _groupRepository.UpdateAsync(category);
+            // Находим новые категории на основе переданных Id
+            var updatedCategories = await _categoryRepository.FindByGroupIdsAsync(groupForUpdateDto.CategoryIds);
+            var updatedCategoryIds = updatedCategories.Select(c => c.Id).ToList();
 
-            return MapToCategoryDto(category);
+            // Найти категории, которые нужно добавить (новые отношения)
+            var categoriesToAdd = updatedCategories.Where(c => !existingCategoryIds.Contains(c.Id)).ToList();
+
+            // Найти категории, которые нужно удалить (старые отношения, отсутствующие в обновленном списке)
+            var categoriesToRemove = group.Categories.Where(c => !updatedCategoryIds.Contains(c.Id)).ToList();
+
+            // Удаляем старые категории, которые больше не принадлежат группе
+            foreach (var categoryToRemove in categoriesToRemove)
+            {
+                group.Categories.Remove(categoryToRemove);
+            }
+
+            // Добавляем новые категории, которые пришли с обновлением
+            foreach (var categoryToAdd in categoriesToAdd)
+            {
+                group.Categories.Add(categoryToAdd);
+            }
+
+            // Сохраняем изменения
+            await _groupRepository.UpdateAsync(group);
+
+            return MapToCategoryDto(group);
         }
 
         public async Task DeleteGroupAsync(int id)
@@ -103,6 +127,35 @@ namespace MediQueue.Services
                 category.Id,
                 category.GroupName,
                 groupInfos
+            );
+        }
+
+        private GroupForAllDateDto MapToGroupAllDateDto(Group group)
+        {
+            return new GroupForAllDateDto(
+                group.Id,
+                group.GroupName,
+                group.Categories.Select(MapToCategoryDto).ToList()
+            );
+        }
+
+        private CategoryForGroupDto MapToCategoryDto(Category category)
+        {
+            return new CategoryForGroupDto(
+                category.Id,
+                category.CategoryName,
+                category.Services.Select(MapToServiceDto).ToList()
+            );
+        }
+
+        private ServiceDtos MapToServiceDto(Service service)
+        {
+            return new ServiceDtos(
+                service.Id,
+                service.Name,
+                service.Amount,
+                service.CategoryId,
+                service.Category?.CategoryName
             );
         }
     }
