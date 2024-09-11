@@ -90,7 +90,6 @@ public class AccountController : ControllerBase
 
         try
         {
-            
             var updatedAccount = await _accountService.UpdateAccountAsync(accountForUpdateDto);
             return Ok(updatedAccount);
         }

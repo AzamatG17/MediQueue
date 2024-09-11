@@ -115,7 +115,7 @@ namespace MediQueue.Services
         private int GenerateRandomId()
         {
             Random random = new Random();
-            return random.Next(100000000, 999999999);
+            return random.Next(1000000, 999999999);
         }
     }
 }

@@ -91,15 +91,7 @@ namespace MediQueue.Services
 
         public async Task DeleteRoleAsync(int id)
         {
-            try
-            {
-                await _roleRepository.DeleteAsync(id);
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
+            await _roleRepository.DeleteAsync(id);
         }
     }
 }

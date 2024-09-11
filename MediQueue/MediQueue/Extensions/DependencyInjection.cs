@@ -65,6 +65,7 @@ namespace MediQueue.Extensions
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IPermissionService, PermissonService>();
             services.AddScoped<IServicesService, ServicesService>();
+            services.AddScoped<IQuestionnaireHistoryService, QuestionnaireHistoryService>();
 
             services.AddSingleton<IAuthorizationHandler, JwtPermissionHandler>();
         }
@@ -78,6 +79,7 @@ namespace MediQueue.Extensions
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IPermissionRepository, PermissionRepository>();
             services.AddScoped<IServiceRepository, ServiceRepository>();
+            services.AddScoped<IQuestionnaireHistoryRepositoty, QuestionnaireHistoryRepository>();
         }
 
         private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)

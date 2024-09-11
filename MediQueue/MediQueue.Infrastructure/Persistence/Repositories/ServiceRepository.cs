@@ -6,8 +6,16 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
 {
     public class ServiceRepository : RepositoryBase<Service>, IServiceRepository
     {
-        public ServiceRepository(MediQueueDbContext mediQueueDbContext) : base(mediQueueDbContext)
+        public ServiceRepository(MediQueueDbContext mediQueueDbContext) 
+            : base(mediQueueDbContext)
         {
+        }
+
+        public async Task<IEnumerable<Service>> FindByServiceIdsAsync(List<int> serviceIds)
+        {
+            return await _context.Services
+                                 .Where(g => serviceIds.Contains(g.Id))
+                                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Service>> GetAllServiceWithCategory()
