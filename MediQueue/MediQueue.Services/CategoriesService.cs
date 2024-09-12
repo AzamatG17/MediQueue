@@ -93,11 +93,10 @@ namespace MediQueue.Services
 
         private CategoryDto MapToCategoryDto(Category category)
         {
-            var groupInfos = category.Groups.Select(g => new GroupInfoResponse
-            {
-                Id = g.Id,
-                Name = g.GroupName,
-            }).ToList();
+            var groupInfos = category.Groups.Select(g => new GroupInfoResponse(
+                g.Id,
+                g.GroupName
+                )).ToList();
 
             var serviceDtos = category.Services.Select(s => new ServiceDtos(
                 s.Id, // ID из модели Service

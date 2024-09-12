@@ -117,11 +117,10 @@ namespace MediQueue.Services
 
         private GroupDto MapToCategoryDto(Group category)
         {
-            var groupInfos = category.Categories.Select(g => new GroupInfoResponse
-            {
-                Id = g.Id,
-                Name = g.CategoryName,
-            }).ToList();
+            var groupInfos = category.Categories.Select(g => new GroupInfoResponse(
+                g.Id,
+                g.CategoryName
+                )).ToList();
 
             return new GroupDto(
                 category.Id,

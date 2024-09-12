@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
-using MediQueue.Domain.DTOs.Account;
 using MediQueue.Domain.DTOs.Questionnaire;
+using MediQueue.Domain.DTOs.QuestionnaireHistory;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Entities.Responses;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -11,29 +12,31 @@ namespace MediQueue.Services
     {
         private readonly IQuestionnaireRepository _questionnaireRepository;
         private readonly IMapper _mapper;
+        private readonly IQuestionnaireHistoryService _questionnaireHistoryService;
 
-        public QuestionnaireService(IQuestionnaireRepository questionnaireRepository, IMapper mapper)
+        public QuestionnaireService(IQuestionnaireRepository questionnaireRepository, IMapper mapper, IQuestionnaireHistoryService questionnaireHistoryService)
         {
             _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _questionnaireHistoryService = questionnaireHistoryService ?? throw new ArgumentNullException(nameof(questionnaireHistoryService));
         }
 
         public async Task<IEnumerable<QuestionnaireDto>> GetAllQuestionnairesAsync()
         {
-            var quest = await _questionnaireRepository.FindAllAsync();
+            var quest = await _questionnaireRepository.GetAllWithQuestionnaireHistoryAsync();
 
-            return _mapper.Map<IEnumerable<QuestionnaireDto>>(quest);
+            return quest.Select(MapToQuestionnaireDto).ToList();
         }
 
         public async Task<QuestionnaireDto> GetQuestionnaireByIdAsync(int id)
         {
-            var quest = await _questionnaireRepository.FindByIdAsync(id);
+            var quest = await _questionnaireRepository.GetByIdWithQuestionnaireHistory(id);
             if (quest == null)
             {
                 throw new KeyNotFoundException($"Questionnaire with {id} not found");
             }
 
-            return _mapper.Map<QuestionnaireDto>(quest);
+            return MapToQuestionnaireDto(quest);
         }
 
         public async Task<QuestionnaireDto> CreateQuestionnaireAsync(QuestionnaireForCreateDto questionnaireForCreateDto)
@@ -64,7 +67,11 @@ namespace MediQueue.Services
 
             await _questionnaireRepository.CreateAsync(quest);
 
-            return _mapper.Map<QuestionnaireDto>(quest);
+            await CreateQuestionnaireHistory
+                (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.DateCreated, questionnaireForCreateDto.IsPayed, questionnaireForCreateDto.AccountId, uniqueQuestionnaireId, questionnaireForCreateDto.ServiceIds);
+
+
+            return MapToQuestionnaireDto(quest);
         }
 
         public async Task<QuestionnaireDto> CreateOrGetBId(QuestionnaireForCreateDto questionnaireForCreateDto)
@@ -78,7 +85,10 @@ namespace MediQueue.Services
                 return result;
             }
 
-            return _mapper.Map<QuestionnaireDto>(question);
+            await CreateQuestionnaireHistory
+                (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.DateCreated, questionnaireForCreateDto.IsPayed, questionnaireForCreateDto.AccountId, question.QuestionnaireId, questionnaireForCreateDto.ServiceIds);
+
+            return MapToQuestionnaireDto(question);
         }
 
         public async Task<QuestionnaireDto> UpdateQuestionnaireAsync(QuestionnaireForUpdateDto questionnaireForUpdateDto)
@@ -92,7 +102,7 @@ namespace MediQueue.Services
 
             await _questionnaireRepository.UpdateAsync(quest);
 
-            return _mapper.Map<QuestionnaireDto>(quest);
+            return MapToQuestionnaireDto(quest);
         }
 
         public async Task DeleteQuestionnaireAsync(int id)
@@ -116,6 +126,76 @@ namespace MediQueue.Services
         {
             Random random = new Random();
             return random.Next(1000000, 999999999);
+        }
+
+        private async Task CreateQuestionnaireHistory(string? HistoryDiscription, DateTime? DateCreated, bool? IsPayed, int? AccountId, int? QuestionnaireId, List<int>? ServiceIds)
+        {
+            var questonnaireForCreate = new QuestionnaireHistoryForCreateDto(
+                HistoryDiscription,
+                DateCreated,
+                0,
+                IsPayed,
+                AccountId,
+                QuestionnaireId,
+                ServiceIds
+                );
+
+            await _questionnaireHistoryService.CreateQuestionnaireHistoryAsync(questonnaireForCreate);
+        }
+
+        private QuestionnaireDto MapToQuestionnaireDto(Questionnaire questionnaire)
+        {
+            return new QuestionnaireDto(
+                questionnaire.Id,
+                questionnaire.QuestionnaireId,
+                questionnaire.Balance,
+                questionnaire.Gender,
+                questionnaire.PassportSeria,
+                questionnaire.PassportPinfl,
+                questionnaire.PhoneNumber,
+                questionnaire.FirstName,
+                questionnaire.LastName,
+                questionnaire.SurName,
+                questionnaire.DateIssue,
+                questionnaire.DateBefore,
+                questionnaire.Region,
+                questionnaire.District,
+                questionnaire.Posolos,
+                questionnaire.Address,
+                questionnaire.Bithdate,
+                questionnaire.SocialSattus,
+                questionnaire.AdvertisingChannel,
+                questionnaire.QuestionnaireHistories != null
+                    ? questionnaire.QuestionnaireHistories.Select(MapToQuestionnaireHistoryDto).ToList()
+                    : new List<QuestionnaireHistoryWithServiceDto>()
+                );
+        }
+
+        private QuestionnaireHistoryWithServiceDto MapToQuestionnaireHistoryDto(QuestionnaireHistory questionnaire)
+        {
+            return new QuestionnaireHistoryWithServiceDto(
+                questionnaire.Id,
+                questionnaire.Historyid,
+                questionnaire.HistoryDiscription,
+                questionnaire.DateCreated,
+                questionnaire.Balance,
+                questionnaire.IsPayed,
+                questionnaire.AccountId,
+                questionnaire.Account != null
+                ? $"{questionnaire.Account.FirstName} {questionnaire.Account.LastName} {questionnaire.Account.SurName}"
+                    : "No Account Data",
+                questionnaire.QuestionnaireId,
+                questionnaire.Services != null
+                ? questionnaire.Services.Select(MapToServiceDto).ToList()
+                : new List<GroupInfoResponse>());
+        }
+
+        private GroupInfoResponse MapToServiceDto(Service service)
+        {
+            return new GroupInfoResponse(
+                service.Id,
+                service.Name
+                );
         }
     }
 }
