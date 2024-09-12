@@ -9,11 +9,13 @@ namespace MediQueue.Services
     public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     {
         private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
+        private readonly IQuestionnaireRepository _questionnaireRepository;
         private readonly IServiceRepository _serviceRepository;
-        public QuestionnaireHistoryService(IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty, IServiceRepository serviceRepository)
+        public QuestionnaireHistoryService(IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty, IServiceRepository serviceRepository, IQuestionnaireRepository questionnaireRepository)
         {
             _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
             _serviceRepository = serviceRepository ?? throw new ArgumentNullException(nameof(serviceRepository));
+            _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
         }
 
         public async Task<IEnumerable<QuestionnaireHistoryDto>> GetAllQuestionnaireHistoriessAsync()
@@ -126,6 +128,13 @@ namespace MediQueue.Services
             var questionn = await _serviceRepository.FindByServiceIdsAsync(questionnaireHistoryForCreateDto.ServiceIds);
             int historyid = await GenerateUniqueQuestionnaireIdAsync();
 
+            if (questionnaireHistoryForCreateDto.QuestionnaireId == null)
+            {
+                throw new KeyNotFoundException($"QuestionnaireId with {questionnaireHistoryForCreateDto.QuestionnaireId} not found");
+            }
+
+            var questionnaryId = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForCreateDto.QuestionnaireId);
+
             decimal balanceAmount = await GenerateBalanse(questionnaireHistoryForCreateDto.ServiceIds);
             return new QuestionnaireHistory
             {
@@ -135,7 +144,7 @@ namespace MediQueue.Services
                 Balance = balanceAmount,
                 IsPayed = questionnaireHistoryForCreateDto?.IsPayed,
                 AccountId = questionnaireHistoryForCreateDto?.AccountId,
-                QuestionnaireId = questionnaireHistoryForCreateDto.QuestionnaireId,
+                QuestionnaireId = questionnaryId.Id,
                 Services = questionn.ToList()
             };
         }
