@@ -14,6 +14,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.HistoryDiscription).IsRequired();
 
+            builder.Property(qh => qh.Balance)
+                .HasColumnType("decimal(18, 2)");
+
             builder.HasOne(qh => qh.Questionnaire)
                   .WithMany(q => q.QuestionnaireHistories)
                   .HasForeignKey(qh => qh.QuestionnaireId)
