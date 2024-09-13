@@ -73,7 +73,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     District = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Posolos = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    Bithdate = table.Column<DateOnly>(type: "date", nullable: true),
+                    Bithdate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     SocialSattus = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     AdvertisingChannel = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
@@ -200,9 +200,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Historyid = table.Column<int>(type: "int", nullable: false),
                     HistoryDiscription = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AccountId = table.Column<int>(type: "int", nullable: false),
-                    QuestionnaireId = table.Column<int>(type: "int", nullable: false)
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    IsPayed = table.Column<bool>(type: "bit", nullable: true),
+                    AccountId = table.Column<int>(type: "int", nullable: true),
+                    QuestionnaireId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {

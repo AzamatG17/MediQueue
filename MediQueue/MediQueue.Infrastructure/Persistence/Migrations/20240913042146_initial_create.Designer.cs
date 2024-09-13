@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediQueue.Infrastructure.persistence.Migrations
 {
     [DbContext(typeof(MediQueueDbContext))]
-    [Migration("20240910074235_initial_create")]
+    [Migration("20240913042146_initial_create")]
     partial class initial_create
     {
         /// <inheritdoc />
@@ -184,8 +184,8 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<decimal?>("Balance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateOnly?>("Bithdate")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("Bithdate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DateBefore")
                         .HasColumnType("datetime2");
@@ -253,10 +253,13 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AccountId")
+                    b.Property<int?>("AccountId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("DateCreated")
+                    b.Property<decimal?>("Balance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("DateCreated")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("HistoryDiscription")
@@ -266,7 +269,10 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int>("Historyid")
                         .HasColumnType("int");
 
-                    b.Property<int>("QuestionnaireId")
+                    b.Property<bool?>("IsPayed")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("QuestionnaireId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -383,14 +389,12 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.HasOne("MediQueue.Domain.Entities.Account", "Account")
                         .WithMany("QuestionnaireHistories")
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("MediQueue.Domain.Entities.Questionnaire", "Questionnaire")
                         .WithMany("QuestionnaireHistories")
                         .HasForeignKey("QuestionnaireId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Account");
 
