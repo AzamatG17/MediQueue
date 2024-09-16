@@ -62,7 +62,8 @@ namespace MediQueue.Services
                 Address = questionnaireForCreateDto.Address,
                 Bithdate = questionnaireForCreateDto.Bithdate ?? default(DateTime),
                 SocialSattus = questionnaireForCreateDto.SocialSattus,
-                AdvertisingChannel = questionnaireForCreateDto.AdvertisingChannel
+                AdvertisingChannel = questionnaireForCreateDto.AdvertisingChannel,
+                PhotoBase64 = questionnaireForCreateDto.PhotoBase64 ?? default(string),
             };
 
             await _questionnaireRepository.CreateAsync(quest);
@@ -165,6 +166,7 @@ namespace MediQueue.Services
                 questionnaire.Bithdate,
                 questionnaire.SocialSattus,
                 questionnaire.AdvertisingChannel,
+                questionnaire.PhotoBase64,
                 questionnaire.QuestionnaireHistories != null
                     ? questionnaire.QuestionnaireHistories.Select(MapToQuestionnaireHistoryDto).ToList()
                     : new List<QuestionnaireHistoryWithServiceDto>()

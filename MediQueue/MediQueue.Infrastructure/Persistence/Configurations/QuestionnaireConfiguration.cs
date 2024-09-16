@@ -60,6 +60,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(a => a.AdvertisingChannel)
                 .HasMaxLength(255);
 
+            builder.Property(x => x.PhotoBase64)
+                .HasColumnType("nvarchar(max)");
+
             builder.HasMany(q => q.QuestionnaireHistories)
                 .WithOne(h => h.Questionnaire)
                 .HasForeignKey(h => h.QuestionnaireId);
