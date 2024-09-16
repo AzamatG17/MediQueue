@@ -15,6 +15,7 @@ namespace MediQueue.Domain.Entities
         public int? QuestionnaireId { get; set; }
         public Questionnaire? Questionnaire { get; set; }
 
-        public virtual ICollection<Service> Services { get; set; }
+        public virtual ICollection<Service>? Services { get; set; }
+        public virtual ICollection<PaymentService>? PaymentServices { get; set; }
     }
 }

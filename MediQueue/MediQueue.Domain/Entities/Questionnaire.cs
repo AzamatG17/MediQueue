@@ -22,6 +22,7 @@ namespace MediQueue.Domain.Entities
         public DateTime? Bithdate { get; set; }
         public string? SocialSattus { get; set; }
         public string? AdvertisingChannel { get; set; }
+        public string? PhotoBase64 { get; set; }
 
         public ICollection<QuestionnaireHistory> QuestionnaireHistories { get; set; }
     }

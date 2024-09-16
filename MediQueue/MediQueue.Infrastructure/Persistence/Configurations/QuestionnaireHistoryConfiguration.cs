@@ -1,7 +1,6 @@
 ﻿using MediQueue.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Reflection.Emit;
 
 namespace MediQueue.Infrastructure.Persistence.Configurations
 {
@@ -30,6 +29,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasMany(qh => qh.Services)
                   .WithMany(s => s.QuestionnaireHistories)
                   .UsingEntity(j => j.ToTable("QuestionnaireHistoryService"));
+
+            builder.HasMany(qh => qh.PaymentServices)
+                .WithOne(ps => ps.QuestionnaireHistory)
+                .HasForeignKey(ps => ps.QuestionnaireHistoryId);
         }
     }
 }

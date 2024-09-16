@@ -134,6 +134,47 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.ToTable("Group", (string)null);
                 });
 
+            modelBuilder.Entity("MediQueue.Domain.Entities.PaymentService", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("OutstandingAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("PaidAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("QuestionnaireHistoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionnaireHistoryId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("PaymentService", (string)null);
+                });
+
             modelBuilder.Entity("MediQueue.Domain.Entities.Permission", b =>
                 {
                     b.Property<int>("Id")
@@ -381,6 +422,21 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("MediQueue.Domain.Entities.PaymentService", b =>
+                {
+                    b.HasOne("MediQueue.Domain.Entities.QuestionnaireHistory", "QuestionnaireHistory")
+                        .WithMany("PaymentServices")
+                        .HasForeignKey("QuestionnaireHistoryId");
+
+                    b.HasOne("MediQueue.Domain.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId");
+
+                    b.Navigation("QuestionnaireHistory");
+
+                    b.Navigation("Service");
+                });
+
             modelBuilder.Entity("MediQueue.Domain.Entities.QuestionnaireHistory", b =>
                 {
                     b.HasOne("MediQueue.Domain.Entities.Account", "Account")
@@ -456,6 +512,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
             modelBuilder.Entity("MediQueue.Domain.Entities.Questionnaire", b =>
                 {
                     b.Navigation("QuestionnaireHistories");
+                });
+
+            modelBuilder.Entity("MediQueue.Domain.Entities.QuestionnaireHistory", b =>
+                {
+                    b.Navigation("PaymentServices");
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.Role", b =>
