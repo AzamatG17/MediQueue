@@ -134,7 +134,7 @@ namespace MediQueue.Services
                 HistoryDiscription,
                 DateCreated,
                 0,
-                IsPayed,
+                IsPayed ?? false,
                 AccountId,
                 QuestionnaireId,
                 ServiceIds

@@ -22,7 +22,13 @@ namespace MediQueue.Services
         {
             var questionn = await _questionnaireHistoryRepositoty.GetAllQuestionnaireHistoriesAsync();
 
-            return questionn.Select(MapToQuestionnaireHistoryDto).ToList();
+            var tasks = questionn.Select(MapToQuestionnaireHistoryDto);
+
+            // Ожидаем завершения всех задач
+            var results = await Task.WhenAll(tasks);
+
+            // Преобразуем результаты в список
+            return results.ToList();
         }
 
         public async Task<QuestionnaireHistoryDto> GetQuestionnaireHistoryByIdAsync(int id)
@@ -33,7 +39,7 @@ namespace MediQueue.Services
                 throw new KeyNotFoundException($"QuestionnaireHistory with {id} not found");
             }
 
-            return MapToQuestionnaireHistoryDto(questionn);
+            return await MapToQuestionnaireHistoryDto(questionn);
         }
 
         public async Task<QuestionnaireHistoryDto> CreateQuestionnaireHistoryAsync(QuestionnaireHistoryForCreateDto questionnaireHistoryForCreateDto)
@@ -47,7 +53,7 @@ namespace MediQueue.Services
 
             await _questionnaireHistoryRepositoty.CreateAsync(questionnaire);
 
-            return MapToQuestionnaireHistoryDto(questionnaire);
+            return await MapToQuestionnaireHistoryDto(questionnaire);
         }
 
         public async Task<QuestionnaireHistoryDto> UpdateQuestionnaireHistoryAsync(QuestionnaireHistoryForUpdateDto questionnaireHistoryForUpdateDto)
@@ -99,7 +105,7 @@ namespace MediQueue.Services
 
             await _questionnaireHistoryRepositoty.UpdateAsync(questionn);
 
-            return MapToQuestionnaireHistoryDto(questionn);
+            return await MapToQuestionnaireHistoryDto(questionn);
         }
 
         public async Task DeleteQuestionnaireHistoryAsync(int id)
@@ -107,8 +113,47 @@ namespace MediQueue.Services
             await _questionnaireHistoryRepositoty.DeleteAsync(id);
         }
 
-        private QuestionnaireHistoryDto MapToQuestionnaireHistoryDto(QuestionnaireHistory questionnaireHistory)
+        private async Task<QuestionnaireHistoryDto> MapToQuestionnaireHistoryDto(QuestionnaireHistory questionnaireHistory)
         {
+            var services = questionnaireHistory.Services.ToList();
+            var payments = questionnaireHistory.PaymentServices ?? Enumerable.Empty<PaymentService>();
+
+            // Создаём словарь для хранения общей суммы оплаченных средств для каждого сервиса
+            var servicePaidAmounts = services.ToDictionary(
+                service => service.Id,
+                service => payments
+                    .Where(payment => payment.ServiceId == service.Id)
+                    .Sum(payment => payment.PaidAmount ?? 0)
+            );
+
+            // Обновляем сервисы с рассчитанным остатком
+            var updatedServices = services.Select(service =>
+            {
+                var totalPaidAmount = servicePaidAmounts.GetValueOrDefault(service.Id, 0);
+                var outstandingAmount = service.Amount - totalPaidAmount;
+
+                return new ServiceDtos(
+                    service.Id,
+                    service.Name,
+                    outstandingAmount,  // Заменяем Amount на OutstandingAmount
+                    service.CategoryId,
+                    service.Category?.CategoryName
+                );
+            }).ToList();
+
+            // Маппинг PaymentServices на DTO
+            var paymentDtos = questionnaireHistory.PaymentServices?.Select(p => new Domain.DTOs.PaymentService.PaymentServiceDto(
+                p.Id,
+                p.TotalAmount,
+                p.PaidAmount,
+                p.OutstandingAmount,
+                p.PaymentDate,
+                p.PaymentType,
+                p.PaymentStatus,
+                p.ServiceId,
+                p.QuestionnaireHistoryId
+            )).ToList();
+
             return new QuestionnaireHistoryDto(
                 questionnaireHistory.Id,
                 questionnaireHistory.Historyid,
@@ -119,8 +164,9 @@ namespace MediQueue.Services
                 questionnaireHistory.AccountId,
                 $"{questionnaireHistory.Account?.FirstName} {questionnaireHistory.Account?.LastName} {questionnaireHistory.Account?.SurName}",
                 questionnaireHistory.QuestionnaireId,
-                questionnaireHistory.Services?.Select(s => new ServiceDtos(s.Id, s.Name, s.Amount, s.CategoryId, s.Category?.CategoryName)).ToList()
-                );
+                updatedServices,
+                paymentDtos
+            );
         }
 
         private async Task<QuestionnaireHistory> MapToQuestionnaryHistory(QuestionnaireHistoryForCreateDto questionnaireHistoryForCreateDto)
