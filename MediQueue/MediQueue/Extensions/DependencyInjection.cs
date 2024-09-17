@@ -67,6 +67,10 @@ namespace MediQueue.Extensions
             services.AddScoped<IServicesService, ServicesService>();
             services.AddScoped<IQuestionnaireHistoryService, QuestionnaireHistoryService>();
             services.AddScoped<IPaymentServiceService, PaymentServiceService>();
+            services.AddScoped<IBranchService, BranchService>();
+            services.AddScoped<IScladService, ScladService>();
+            services.AddScoped<ILekarstvoService, LekarstvoService>();
+            services.AddScoped<ICategoryLekarstvoService, CategoryLekarstvoService>();
 
             services.AddSingleton<IAuthorizationHandler, JwtPermissionHandler>();
         }
@@ -82,6 +86,10 @@ namespace MediQueue.Extensions
             services.AddScoped<IServiceRepository, ServiceRepository>();
             services.AddScoped<IQuestionnaireHistoryRepositoty, QuestionnaireHistoryRepository>();
             services.AddScoped<IPaymentServiceRepository, PaymentServiceRepository>();
+            services.AddScoped<IBranchRepository, BranchRepository>();
+            services.AddScoped<IScladRepository, ScladRepository>();
+            services.AddScoped<ILekarstvoRepository, LekarstvoRepository>();
+            services.AddScoped<ICategoryLekarstvoRepository, CategoryLekarstvoRepository>();
         }
 
         private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
