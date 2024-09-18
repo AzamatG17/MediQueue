@@ -9,15 +9,21 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
         public void Configure(EntityTypeBuilder<RolePermission> builder)
         {
             builder.ToTable(nameof(RolePermission));
-            builder.HasKey(rp => new { rp.RoleId, rp.PermissionId });
+            builder.HasKey(rp => rp.Id);
+
+            builder.Property(rp => rp.ControllerId)
+                .IsRequired();
 
             builder.HasOne(rp => rp.Role)
                 .WithMany(r => r.RolePermissions)
                 .HasForeignKey(rp => rp.RoleId);
 
-            builder.HasOne(rp => rp.Permission)
-                .WithMany()
-                .HasForeignKey(rp => rp.PermissionId);
+            builder.Property(rp => rp.Permissions);
+
+            builder.HasOne(rp => rp.Role)
+                .WithMany(p => p.RolePermissions)
+                .HasForeignKey(rp => rp.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -1,10 +1,13 @@
-﻿namespace MediQueue.Domain.Entities
+﻿using MediQueue.Domain.Common;
+
+namespace MediQueue.Domain.Entities
 {
-    public class RolePermission
+    public class RolePermission : EntityBase
     {
+        public int ControllerId { get; set; }
+        public List<int> Permissions { get; set; }
+
         public int RoleId { get; set; }
         public Role Role { get; set; }
-        public int PermissionId { get; set; }
-        public Permission Permission { get; set; }
     }
 }

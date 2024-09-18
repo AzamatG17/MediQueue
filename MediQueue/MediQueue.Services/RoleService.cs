@@ -24,8 +24,7 @@ namespace MediQueue.Services
 
             var roleDtos = role.Select(role => new RoleDto(
                 role.Id,
-                role.Name,
-                role.RolePermissions.Select(rp => rp.PermissionId).ToList()
+                role.Name
                 ));
 
             return roleDtos;
@@ -42,8 +41,7 @@ namespace MediQueue.Services
 
             var roleDto = new RoleDto(
                 role.Id,
-                role.Name,
-                role.RolePermissions.Select(rp => rp.PermissionId).ToList()
+                role.Name
                 );
 
             return roleDto;
@@ -62,8 +60,7 @@ namespace MediQueue.Services
 
             var roleDto = new RoleDto(
                 Id: role.Id,
-                Name: role.Name,
-                PermissionId: role.RolePermissions.Select(rp => rp.PermissionId).ToList()
+                Name: role.Name
                 );
 
             return roleDto;
@@ -82,8 +79,7 @@ namespace MediQueue.Services
 
             var roleDto = new RoleDto(
                 Id: role.Id,
-                Name: role.Name,
-                PermissionId: role.RolePermissions.Select(rp => rp.PermissionId).ToList()
+                Name: role.Name
                 );
 
             return roleDto;

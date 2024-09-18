@@ -7,6 +7,7 @@ using MediQueue.Infrastructure.Persistence.Repositories;
 using MediQueue.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -73,6 +74,7 @@ namespace MediQueue.Extensions
             services.AddScoped<ICategoryLekarstvoService, CategoryLekarstvoService>();
 
             services.AddSingleton<IAuthorizationHandler, JwtPermissionHandler>();
+            services.AddSingleton<IAuthorizationFilter, PermissionAuthorizeAttribute>();
         }
 
         private static void AddRepositories(IServiceCollection services)
@@ -122,7 +124,7 @@ namespace MediQueue.Extensions
                     {
                         OnMessageReceived = context =>
                         {
-                            context.Token = context.Request.Cookies["tasty-cookies"];
+                            context.Token = context.Request.Cookies["mediks-cookies"];
 
                             return Task.CompletedTask;
                         }
@@ -134,23 +136,10 @@ namespace MediQueue.Extensions
         {
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("CategoryGetAll", policy =>
-                    policy.Requirements.Add(new JwtPermissionRequirement("CategoryGetAll")));
-
-                options.AddPolicy("CategoryGetById", policy =>
-                    policy.Requirements.Add(new JwtPermissionRequirement("CategoryGetById")));
-
-                options.AddPolicy("CategoryPost", policy =>
-                    policy.Requirements.Add(new JwtPermissionRequirement("CategoryPost")));
-
-                options.AddPolicy("CategoryPut", policy =>
-                    policy.Requirements.Add(new JwtPermissionRequirement("CategoryPut")));
-
-                options.AddPolicy("CategoryDelete", policy =>
-                    policy.Requirements.Add(new JwtPermissionRequirement("CategoryDelete")));
-
-                options.AddPolicy("AllQuestionnaire", policy =>
-                    policy.Requirements.Add(new JwtPermissionRequirement("AllQuestionnaire")));
+                options.AddPolicy("HasPermission", policy =>
+                {
+                    policy.Requirements.Add(new JwtPermissionRequirement());
+                });
             });
         }
     }
