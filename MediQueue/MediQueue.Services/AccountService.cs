@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Account;
+using MediQueue.Domain.DTOs.Role;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
@@ -23,7 +24,7 @@ namespace MediQueue.Services
         {
             var accounts =  await _accountRepository.FindAllWithRoleIdAsync();
 
-            return _mapper.Map<IEnumerable<AccountDto>>(accounts);
+            return accounts.Select(MapToAccountDto).ToList();
         }
 
         public async Task<AccountDto> GetAccountByIdAsync(int id)
@@ -77,6 +78,33 @@ namespace MediQueue.Services
         public async Task DeleteAccountAsync(int id)
         {
             await _accountRepository.DeleteAsync(id);
+        }
+
+        private AccountDto MapToAccountDto(Account account)
+        {
+            return new AccountDto(
+                account.Id,
+                account.Login,
+                account.Password,
+                account.Passport,
+                account.PhoneNumber,
+                account.FirstName,
+                account.LastName,
+                account.SurName,
+                account.Email,
+                account.Bithdate,
+                account.RoleId,
+                account.Role.Name,
+                account.RolePermissions.Select(MapToRolePermissionDto).ToList()
+                );
+        }
+
+        private RolePermissionDto MapToRolePermissionDto(RolePermission rolePermission)
+        {
+            return new RolePermissionDto(
+                rolePermission.ControllerId,
+                rolePermission.Permissions
+                );
         }
     }
 }

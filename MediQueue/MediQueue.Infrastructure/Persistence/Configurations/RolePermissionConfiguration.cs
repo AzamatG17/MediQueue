@@ -15,19 +15,15 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(rp => rp.ControllerId)
                 .IsRequired();
 
-            builder.HasOne(rp => rp.Role)
-                .WithMany(r => r.RolePermissions)
-                .HasForeignKey(rp => rp.RoleId);
-
             builder.Property(rp => rp.Permissions)
                         .HasConversion(
                         v => JsonConvert.SerializeObject(v),  // Convert List<int> to JSON
                         v => JsonConvert.DeserializeObject<List<int>>(v)  // Convert JSON back to List<int>
                     );
 
-            builder.HasOne(rp => rp.Role)
+            builder.HasOne(rp => rp.Account)
                 .WithMany(p => p.RolePermissions)
-                .HasForeignKey(rp => rp.RoleId)
+                .HasForeignKey(rp => rp.AccountId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -2,5 +2,5 @@
 
 namespace MediQueue.Domain.DTOs.Role
 {
-    public record RoleDto(int Id, string Name, ICollection<RolePermissionDto>? RolePermissionDtos);
+    public record RoleDto(int Id, string Name);
 }

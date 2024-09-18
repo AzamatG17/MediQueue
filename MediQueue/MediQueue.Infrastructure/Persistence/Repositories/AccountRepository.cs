@@ -14,6 +14,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<Account>> FindAllWithRoleIdAsync()
         {
             return await _context.Set<Account>()
+                .Include(x => x.RolePermissions)
                 .Include(x => x.Role)
                 .AsNoTracking()
                 .ToListAsync();
@@ -22,6 +23,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<Account> FindByIdWithRoleAsync(int Id)
         {
             return await _context.Set<Account>()
+                .Include(x => x.RolePermissions)
                 .Include(x => x.Role)
                 .FirstOrDefaultAsync(x => x.Id == Id);
         }

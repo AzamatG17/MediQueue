@@ -26,8 +26,7 @@ namespace MediQueue.Infrastructure.JwtToken
             int userId = int.TryParse(username, out int tempUserId) ? tempUserId : 0;
 
             var user = await _context.Accounts
-                .Include(a => a.Role)
-                .ThenInclude(r => r.RolePermissions)
+                .Include(x => x.RolePermissions)
                 .FirstOrDefaultAsync(a => a.Id == userId);
 
             if (user == null)
@@ -40,7 +39,7 @@ namespace MediQueue.Infrastructure.JwtToken
             var actionName = (context.Resource as ControllerActionDescriptor)?.ActionName;
             var permissionId = GetPermissionIdByAction(actionName);
 
-            if (user.Role.RolePermissions
+            if (user.RolePermissions
                 .Any(cp => cp.ControllerId == controllerId && cp.Permissions.Contains(permissionId)))
             {
                 context.Succeed(requirement);

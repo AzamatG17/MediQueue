@@ -19,11 +19,6 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .WithOne(a => a.Role)
                 .HasForeignKey(a => a.RoleId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasMany(r => r.RolePermissions)
-                .WithOne(rp => rp.Role)
-                .HasForeignKey(rp => rp.RoleId)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

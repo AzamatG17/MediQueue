@@ -32,8 +32,7 @@ namespace MediQueue.Infrastructure.JwtToken
             int userId = int.TryParse(username, out int tempUserId) ? tempUserId : 0;
 
             var account = dbContext.Accounts
-                .Include(x => x.Role)
-                .ThenInclude(r => r.RolePermissions)
+                .Include(x => x.RolePermissions)
                 .FirstOrDefault(x => x.Id == userId);
 
             if (account == null)
@@ -42,7 +41,7 @@ namespace MediQueue.Infrastructure.JwtToken
                 return;
             }
 
-            var hasPermission = account.Role.RolePermissions
+            var hasPermission = account.RolePermissions
             .Any(cp => cp.ControllerId == _controllerid && _permissions.All(p => cp.Permissions.Contains(p)));
 
             if (!hasPermission)

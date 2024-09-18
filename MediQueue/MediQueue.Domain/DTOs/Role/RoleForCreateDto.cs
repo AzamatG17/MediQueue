@@ -2,5 +2,5 @@
 
 namespace MediQueue.Domain.DTOs.Role
 {
-    public record RoleForCreateDto(string Name, List<RolePermissionDto> PermissionId);
+    public record RoleForCreateDto(string Name);
 }

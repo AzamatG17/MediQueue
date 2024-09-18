@@ -13,12 +13,21 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<Questionnaire>> GetAllWithQuestionnaireHistoryAsync()
         {
-            return await _context.Questionnaires
-                .Include(q => q.QuestionnaireHistories)
-                .ThenInclude(q => q.Account)
-                .Include(a => a.QuestionnaireHistories)
-                .ThenInclude(q => q.Services)
-                .ToListAsync();
+            var questionnaires = await _context.Questionnaires
+        .Include(q => q.QuestionnaireHistories)
+            .ThenInclude(qh => qh.Account)
+        .Include(q => q.QuestionnaireHistories)
+            .ThenInclude(qh => qh.Services)
+        .ToListAsync();
+
+            foreach (var questionnaire in questionnaires)
+            {
+                questionnaire.QuestionnaireHistories = questionnaire.QuestionnaireHistories
+                    .OrderByDescending(qh => qh.Id)
+                    .ToList();
+            }
+
+            return questionnaires;
         }
 
         public async Task<Questionnaire> GetByIdWithQuestionnaireHistory(int Id)
