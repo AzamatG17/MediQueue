@@ -12,15 +12,7 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Name)
-                .HasMaxLength(255)
-                .IsRequired();
-
-            builder.Property(x => x.Controller)
-                .HasMaxLength(255)
-                .IsRequired();
-
-            builder.Property(x => x.Action)
-                .HasMaxLength(255)
+                .HasMaxLength(50)
                 .IsRequired();
         }
     }

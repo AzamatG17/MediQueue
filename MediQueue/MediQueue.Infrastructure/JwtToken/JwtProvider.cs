@@ -1,7 +1,6 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Auth;
 using MediQueue.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -19,23 +18,24 @@ namespace MediQueue.Infrastructure.JwtToken
         {
             var claimForToken = new List<Claim>
             {
-                new Claim("AccountId", account.Id.ToString()),
-                new Claim("RoleId", account.RoleId.ToString())
+                new Claim(ClaimTypes.Name, account.Id.ToString()),
+                new Claim("RoleId", account.Role.Name),
+                new Claim(ClaimTypes.Role, account.RoleId.ToString())
             };
 
-            var role = _context.Roles
-                .Include(r => r.RolePermissions)
-                .ThenInclude(rp => rp.Permission)
-                .FirstOrDefault(r => r.Id == account.RoleId);
+            //var role = _context.Roles
+            //    .Include(r => r.RolePermissions)
+            //    .ThenInclude(rp => rp.Permission)
+            //    .FirstOrDefault(r => r.Id == account.RoleId);
 
-            if (role != null)
-            {
-                foreach(var rolePermision in role.RolePermissions)
-                {
-                    var permission = rolePermision.Permission;
-                    claimForToken.Add(new Claim("Permission", permission.Name));
-                }
-            }
+            //if (role != null)
+            //{
+            //    foreach(var rolePermision in role.RolePermissions)
+            //    {
+            //        var permission = rolePermision.Permission;
+            //        claimForToken.Add(new Claim("Permission", permission.Name));
+            //    }
+            //}
 
             var securityKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_options.SecretKey));

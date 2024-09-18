@@ -4,10 +4,8 @@ namespace MediQueue.Infrastructure.JwtToken
 {
     public class JwtPermissionRequirement : IAuthorizationRequirement
     {
-        public string Permission { get; }
-        public JwtPermissionRequirement(string permission)
+        public JwtPermissionRequirement()
         {
-            Permission = permission;
         }
     }
 }
