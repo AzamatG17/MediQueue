@@ -31,14 +31,6 @@ namespace MediQueue.Infrastructure.Persistence
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Permission>().HasData(
-            new Permission { Id = 1, Name = "Get" },
-            new Permission { Id = 2, Name = "GetById" },
-            new Permission { Id = 3, Name = "Post" },
-            new Permission { Id = 4, Name = "Put" },
-            new Permission { Id = 5, Name = "Delete" }
-        );
         }
     }
 }

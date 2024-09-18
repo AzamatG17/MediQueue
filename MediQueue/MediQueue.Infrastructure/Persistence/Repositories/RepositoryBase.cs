@@ -21,7 +21,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
 
         public async Task<T> FindByIdAsync(int id)
         {
-            return await _context.Set<T>().FindAsync(id);
+            return await _context.Set<T>()
+                .FindAsync(id);
         }
 
         public async Task<T> CreateAsync(T entity)

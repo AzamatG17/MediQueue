@@ -73,8 +73,9 @@ namespace MediQueue.Extensions
             services.AddScoped<ILekarstvoService, LekarstvoService>();
             services.AddScoped<ICategoryLekarstvoService, CategoryLekarstvoService>();
 
-            services.AddSingleton<IAuthorizationHandler, JwtPermissionHandler>();
-            services.AddSingleton<IAuthorizationFilter, PermissionAuthorizeAttribute>();
+            services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
+            services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
+            //services.AddSingleton<IAuthorizationFilter, PermissionAuthorizeAttribute>();
         }
 
         private static void AddRepositories(IServiceCollection services)
