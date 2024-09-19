@@ -2,16 +2,20 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
 
 namespace MediQueue.Infrastructure.JwtToken
 {
     public class JwtPermissionHandler : AuthorizationHandler<JwtPermissionRequirement>
     {
         private readonly MediQueueDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public JwtPermissionHandler(MediQueueDbContext context)
+        public JwtPermissionHandler(MediQueueDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, JwtPermissionRequirement requirement)
@@ -35,8 +39,25 @@ namespace MediQueue.Infrastructure.JwtToken
                 return;
             }
 
-            var controllerId = GetControllerId(context.Resource as ControllerActionDescriptor);
-            var actionName = (context.Resource as ControllerActionDescriptor)?.ActionName;
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext == null)
+            {
+                context.Fail();
+                return;
+            }
+
+            var endpoint = httpContext.GetEndpoint();
+            var controllerDescriptor = endpoint?.Metadata.GetMetadata<ControllerActionDescriptor>();
+
+            if (controllerDescriptor == null)
+            {
+                context.Fail();
+                return;
+            }
+
+            var controllerId = GetControllerId(controllerDescriptor);
+            var actionName = controllerDescriptor.ActionName;
             var permissionId = GetPermissionIdByAction(actionName);
 
             if (user.RolePermissions
@@ -55,9 +76,19 @@ namespace MediQueue.Infrastructure.JwtToken
             // Определите ID контроллера на основе имени контроллера
             return descriptor?.ControllerName switch
             {
-                "QuestionnaryController" => 1,
-                "QuestionnaryHistoryController" => 2,
-                "AccountController" => 3,
+                "Account" => 1,
+                "Branch" => 2,
+                "Category" => 3,
+                "CategoryLekarstvo" => 4,
+                "Group" => 5,
+                "Lekarstvo" => 6,
+                "PaymentService" => 7,
+                "Permission" => 8,
+                "Questionnaire" => 9,
+                "QuestionnaireHistory" => 10,
+                "Role" => 11,
+                "Sclad" => 12,
+                "Service" => 13,
                 _ => 0
             };
         }

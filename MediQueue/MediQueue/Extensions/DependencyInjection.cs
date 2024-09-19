@@ -20,7 +20,7 @@ namespace MediQueue.Extensions
         {
             AddDatabaseContext(services, configuration);
             AddAuthentication(services, configuration);
-            //AddAuthorization(services);
+            AddAuthorization(services);
             AddServices(services);
             AddRepositories(services);
             AddAutoMapper(services);
@@ -75,7 +75,7 @@ namespace MediQueue.Extensions
 
             services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
             services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
-            //services.AddSingleton<IAuthorizationFilter, PermissionAuthorizeAttribute>();
+            //services.AddScoped<IAuthorizationFilter, PermissionAuthorizeAttribute>();
         }
 
         private static void AddRepositories(IServiceCollection services)
@@ -135,6 +135,7 @@ namespace MediQueue.Extensions
 
         private static void AddAuthorization(IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("HasPermission", policy =>

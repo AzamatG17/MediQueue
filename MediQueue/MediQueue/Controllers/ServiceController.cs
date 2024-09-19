@@ -1,13 +1,12 @@
-﻿using MediQueue.Domain.DTOs.Role;
-using MediQueue.Domain.DTOs.Service;
+﻿using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Interfaces.Services;
-using MediQueue.Services;
-using Microsoft.AspNetCore.Cors;
+using MediQueue.Infrastructure.JwtToken;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize(Policy = "AllRolePermission")]
+[Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/service")]
 //[EnableCors("AllowSpecificOrigins")]
@@ -20,8 +19,9 @@ public class ServiceController : ControllerBase
             _servicesService = services ?? throw new ArgumentNullException(nameof(services));
     }
 
+    [PermissionAuthorize(13, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetServicesAsync()
+    public async Task<ActionResult> GetAsync()
     {
         try
         {
@@ -34,8 +34,9 @@ public class ServiceController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(13, 2)]
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetServiceByIdAsync(int id)
+    public async Task<ActionResult> GetByIdAsync(int id)
     {
         try
         {
@@ -56,6 +57,7 @@ public class ServiceController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(13, 3)]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] ServiceForCreateDto serviceForCreateDto)
     {
@@ -75,6 +77,7 @@ public class ServiceController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(13, 4)]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] ServiceForUpdateDto serviceForUpdateDto)
     {
@@ -103,8 +106,9 @@ public class ServiceController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(13, 5)]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteService(int id)
+    public async Task<ActionResult> DeleteAsync(int id)
     {
         try
         {

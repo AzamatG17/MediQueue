@@ -1,12 +1,11 @@
 ﻿using MediQueue.Domain.Interfaces.Services;
-using MediQueue.Services;
+using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize]
+[Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/permission")]
 //[EnableCors("AllowSpecificOrigins")]
@@ -18,8 +17,9 @@ public class PermissionController : ControllerBase
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
     }
 
+    [PermissionAuthorize(8, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetPermissionsAsync()
+    public async Task<ActionResult> GetAsync()
     {
         try
         {
@@ -32,8 +32,9 @@ public class PermissionController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(8, 2)]
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetPermissionByIdAsync(int id)
+    public async Task<ActionResult> GetByIdAsync(int id)
     {
         try
         {

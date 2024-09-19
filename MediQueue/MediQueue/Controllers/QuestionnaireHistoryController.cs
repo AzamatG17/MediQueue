@@ -1,11 +1,12 @@
-﻿using MediQueue.Domain.DTOs.Questionnaire;
-using MediQueue.Domain.DTOs.QuestionnaireHistory;
+﻿using MediQueue.Domain.DTOs.QuestionnaireHistory;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.JwtToken;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize(Policy = "AllQuestionnaire")]
+[Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/questionnairehistory")]
 //[EnableCors("AllowSpecificOrigins")]
@@ -18,8 +19,9 @@ public class QuestionnaireHistoryController : ControllerBase
         _questionnaireHistoryService = questionnaireHistoryService ?? throw new ArgumentNullException(nameof(questionnaireHistoryService));
     }
 
+    [PermissionAuthorize(10, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetQuestionnaireHistoriesAsync()
+    public async Task<ActionResult> GetAsync()
     {
         try
         {
@@ -32,8 +34,9 @@ public class QuestionnaireHistoryController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(10, 2)]
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetQuestionnaireHistoryByIdAsync(int id)
+    public async Task<ActionResult> GetByIdAsync(int id)
     {
         try
         {
@@ -54,6 +57,7 @@ public class QuestionnaireHistoryController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(10, 3)]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] QuestionnaireHistoryForCreateDto questionnaireHistoryForCreateDto)
     {
@@ -68,6 +72,7 @@ public class QuestionnaireHistoryController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(10, 4)]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] QuestionnaireHistoryForUpdateDto questionnaireHistoryForUpdateDto)
     {
@@ -96,8 +101,9 @@ public class QuestionnaireHistoryController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(10, 5)]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteGroup(int id)
+    public async Task<ActionResult> DeleteAsync(int id)
     {
         try
         {

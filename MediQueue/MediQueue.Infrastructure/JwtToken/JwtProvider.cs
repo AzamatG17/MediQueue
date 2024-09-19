@@ -19,7 +19,7 @@ namespace MediQueue.Infrastructure.JwtToken
             var claimForToken = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, account.Id.ToString()),
-                new Claim("RoleId", account.Role.Name),
+                //new Claim("RoleId", account.Role.Name),
                 new Claim(ClaimTypes.Role, account.RoleId.ToString())
             };
 

@@ -25,7 +25,7 @@ public class AuthorizationController : ControllerBase
             return Unauthorized("Invalid login or password");
         }
 
-        HttpContext.Response.Cookies.Append("tasty-cookies", token.Token);
+        HttpContext.Response.Cookies.Append("mediks-cookies", token.Token);
 
         return Ok(token);
     }

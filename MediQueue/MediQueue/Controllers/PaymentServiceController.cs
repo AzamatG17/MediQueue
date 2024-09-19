@@ -1,11 +1,12 @@
 ﻿using MediQueue.Domain.DTOs.PaymentService;
-using MediQueue.Domain.DTOs.Role;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.JwtToken;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize(Policy = "AllRolePermission")]
+[Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/payment")]
 //[EnableCors("AllowSpecificOrigins")]
@@ -18,8 +19,9 @@ public class PaymentServiceController : ControllerBase
         _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
     }
 
+    [PermissionAuthorize(7, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetPaymentsAsync()
+    public async Task<ActionResult> GetAsync()
     {
         try
         {
@@ -32,8 +34,9 @@ public class PaymentServiceController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(7, 2)]
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetPaymentByIdAsync(int id)
+    public async Task<ActionResult> GetByIdAsync(int id)
     {
         try
         {
@@ -54,6 +57,7 @@ public class PaymentServiceController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(7, 3)]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] PaymentServiceHelperDto paymentServiceHelperDto)
     {
@@ -73,6 +77,7 @@ public class PaymentServiceController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(7, 4)]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] PaymentServiceForUpdateDto paymentServiceForUpdateDto)
     {
@@ -101,8 +106,9 @@ public class PaymentServiceController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(7, 5)]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeletePayment(int id)
+    public async Task<ActionResult> DeleteAsync(int id)
     {
         try
         {

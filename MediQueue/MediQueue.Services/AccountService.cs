@@ -4,6 +4,7 @@ using MediQueue.Domain.DTOs.Role;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.Persistence;
 
 namespace MediQueue.Services
 {
@@ -12,17 +13,19 @@ namespace MediQueue.Services
         private readonly IMapper _mapper;
         private readonly IAccountRepository _accountRepository;
         private readonly IRoleRepository _roleRepository;
+        private readonly MediQueueDbContext _dbContext;
 
-        public AccountService(IAccountRepository accountRepository, IMapper mapper, IRoleRepository roleRepository)
+        public AccountService(IAccountRepository accountRepository, IMapper mapper, IRoleRepository roleRepository, MediQueueDbContext mediQueueDbContext)
         {
             _accountRepository = accountRepository ?? throw new ArgumentNullException(nameof(accountRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _roleRepository = roleRepository ?? throw new ArgumentNullException(nameof(roleRepository));
+            _dbContext = mediQueueDbContext ?? throw new ArgumentNullException(nameof(mediQueueDbContext));
         }
 
         public async Task<IEnumerable<AccountDto>> GetAllAccountsAsync()
         {
-            var accounts =  await _accountRepository.FindAllWithRoleIdAsync();
+            var accounts = await _accountRepository.FindAllWithRoleIdAsync();
 
             return accounts.Select(MapToAccountDto).ToList();
         }
@@ -52,13 +55,37 @@ namespace MediQueue.Services
                 throw new ArgumentException("Role not found.");
             }
 
-            var accountEntity = _mapper.Map<Account>(accountForCreateDto);
+            var accountEntity = new Account
+            {
+                Login = accountForCreateDto.Login,
+                Password = accountForCreateDto.Password,
+                Passport = accountForCreateDto.Passport,
+                PhoneNumber = accountForCreateDto.PhoneNumber,
+                FirstName = accountForCreateDto.FirstName,
+                LastName = accountForCreateDto.LastName,
+                SurName = accountForCreateDto.SurName,
+                Email = accountForCreateDto.Email,
+                Bithdate = accountForCreateDto.Bithdate,
+                RoleId = accountForCreateDto.RoleId
+            };
 
             accountEntity.Role = role;
 
             await _accountRepository.CreateAsync(accountEntity);
 
-            return _mapper.Map<AccountDto>(accountEntity);
+            var rolePermissions = accountForCreateDto.RolePermissions
+                .Select(dto => MapToRolePermission(dto, accountEntity.Id))
+                .ToList();
+
+            _dbContext.RolePermissions.AddRange(rolePermissions); // Здесь await не нужен
+
+            // Сохраняем изменения в базе данных
+            await _dbContext.SaveChangesAsync();
+
+
+            accountEntity.RolePermissions = rolePermissions;
+
+            return MapToAccountDto(accountEntity);
         }
 
         public async Task<AccountDto> UpdateAccountAsync(AccountForUpdateDto accountForUpdateDto)
@@ -72,7 +99,7 @@ namespace MediQueue.Services
 
             await _accountRepository.UpdateAsync(account);
 
-            return _mapper.Map<AccountDto>(account);      
+            return _mapper.Map<AccountDto>(account);
         }
 
         public async Task DeleteAccountAsync(int id)
@@ -105,6 +132,16 @@ namespace MediQueue.Services
                 rolePermission.ControllerId,
                 rolePermission.Permissions
                 );
+        }
+
+        private RolePermission MapToRolePermission(RolePermissionDto rolePermissionDto, int accountId)
+        {
+            return new RolePermission
+            {
+                ControllerId = rolePermissionDto.ControllerId,
+                Permissions = (List<int>)rolePermissionDto.Permissions,
+                AccountId = accountId
+            };
         }
     }
 }

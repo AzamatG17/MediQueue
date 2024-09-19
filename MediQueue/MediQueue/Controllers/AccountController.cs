@@ -1,12 +1,12 @@
 ﻿using MediQueue.Domain.DTOs.Account;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize(Policy = "AllAccountPermission")]
+[Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/accounts")]
 //[EnableCors("AllowSpecificOrigins")]
@@ -19,8 +19,9 @@ public class AccountController : ControllerBase
         _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
     }
 
+    [PermissionAuthorize(1, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetAccountsAsync()
+    public async Task<ActionResult> GetAsync()
     {
         try
         {
@@ -33,8 +34,9 @@ public class AccountController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(1, 2)]
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetAccountByIdAsync(int id)
+    public async Task<ActionResult> GetByIdAsync(int id)
     {
         try
         {
@@ -55,6 +57,7 @@ public class AccountController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(1, 3)]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] AccountForCreateDto accountForCreateDto)
     {
@@ -74,6 +77,7 @@ public class AccountController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(1, 4)]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] AccountForUpdateDto accountForUpdateDto)
     {
@@ -103,8 +107,9 @@ public class AccountController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(1, 5)]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteAccount(int id)
+    public async Task<ActionResult> DeleteAsync(int id)
     {
         try
         {
