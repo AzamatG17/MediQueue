@@ -1,12 +1,12 @@
 ﻿using MediQueue.Domain.DTOs.Category;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize]
+[Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/category")]
 //[EnableCors("AllowSpecificOrigins")]
@@ -19,9 +19,9 @@ public class CategoryController : ControllerBase
         _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
     }
 
-    //[Authorize(Policy = "CategoryGetAll")]
+    [PermissionAuthorize(3, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetCategoryAsync()
+    public async Task<ActionResult> GetAsync()
     {
         try
         {
@@ -34,9 +34,9 @@ public class CategoryController : ControllerBase
         }
     }
 
-    //[Authorize(Policy = "CategoryGetById")]
+    [PermissionAuthorize(3, 2)]
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetCategoryByIdAsync(int id)
+    public async Task<ActionResult> GetByIdAsync(int id)
     {
         try
         {
@@ -57,7 +57,7 @@ public class CategoryController : ControllerBase
         }
     }
 
-    //[Authorize(Policy = "CategoryPost")]
+    [PermissionAuthorize(3, 3)]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] CategoryForCreateDto categoryForCreateDto)
     {
@@ -77,7 +77,7 @@ public class CategoryController : ControllerBase
         }
     }
 
-    //[Authorize(Policy = "CategoryPut")]
+    [PermissionAuthorize(3, 4)]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] CategoryForUpdateDto categoryForUpdateDto)
     {
@@ -108,9 +108,9 @@ public class CategoryController : ControllerBase
         }
     }
 
-    //[Authorize(Policy = "CategoryDelete")]
+    [PermissionAuthorize(3, 5)]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteCategory(int id)
+    public async Task<ActionResult> DeleteAsync(int id)
     {
         try
         {

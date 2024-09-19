@@ -1,9 +1,12 @@
 ﻿using MediQueue.Domain.DTOs.CategoryLekarstvo;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.JwtToken;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
-//[Authorize]
+
+[Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/categorylekarstvo")]
 //[EnableCors("AllowSpecificOrigins")]
@@ -17,8 +20,9 @@ public class CategoryLekarstvoController : ControllerBase
         _categoryLekarstvoService = categoryLekarstvoService ?? throw new ArgumentNullException(nameof(categoryLekarstvoService));
     }
 
+    [PermissionAuthorize(4, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetategoryLekarstvosAsync()
+    public async Task<ActionResult> GetAsync()
     {
         try
         {
@@ -31,8 +35,9 @@ public class CategoryLekarstvoController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(4, 2)]
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetCategoryLekarstvoByIdAsync(int id)
+    public async Task<ActionResult> GetByIdAsync(int id)
     {
         try
         {
@@ -53,6 +58,7 @@ public class CategoryLekarstvoController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(4, 3)]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] CategoryLekarstvoForCreateDto categoryLekarstvoForCreateDto)
     {
@@ -72,6 +78,7 @@ public class CategoryLekarstvoController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(4, 4)]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] CategoryLekarstvoForUpdateDto categoryLekarstvoForUpdateDto)
     {
@@ -100,8 +107,9 @@ public class CategoryLekarstvoController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(4, 5)]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteCategory(int id)
+    public async Task<ActionResult> DeleteAsync(int id)
     {
         try
         {

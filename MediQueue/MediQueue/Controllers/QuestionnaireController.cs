@@ -1,12 +1,12 @@
 ﻿using MediQueue.Domain.DTOs.Questionnaire;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize(Policy = "AllQuestionnaire")]
+[Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/questionnaire")]
 //[EnableCors("AllowSpecificOrigins")]
@@ -19,8 +19,9 @@ public class QuestionnaireController : ControllerBase
         _questionnaireService = questionnaireService ?? throw new ArgumentNullException(nameof(questionnaireService));
     }
 
+    [PermissionAuthorize(9, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetQuestionnairesAsync()
+    public async Task<ActionResult> GetAsync()
     {
         try
         {
@@ -33,8 +34,9 @@ public class QuestionnaireController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(9, 2)]
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetQuestionnaireByIdAsync(int id)
+    public async Task<ActionResult> GetByIdAsync(int id)
     {
         try
         {
@@ -55,6 +57,7 @@ public class QuestionnaireController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(9, 3)]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] QuestionnaireForCreateDto questionnaireForCreateDto)
     {
@@ -69,6 +72,7 @@ public class QuestionnaireController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(9, 4)]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] QuestionnaireForUpdateDto questionnaireForUpdateDto)
     {
@@ -97,8 +101,9 @@ public class QuestionnaireController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(9, 5)]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteGroup(int id)
+    public async Task<ActionResult> DeleteAsync(int id)
     {
         try
         {

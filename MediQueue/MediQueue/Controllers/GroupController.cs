@@ -1,12 +1,12 @@
 ﻿using MediQueue.Domain.DTOs.Group;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize(Policy = "AllGroupPermission")]
+[Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/group")]
 //[EnableCors("AllowSpecificOrigins")]
@@ -19,8 +19,9 @@ public class GroupController : ControllerBase
         _groupService = groupService ?? throw new ArgumentNullException(nameof(groupService));
     }
 
+    [PermissionAuthorize(5, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetGroupAsync()
+    public async Task<ActionResult> GetAsync()
     {
         try
         {
@@ -33,8 +34,9 @@ public class GroupController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(5, 2)]
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetGroupByIdAsync(int id)
+    public async Task<ActionResult> GetByIdAsync(int id)
     {
         try
         {
@@ -55,6 +57,7 @@ public class GroupController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(5, 3)]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] GroupForCreateDto groupForCreateDto)
     {
@@ -74,6 +77,7 @@ public class GroupController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(5, 4)]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] GroupForUpdateDto groupForUpdateDto)
     {
@@ -102,6 +106,7 @@ public class GroupController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(5, 5)]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteGroup(int id)
     {

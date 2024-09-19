@@ -1,10 +1,12 @@
 ﻿using MediQueue.Domain.DTOs.Sclad;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.JwtToken;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
 
-//[Authorize]
+[Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/sclad")]
 //[EnableCors("AllowSpecificOrigins")]
@@ -16,8 +18,9 @@ public class ScladController : ControllerBase
         _cladService = cladService ?? throw new ArgumentNullException(nameof(cladService));
     }
 
+    [PermissionAuthorize(12, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetScladsAsync()
+    public async Task<ActionResult> GetAsync()
     {
         try
         {
@@ -30,8 +33,9 @@ public class ScladController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(12, 2)]
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetScladByIdAsync(int id)
+    public async Task<ActionResult> GetByIdAsync(int id)
     {
         try
         {
@@ -52,6 +56,7 @@ public class ScladController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(12, 3)]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] ScladForCreateDto scladForCreateDto)
     {
@@ -71,6 +76,7 @@ public class ScladController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(12, 4)]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] ScladForUpdateDto scladForUpdateDto)
     {
@@ -99,8 +105,9 @@ public class ScladController : ControllerBase
         }
     }
 
+    [PermissionAuthorize(12, 5)]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteCategory(int id)
+    public async Task<ActionResult> DeleteAsync(int id)
     {
         try
         {
