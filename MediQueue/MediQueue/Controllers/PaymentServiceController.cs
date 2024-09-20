@@ -10,7 +10,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/payment")]
 //[EnableCors("AllowSpecificOrigins")]
-public class PaymentServiceController : ControllerBase
+public class PaymentServiceController : BaseController
 {
     private readonly IPaymentServiceService _paymentService;
 
@@ -30,7 +30,7 @@ public class PaymentServiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -43,17 +43,17 @@ public class PaymentServiceController : ControllerBase
             var account = await _paymentService.GetPaymentByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Payment with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"Payment with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Payment not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -63,17 +63,17 @@ public class PaymentServiceController : ControllerBase
     {
         if (paymentServiceHelperDto == null)
         {
-            return BadRequest("Payment data is null.");
+            return BadRequest(CreateErrorResponse("Payment data is null."));
         }
 
         try
         {
             var createdAccount = await _paymentService.CreatePaymentAsync(paymentServiceHelperDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("Payment successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -83,26 +83,26 @@ public class PaymentServiceController : ControllerBase
     {
         if (paymentServiceForUpdateDto == null)
         {
-            return BadRequest("Payment data is null.");
+            return BadRequest(CreateErrorResponse("Payment data is null."));
         }
 
         if (id != paymentServiceForUpdateDto.id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {paymentServiceForUpdateDto.id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {paymentServiceForUpdateDto.id}."));
         }
         try
         {
             var updatedAccount = await _paymentService.UpdatePaymentAsync(paymentServiceForUpdateDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("Payment successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Payment not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -113,15 +113,15 @@ public class PaymentServiceController : ControllerBase
         try
         {
             await _paymentService.DeletePaymentAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("Payment successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Payment not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

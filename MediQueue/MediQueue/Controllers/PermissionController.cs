@@ -9,7 +9,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/permission")]
 //[EnableCors("AllowSpecificOrigins")]
-public class PermissionController : ControllerBase
+public class PermissionController : BaseController
 {
     private readonly IPermissionService _permissionService;
     public PermissionController(IPermissionService permissionService)
@@ -24,11 +24,11 @@ public class PermissionController : ControllerBase
         try
         {
             var accounts = await _permissionService.GetAllPermissionsAsync();
-            return Ok(accounts);
+            return Ok(new { Controllers = accounts.Item1, Permissions = accounts.Item2 });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -41,17 +41,17 @@ public class PermissionController : ControllerBase
             var account = await _permissionService.GetPermissionByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Permission with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"Permission with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Permission not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

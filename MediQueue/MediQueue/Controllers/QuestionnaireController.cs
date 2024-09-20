@@ -10,7 +10,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/questionnaire")]
 //[EnableCors("AllowSpecificOrigins")]
-public class QuestionnaireController : ControllerBase
+public class QuestionnaireController : BaseController
 {
     private readonly IQuestionnaireService _questionnaireService;
 
@@ -30,7 +30,7 @@ public class QuestionnaireController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -43,17 +43,17 @@ public class QuestionnaireController : ControllerBase
             var account = await _questionnaireService.GetQuestionnaireByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Questionnaire with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"Questionnaire with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Questionnaire not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -61,14 +61,19 @@ public class QuestionnaireController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] QuestionnaireForCreateDto questionnaireForCreateDto)
     {
+        if (questionnaireForCreateDto == null)
+        {
+            return BadRequest(CreateErrorResponse("Questionnaire data is null."));
+        }
+
         try
         {
             var createdAccount = await _questionnaireService.CreateOrGetBId(questionnaireForCreateDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("Questionnaire successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -78,26 +83,26 @@ public class QuestionnaireController : ControllerBase
     {
         if (questionnaireForUpdateDto == null)
         {
-            return BadRequest("Questionnaire data is null.");
+            return BadRequest(CreateErrorResponse("Questionnaire data is null."));
         }
 
         if (id != questionnaireForUpdateDto.Id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {questionnaireForUpdateDto.Id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {questionnaireForUpdateDto.Id}."));
         }
         try
         {
             var updatedAccount = await _questionnaireService.UpdateQuestionnaireAsync(questionnaireForUpdateDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("Questionnaire successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Questionnaire not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -108,15 +113,15 @@ public class QuestionnaireController : ControllerBase
         try
         {
             await _questionnaireService.DeleteQuestionnaireAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("Questionnaire successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Questionnaire not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

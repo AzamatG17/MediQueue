@@ -11,7 +11,7 @@ namespace MediQueue.Controllers;
 [Route("api/categorylekarstvo")]
 //[EnableCors("AllowSpecificOrigins")]
 
-public class CategoryLekarstvoController : ControllerBase
+public class CategoryLekarstvoController : BaseController
 {
     private readonly ICategoryLekarstvoService _categoryLekarstvoService;
 
@@ -31,7 +31,7 @@ public class CategoryLekarstvoController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -44,17 +44,17 @@ public class CategoryLekarstvoController : ControllerBase
             var account = await _categoryLekarstvoService.GetCategoryLekarstvoByIdAsync(id);
 
             if (account is null)
-                return NotFound($"CategoryLekarstvo with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"CategoryLekarstvo with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", CategoryLekarstvo not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -64,17 +64,17 @@ public class CategoryLekarstvoController : ControllerBase
     {
         if (categoryLekarstvoForCreateDto == null)
         {
-            return BadRequest("CategoryLekarstvo data is null.");
+            return BadRequest(CreateErrorResponse("CategoryLekarstvo data is null."));
         }
 
         try
         {
             var createdAccount = await _categoryLekarstvoService.CreateCategoryLekarstvoAsync(categoryLekarstvoForCreateDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("CategoryLekarstvo successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -84,26 +84,26 @@ public class CategoryLekarstvoController : ControllerBase
     {
         if (categoryLekarstvoForUpdateDto == null)
         {
-            return BadRequest("CategoryLekarstvo data is null.");
+            return BadRequest(CreateErrorResponse("CategoryLekarstvo data is null."));
         }
 
         if (id != categoryLekarstvoForUpdateDto.Id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {categoryLekarstvoForUpdateDto.Id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {categoryLekarstvoForUpdateDto.Id}."));
         }
         try
         {
             var updatedAccount = await _categoryLekarstvoService.UpdateCategoryLekarstvoAsync(categoryLekarstvoForUpdateDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("CategoryLekarstvo successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", CategoryLekarstvo not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -114,15 +114,15 @@ public class CategoryLekarstvoController : ControllerBase
         try
         {
             await _categoryLekarstvoService.DeleteCategoryLekarstvoAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("CategoryLekarstvo successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", CategoryLekarstvo not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

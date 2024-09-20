@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Permission;
+using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediQueue.Services
 {
@@ -9,11 +12,13 @@ namespace MediQueue.Services
     {
         private readonly IPermissionRepository _permissionRepository;
         private readonly IMapper _mapper;
+        private readonly MediQueueDbContext _dbContext;
 
-        public PermissonService(IPermissionRepository permissionRepository, IMapper mapper)
+        public PermissonService(IPermissionRepository permissionRepository, IMapper mapper, MediQueueDbContext mediQueueDbContext)
         {
             _permissionRepository = permissionRepository ?? throw new ArgumentNullException(nameof(permissionRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _dbContext = mediQueueDbContext ?? throw new ArgumentNullException(nameof(mediQueueDbContext));
         }
         public Task<PermissionDto> CreatePermissionAsync(PermissionForCreateDto permissionForCreateDto)
         {
@@ -25,11 +30,15 @@ namespace MediQueue.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<PermissionDto>> GetAllPermissionsAsync()
+        public async Task<(IEnumerable<Controllers>, IEnumerable<PermissionDto>)> GetAllPermissionsAsync()
         {
             var permission = await _permissionRepository.FindAllAsync();
 
-            return _mapper.Map<IEnumerable<PermissionDto>>(permission);
+            var controllers = await GetAllControllers();
+
+            var permissionDtos = _mapper.Map<IEnumerable<PermissionDto>>(permission);
+
+            return (controllers, permissionDtos);
         }
 
         public async Task<PermissionDto> GetPermissionByIdAsync(int id)
@@ -46,6 +55,13 @@ namespace MediQueue.Services
         public Task<PermissionDto> UpdatePermissionAsync(PermissionForUpdateDto permissionForUpdateDto)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<Controllers>> GetAllControllers()
+        {
+            return await _dbContext.Controllers
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

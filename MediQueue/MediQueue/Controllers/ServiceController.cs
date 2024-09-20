@@ -10,7 +10,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/service")]
 //[EnableCors("AllowSpecificOrigins")]
-public class ServiceController : ControllerBase
+public class ServiceController : BaseController
 {
     private readonly IServicesService _servicesService;
 
@@ -30,7 +30,7 @@ public class ServiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -43,17 +43,17 @@ public class ServiceController : ControllerBase
             var account = await _servicesService.GetServiceByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Service with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"Service with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Service not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -63,17 +63,17 @@ public class ServiceController : ControllerBase
     {
         if (serviceForCreateDto == null)
         {
-            return BadRequest("Service data is null.");
+            return BadRequest(CreateErrorResponse("Service data is null."));
         }
 
         try
         {
             var createdAccount = await _servicesService.CreateServiceAsync(serviceForCreateDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("Service successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -83,26 +83,26 @@ public class ServiceController : ControllerBase
     {
         if (serviceForUpdateDto == null)
         {
-            return BadRequest("Service data is null.");
+            return BadRequest(CreateErrorResponse("Service data is null."));
         }
 
         if (id != serviceForUpdateDto.id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {serviceForUpdateDto.id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {serviceForUpdateDto.id}."));
         }
         try
         {
             var updatedAccount = await _servicesService.UpdateServiceAsync(serviceForUpdateDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("Service successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Service not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -113,15 +113,15 @@ public class ServiceController : ControllerBase
         try
         {
             await _servicesService.DeleteServiceAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("Service successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Service not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

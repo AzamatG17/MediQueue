@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Account;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Entities.Responses;
 using MediQueue.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +8,7 @@ namespace MediQueue.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthorizationController : ControllerBase
+public class AuthorizationController : BaseController
 {
     private readonly IAuthorizationService _authorizationService;
     public AuthorizationController(IAuthorizationService authorizationService)
@@ -22,7 +23,7 @@ public class AuthorizationController : ControllerBase
 
         if (token == null)
         {
-            return Unauthorized("Invalid login or password");
+            return Unauthorized(CreateErrorResponse("Invalid login or password"));
         }
 
         HttpContext.Response.Cookies.Append("mediks-cookies", token.Token);

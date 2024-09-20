@@ -10,7 +10,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/questionnairehistory")]
 //[EnableCors("AllowSpecificOrigins")]
-public class QuestionnaireHistoryController : ControllerBase
+public class QuestionnaireHistoryController : BaseController
 {
     private readonly IQuestionnaireHistoryService _questionnaireHistoryService;
 
@@ -30,7 +30,7 @@ public class QuestionnaireHistoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -43,17 +43,17 @@ public class QuestionnaireHistoryController : ControllerBase
             var account = await _questionnaireHistoryService.GetQuestionnaireHistoryByIdAsync(id);
 
             if (account is null)
-                return NotFound($"QuestionnaireHistory with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"QuestionnaireHistory with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", QuestionnaireHistory not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -61,14 +61,19 @@ public class QuestionnaireHistoryController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] QuestionnaireHistoryForCreateDto questionnaireHistoryForCreateDto)
     {
+        if (questionnaireHistoryForCreateDto == null)
+        {
+            return BadRequest(CreateErrorResponse("QuestionnaireHistory data is null."));
+        }
+
         try
         {
             var createdAccount = await _questionnaireHistoryService.CreateQuestionnaireHistoryAsync(questionnaireHistoryForCreateDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("QuestionnaireHistory successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -78,26 +83,26 @@ public class QuestionnaireHistoryController : ControllerBase
     {
         if (questionnaireHistoryForUpdateDto == null)
         {
-            return BadRequest("QuestionnaireHistory data is null.");
+            return BadRequest(CreateErrorResponse("QuestionnaireHistory data is null."));
         }
 
         if (id != questionnaireHistoryForUpdateDto.id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {questionnaireHistoryForUpdateDto.id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {questionnaireHistoryForUpdateDto.id}."));
         }
         try
         {
             var updatedAccount = await _questionnaireHistoryService.UpdateQuestionnaireHistoryAsync(questionnaireHistoryForUpdateDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("QuestionnaireHistory successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", QuestionnaireHistory not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -108,15 +113,15 @@ public class QuestionnaireHistoryController : ControllerBase
         try
         {
             await _questionnaireHistoryService.DeleteQuestionnaireHistoryAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("QuestionnaireHistory successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", QuestionnaireHistory not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }
