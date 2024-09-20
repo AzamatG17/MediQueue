@@ -74,7 +74,9 @@ namespace MediQueue.Services
             return new CategoryLekarstvoDto(
                 lekarstvo.Id,
                 lekarstvo.Name,
-                lekarstvo.Lekarstvos.Select(MapToLekarstvoDto).ToList()
+                lekarstvo.Lekarstvos != null
+                    ? lekarstvo.Lekarstvos.Select(MapToLekarstvoDto).ToList()
+                    : new List<LekarstvoDto>()
                 );
         }
 

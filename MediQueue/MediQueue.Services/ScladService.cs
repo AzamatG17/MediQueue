@@ -19,17 +19,24 @@ namespace MediQueue.Services
 
         public async Task<IEnumerable<ScladDto>> GetAllScladsAsync()
         {
-            var sclad = await _cladRepository.FindAllAsync();
+            var sclads = await _cladRepository.FindAllScladAsync();
 
-            return sclad.Select(MapToScladDto).ToList();
+            var scladDtos = new List<ScladDto>();
+
+            foreach (var sclad in sclads)
+            {
+                var scladDto = await MapToScladDto(sclad);
+                scladDtos.Add(scladDto);
+            }
+
+            return scladDtos.ToList();
         }
-
 
         public async Task<ScladDto> GetScladByIdAsync(int id)
         {
-            var sclad = await _cladRepository.FindByIdAsync(id);
+            var sclad = await _cladRepository.FindbyIdScladAsync(id);
 
-            return MapToScladDto(sclad);
+            return await MapToScladDto(sclad);
         }
 
         public async Task<ScladDto> CreateScladAsync(ScladForCreateDto scladForCreateDto)
@@ -43,7 +50,7 @@ namespace MediQueue.Services
 
             await _cladRepository.CreateAsync(sclad);
 
-            return MapToScladDto(sclad);
+            return await MapToScladDto(sclad);
         }
 
         public async Task<ScladDto> UpdateScladAsync(ScladForUpdateDto scladForUpdateDto)
@@ -57,7 +64,7 @@ namespace MediQueue.Services
 
             await _cladRepository.UpdateAsync(sclad);
 
-            return MapToScladDto(sclad);
+            return await MapToScladDto(sclad);
         }
 
         public async Task DeleteScladAsync(int id)
@@ -84,15 +91,18 @@ namespace MediQueue.Services
             };
         }
 
-        private ScladDto MapToScladDto(Sclad sclad)
+        private async Task<ScladDto> MapToScladDto(Sclad sclad)
         {
+            var branch = await _branchRepository.FindByIdAsync(sclad.Branchid);
+
             return new ScladDto(
                 sclad.Id,
                 sclad.Name,
                 sclad.Branchid,
-                sclad.Branch.Name,
-                sclad.Lekarstvos.Select(MapToLekarstvoDto).ToList()
-                );
+                branch.Name,
+                sclad.Lekarstvos != null
+                    ? sclad.Lekarstvos.Select(MapToLekarstvoDto).ToList()
+                    : new List<LekarstvoDto>());
         }
 
         private LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
@@ -109,8 +119,7 @@ namespace MediQueue.Services
                 lekarstvo.CategoryLekarstvoId,
                 lekarstvo.CategoryLekarstvo.Name,
                 lekarstvo.ScladId,
-                lekarstvo.Sclad.Name
-                );
+                lekarstvo.Sclad.Name);
         }
     }
 }

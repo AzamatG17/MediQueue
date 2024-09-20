@@ -106,9 +106,9 @@ namespace MediQueue.Services
                 lekarstvo.PhotoBase64,
                 lekarstvo.MeasurementUnit,
                 lekarstvo.CategoryLekarstvoId,
-                lekarstvo.CategoryLekarstvo.Name ?? null,
+                lekarstvo.CategoryLekarstvo?.Name ?? "",
                 lekarstvo.ScladId,
-                lekarstvo.Sclad.Name ?? null
+                lekarstvo.Sclad?.Name ?? ""
 
                 );
         }

@@ -90,18 +90,21 @@ namespace MediQueue.Services
                 branch.Id,
                 branch.Name,
                 branch.Addres,
-                branch.Sclads.Select(MapToScladDto).ToList()
-                );
+                branch.Sclads != null
+                    ? branch.Sclads.Select(MapToScladDto).ToList()
+                    : new List<ScladDto>());
         }
 
-        private ScladDto MapToScladDto(Sclad sclad)
+        private ScladDto MapToScladDto(Sclad? sclad)
         {
             return new ScladDto(
-                sclad.Id, 
-                sclad.Name, 
-                sclad.Branchid, 
+                sclad.Id,
+                sclad.Name,
+                sclad.Branchid,
                 sclad.Branch.Name,
-                sclad.Lekarstvos.Select(MapToLekarstvoDto).ToList());
+                sclad.Lekarstvos != null
+                    ? sclad.Lekarstvos.Select(MapToLekarstvoDto).ToList()
+                    : new List<LekarstvoDto>());
         }
 
         private LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
