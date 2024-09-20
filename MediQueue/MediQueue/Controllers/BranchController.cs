@@ -10,7 +10,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/branch")]
 //[EnableCors("AllowSpecificOrigins")]
-public class BranchController : ControllerBase
+public class BranchController : BaseController
 {
     private readonly IBranchService _branchService;
     public BranchController(IBranchService branchService)
@@ -29,7 +29,7 @@ public class BranchController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -42,17 +42,17 @@ public class BranchController : ControllerBase
             var account = await _branchService.GetBranchByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Branch with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"Branch with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Branch not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -62,17 +62,17 @@ public class BranchController : ControllerBase
     {
         if (branchForCreateDto == null)
         {
-            return BadRequest("Branch data is null.");
+            return BadRequest(CreateErrorResponse("Branch data is null."));
         }
 
         try
         {
             var createdAccount = await _branchService.CreateBranchAsync(branchForCreateDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("Branch successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -82,28 +82,27 @@ public class BranchController : ControllerBase
     {
         if (branchForUpdatreDto == null)
         {
-            return BadRequest("Branch data is null.");
+            return BadRequest(CreateErrorResponse("Branch data is null."));
         }
 
         if (id != branchForUpdatreDto.Id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {branchForUpdatreDto.Id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {branchForUpdatreDto.Id}."));
         }
 
         try
         {
-
             var updatedAccount = await _branchService.UpdateBranchAsync(branchForUpdatreDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("Branch successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Branch not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -114,15 +113,15 @@ public class BranchController : ControllerBase
         try
         {
             await _branchService.DeleteBranchAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("Branch successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Branch not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

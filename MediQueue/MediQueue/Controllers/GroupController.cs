@@ -10,7 +10,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/group")]
 //[EnableCors("AllowSpecificOrigins")]
-public class GroupController : ControllerBase
+public class GroupController : BaseController
 {
     private readonly IGroupService _groupService;
 
@@ -30,7 +30,7 @@ public class GroupController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -43,17 +43,17 @@ public class GroupController : ControllerBase
             var account = await _groupService.GetGroupByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Group with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"Group with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Group not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -63,17 +63,17 @@ public class GroupController : ControllerBase
     {
         if (groupForCreateDto == null)
         {
-            return BadRequest("Group data is null.");
+            return BadRequest(CreateErrorResponse("Group data is null."));
         }
 
         try
         {
             var createdAccount = await _groupService.CreateGroupAsync(groupForCreateDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("Group successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -83,26 +83,26 @@ public class GroupController : ControllerBase
     {
         if (groupForUpdateDto == null)
         {
-            return BadRequest("Group data is null.");
+            return BadRequest(CreateErrorResponse("Group data is null."));
         }
 
         if (id != groupForUpdateDto.Id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {groupForUpdateDto.Id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {groupForUpdateDto.Id}."));
         }
         try
         {
             var updatedAccount = await _groupService.UpdateGroupAsync(groupForUpdateDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("Group successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Group not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -113,15 +113,15 @@ public class GroupController : ControllerBase
         try
         {
             await _groupService.DeleteGroupAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("Group successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Group not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

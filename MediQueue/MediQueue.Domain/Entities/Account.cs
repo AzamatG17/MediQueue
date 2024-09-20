@@ -18,5 +18,5 @@ namespace MediQueue.Domain.Entities
 
         public virtual ICollection<QuestionnaireHistory> QuestionnaireHistories { get; set; }
         public virtual ICollection<RolePermission> RolePermissions { get; set; }
-    }
+    }  
 }

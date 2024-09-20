@@ -1,4 +1,5 @@
 ﻿using MediQueue.Domain.DTOs.Account;
+using MediQueue.Domain.Entities.Responses;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
@@ -9,8 +10,8 @@ namespace MediQueue.Controllers;
 [Authorize(Policy = "HasPermission")]
 [ApiController]
 [Route("api/accounts")]
-//[EnableCors("AllowSpecificOrigins")]
-public class AccountController : ControllerBase
+//[EnableCors("AllowSpecificOrigins")] 
+public class AccountController : BaseController
 {
     private readonly IAccountService _accountService;
 
@@ -30,7 +31,7 @@ public class AccountController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -43,86 +44,79 @@ public class AccountController : ControllerBase
             var account = await _accountService.GetAccountByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Account with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse("Account data is null."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Account not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
     [PermissionAuthorize(1, 3)]
     [HttpPost]
-    public async Task<ActionResult> PostAsync([FromBody] AccountForCreateDto accountForCreateDto)
+    public async Task<ActionResult<ReturnResponse>> PostAsync([FromBody] AccountForCreateDto accountForCreateDto)
     {
         if (accountForCreateDto == null)
-        {
-            return BadRequest("Account data is null.");
-        }
+            return BadRequest(CreateErrorResponse("Account data is null."));
 
         try
         {
-            var createdAccount = await _accountService.CreateAccountAsync(accountForCreateDto);
-            return Ok(createdAccount);
+            await _accountService.CreateAccountAsync(accountForCreateDto);
+            return Ok(CreateSuccessResponse("Account successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
     [PermissionAuthorize(1, 4)]
     [HttpPut("{id}")]
-    public async Task<ActionResult> PutAsync(int id, [FromBody] AccountForUpdateDto accountForUpdateDto)
+    public async Task<ActionResult<ReturnResponse>> PutAsync(int id, [FromBody] AccountForUpdateDto accountForUpdateDto)
     {
         if (accountForUpdateDto == null)
-        {
-            return BadRequest("Account data is null.");
-        }
+            return BadRequest(CreateErrorResponse("Account data is null."));
 
         if (id != accountForUpdateDto.Id)
-        {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {accountForUpdateDto.Id}.");
-        }
+            return BadRequest(CreateErrorResponse($"Route id: {id} does not match with parameter id: {accountForUpdateDto.Id}."));
 
         try
         {
-            var updatedAccount = await _accountService.UpdateAccountAsync(accountForUpdateDto);
-            return Ok(updatedAccount);
+            await _accountService.UpdateAccountAsync(accountForUpdateDto);
+            return Ok(CreateSuccessResponse("Account successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Account not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
     [PermissionAuthorize(1, 5)]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteAsync(int id)
+    public async Task<ActionResult<ReturnResponse>> DeleteAsync(int id)
     {
         try
         {
             await _accountService.DeleteAccountAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("Account successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Account not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

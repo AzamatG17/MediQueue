@@ -10,7 +10,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/sclad")]
 //[EnableCors("AllowSpecificOrigins")]
-public class ScladController : ControllerBase
+public class ScladController : BaseController
 {
     private readonly IScladService _cladService;
     public ScladController(IScladService cladService)
@@ -29,7 +29,7 @@ public class ScladController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -42,17 +42,17 @@ public class ScladController : ControllerBase
             var account = await _cladService.GetScladByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Sclad with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"Sclad with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Sclad not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -62,17 +62,17 @@ public class ScladController : ControllerBase
     {
         if (scladForCreateDto == null)
         {
-            return BadRequest("Sclad data is null.");
+            return BadRequest(CreateErrorResponse("Sclad data is null."));
         }
 
         try
         {
             var createdAccount = await _cladService.CreateScladAsync(scladForCreateDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("Sclad successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -82,26 +82,26 @@ public class ScladController : ControllerBase
     {
         if (scladForUpdateDto == null)
         {
-            return BadRequest("Sclad data is null.");
+            return BadRequest(CreateErrorResponse("Sclad data is null."));
         }
 
         if (id != scladForUpdateDto.Id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {scladForUpdateDto.Id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {scladForUpdateDto.Id}."));
         }
         try
         {
             var updatedAccount = await _cladService.UpdateScladAsync(scladForUpdateDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("Sclad successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Sclad not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -112,15 +112,15 @@ public class ScladController : ControllerBase
         try
         {
             await _cladService.DeleteScladAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("Sclad successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Sclad not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

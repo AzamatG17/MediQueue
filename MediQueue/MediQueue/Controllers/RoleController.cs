@@ -11,7 +11,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/role")]
 //[EnableCors("AllowSpecificOrigins")]
-public class RoleController : ControllerBase
+public class RoleController : BaseController
 {
     private readonly IRoleService _roleService;
 
@@ -31,7 +31,7 @@ public class RoleController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -44,17 +44,17 @@ public class RoleController : ControllerBase
             var account = await _roleService.GetRoleByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Role with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"Role with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Role not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -64,17 +64,17 @@ public class RoleController : ControllerBase
     {
         if (roleForCreateDto == null)
         {
-            return BadRequest("Role data is null.");
+            return BadRequest(CreateErrorResponse("Role data is null."));
         }
 
         try
         {
             var createdAccount = await _roleService.CreateRoleAsync(roleForCreateDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("Role successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -84,26 +84,26 @@ public class RoleController : ControllerBase
     {
         if (roleForUpdateDto == null)
         {
-            return BadRequest("Role data is null.");
+            return BadRequest(CreateErrorResponse("Role data is null."));
         }
 
         if (id != roleForUpdateDto.Id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {roleForUpdateDto.Id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {roleForUpdateDto.Id}."));
         }
         try
         {
             var updatedAccount = await _roleService.UpdateRoleAsync(roleForUpdateDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("Role successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Role not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -114,15 +114,15 @@ public class RoleController : ControllerBase
         try
         {
             await _roleService.DeleteRoleAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("Role successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Role not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

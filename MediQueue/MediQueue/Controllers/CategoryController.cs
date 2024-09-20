@@ -10,7 +10,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/category")]
 //[EnableCors("AllowSpecificOrigins")]
-public class CategoryController : ControllerBase
+public class CategoryController : BaseController
 {
     private readonly ICategoryService _categoryService;
 
@@ -30,7 +30,7 @@ public class CategoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -43,17 +43,17 @@ public class CategoryController : ControllerBase
             var account = await _categoryService.GetCategoryByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Category with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"Category with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Category not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -63,17 +63,17 @@ public class CategoryController : ControllerBase
     {
         if (categoryForCreateDto == null)
         {
-            return BadRequest("Category data is null.");
+            return BadRequest(CreateErrorResponse("Category data is null."));
         }
 
         try
         {
             var createdAccount = await _categoryService.CreateCategoryAsync(categoryForCreateDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("Category successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -83,28 +83,27 @@ public class CategoryController : ControllerBase
     {
         if (categoryForUpdateDto == null)
         {
-            return BadRequest("Category data is null.");
+            return BadRequest(CreateErrorResponse("Category data is null."));
         }
 
         if (id != categoryForUpdateDto.Id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {categoryForUpdateDto.Id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {categoryForUpdateDto.Id}."));
         }
 
         try
         {
-
             var updatedAccount = await _categoryService.UpdateCategoryAsync(categoryForUpdateDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("Category successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Category not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -115,15 +114,15 @@ public class CategoryController : ControllerBase
         try
         {
             await _categoryService.DeleteCategoryAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("Category successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Category not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }

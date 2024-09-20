@@ -10,7 +10,7 @@ namespace MediQueue.Controllers;
 [ApiController]
 [Route("api/lekarstvo")]
 //[EnableCors("AllowSpecificOrigins")]
-public class LekarstvoController : ControllerBase
+public class LekarstvoController : BaseController
 {
     private readonly ILekarstvoService _lekarstvoService;
 
@@ -30,7 +30,7 @@ public class LekarstvoController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -43,17 +43,17 @@ public class LekarstvoController : ControllerBase
             var account = await _lekarstvoService.GetLekarstvoByIdAsync(id);
 
             if (account is null)
-                return NotFound($"Lekarstvo with id: {id} does not exist.");
+                return NotFound(CreateErrorResponse($"Lekarstvo with id: {id} does not exist."));
 
             return Ok(account);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Lekarstvo not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -63,17 +63,17 @@ public class LekarstvoController : ControllerBase
     {
         if (lekarstvoForCreateDto == null)
         {
-            return BadRequest("Lekarstvo data is null.");
+            return BadRequest(CreateErrorResponse("Lekarstvo data is null."));
         }
 
         try
         {
             var createdAccount = await _lekarstvoService.CreateLekarstvoAsync(lekarstvoForCreateDto);
-            return Ok(createdAccount);
+            return Ok(CreateSuccessResponse("Group successfully created."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -83,26 +83,26 @@ public class LekarstvoController : ControllerBase
     {
         if (lekarstvoForUpdateDto == null)
         {
-            return BadRequest("Lekarstvo data is null.");
+            return BadRequest(CreateErrorResponse("Lekarstvo data is null."));
         }
 
         if (id != lekarstvoForUpdateDto.Id)
         {
-            return BadRequest(
-                $"Route id: {id} does not match with parameter id: {lekarstvoForUpdateDto.Id}.");
+            return BadRequest(CreateErrorResponse(
+                $"Route id: {id} does not match with parameter id: {lekarstvoForUpdateDto.Id}."));
         }
         try
         {
             var updatedAccount = await _lekarstvoService.UpdateLekarstvoAsync(lekarstvoForUpdateDto);
-            return Ok(updatedAccount);
+            return Ok(CreateSuccessResponse("Lekarstvo successfully updated."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Lekarstvo not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 
@@ -113,15 +113,15 @@ public class LekarstvoController : ControllerBase
         try
         {
             await _lekarstvoService.DeleteLekarstvoAsync(id);
-            return NoContent();
+            return Ok(CreateSuccessResponse("Lekarstvo successfully deleted."));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(CreateErrorResponse(ex.Message + ", Lekarstvo not found."));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message });
+            return HandleError(ex);
         }
     }
 }
