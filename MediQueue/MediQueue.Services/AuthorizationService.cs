@@ -19,6 +19,7 @@ namespace MediQueue.Services
             _mapper = mapper;
             _jwtProvider = jwtProvider;
         }
+
         public async Task<LoginResponse> Login(AccountForLoginDto accountForLoginDto)
         {
             if (string.IsNullOrWhiteSpace(accountForLoginDto.login) || string.IsNullOrWhiteSpace(accountForLoginDto.password))
@@ -32,13 +33,52 @@ namespace MediQueue.Services
                 return null;
             }
 
-            var token = _jwtProvider.GenerateToken(user);
+            var existingSession = await _context.AccountSessions
+                .Where(s => s.AccountId == user.Id && !s.IsLoggedOut)
+                .FirstOrDefaultAsync();
+
+            if (existingSession != null && DateTime.UtcNow - existingSession.LastActivitytime < TimeSpan.FromHours(1))
+            {
+                return null;
+            }
+
+            string sessionId;
+            do
+            {
+                sessionId = Guid.NewGuid().ToString();
+            }
+            while (await _context.AccountSessions.AnyAsync(s => s.SessionId == sessionId));
+
+            var newSession = new AccountSession
+            {
+                AccountId = user.Id,
+                SessionId = sessionId,
+                LastActivitytime = DateTime.UtcNow,
+                IsLoggedOut = false,
+            };
+
+            _context.AccountSessions.Add(newSession);   
+            await _context.SaveChangesAsync();
+
+            var token = _jwtProvider.GenerateToken(user, sessionId);
 
             return new LoginResponse
             {
                 Token = token,
                 User = user
             };
+        }
+
+        public async Task Logout(string sessionId)
+        {
+            var session = await _context.AccountSessions
+                .FirstOrDefaultAsync(s => s.SessionId == sessionId);
+
+            if (session != null)
+            {
+                _context.AccountSessions.Remove(session);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<string> Register(AccountForCreateDto accountForCreateDto)

@@ -1,7 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Account;
 using MediQueue.Domain.Entities;
-using MediQueue.Domain.Entities.Responses;
-using MediQueue.Domain.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
@@ -10,8 +9,8 @@ namespace MediQueue.Controllers;
 [Route("api/auth")]
 public class AuthorizationController : BaseController
 {
-    private readonly IAuthorizationService _authorizationService;
-    public AuthorizationController(IAuthorizationService authorizationService)
+    private readonly Domain.Interfaces.Services.IAuthorizationService _authorizationService;
+    public AuthorizationController(Domain.Interfaces.Services.IAuthorizationService authorizationService)
     {
         _authorizationService = authorizationService;
     }
@@ -31,18 +30,19 @@ public class AuthorizationController : BaseController
         return Ok(token);
     }
 
-    //[HttpPost("register")]
-    //public async Task<ActionResult<string>> Register(AccountForCreateDto accountForLogin)
-    //{
-    //    var token = await _authorizationService.Register(accountForLogin);
+    [Authorize]
+    [HttpPost]
+    public async Task<ActionResult> Logout()
+    {
+        var sessionId = User.FindFirst("SessionId")?.Value;
 
-    //    if (token == null)
-    //    {
-    //        return Unauthorized("Invalid login or password");
-    //    }
+        if (string.IsNullOrEmpty(sessionId))
+        {
+            return BadRequest("Session not found.");
+        }
 
-    //    //HttpContext.Response.Cookies.Append("tasty-cookies", token);
+        await _authorizationService.Logout(sessionId);
 
-    //    return Ok(token);
-    //}
+        return Ok("Logged out successfully.");
+    }
 }

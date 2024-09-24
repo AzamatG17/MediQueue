@@ -4,6 +4,6 @@ namespace MediQueue.Domain.Interfaces.Auth
 {
     public interface IJwtProvider
     {
-        string GenerateToken(Account account);
+        string GenerateToken(Account account, string sessionId);
     }
 }
