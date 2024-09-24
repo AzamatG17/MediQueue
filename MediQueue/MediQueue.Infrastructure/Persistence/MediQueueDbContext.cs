@@ -21,6 +21,7 @@ namespace MediQueue.Infrastructure.Persistence
         public virtual DbSet<Sclad> Sclads { get; set; }
         public virtual DbSet<Lekarstvo> Lekarstvos { get; set; }
         public virtual DbSet<Controllers> Controllers { get; set; }
+        public virtual DbSet<AccountSession> AccountSessions { get; set; }
 
         public MediQueueDbContext(DbContextOptions<MediQueueDbContext> options)
             :base(options)
