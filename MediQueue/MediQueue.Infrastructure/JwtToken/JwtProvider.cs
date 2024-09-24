@@ -14,28 +14,15 @@ namespace MediQueue.Infrastructure.JwtToken
         private readonly JwtOptions _options = options.Value;
         private readonly MediQueueDbContext _context = mediQueueDbContext;
 
-        public string GenerateToken(Account account)
+        public string GenerateToken(Account account, string sessionid)
         {
             var claimForToken = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, account.Id.ToString()),
                 //new Claim("RoleId", account.Role.Name),
-                new Claim(ClaimTypes.Role, account.RoleId.ToString())
+                new Claim(ClaimTypes.Role, account.RoleId.ToString()),
+                new Claim("SessionId", sessionid)
             };
-
-            //var role = _context.Roles
-            //    .Include(r => r.RolePermissions)
-            //    .ThenInclude(rp => rp.Permission)
-            //    .FirstOrDefault(r => r.Id == account.RoleId);
-
-            //if (role != null)
-            //{
-            //    foreach(var rolePermision in role.RolePermissions)
-            //    {
-            //        var permission = rolePermision.Permission;
-            //        claimForToken.Add(new Claim("Permission", permission.Name));
-            //    }
-            //}
 
             var securityKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_options.SecretKey));

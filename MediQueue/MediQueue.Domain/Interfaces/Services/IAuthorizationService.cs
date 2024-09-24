@@ -7,5 +7,6 @@ namespace MediQueue.Domain.Interfaces.Services
     {
         Task<LoginResponse> Login(AccountForLoginDto accountForLoginDto);
         Task<string> Register(AccountForCreateDto accountForCreateDto);
+        Task Logout(string sessionId);
     }
 }
