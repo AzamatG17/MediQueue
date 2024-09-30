@@ -9,6 +9,7 @@ namespace MediQueue.Domain.Interfaces.Repositories
         Task<QuestionnaireHistory> GetQuestionnaireHistoryByHistoryIdAsync(int? id);
         Task<bool> ExistsByIdAsync(int newId);
         Task<QuestionnaireHistory> GetByIdAsync(int? id);
+        Task DeleteWithOutService(int id);
         Task<int> SaveChangeAsync();
     }
 }

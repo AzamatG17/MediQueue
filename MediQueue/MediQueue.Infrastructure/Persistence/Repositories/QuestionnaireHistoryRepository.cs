@@ -61,6 +61,19 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(q => q.Historyid == id);
         }
 
+        public async Task DeleteWithOutService(int id)
+        {
+            var questionnaireHistory = await _context.Set<QuestionnaireHistory>()
+                .Include(a => a.Services)
+                .Include(s => s.PaymentServices)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            ArgumentNullException.ThrowIfNull(questionnaireHistory);
+
+            _context.QuestionnaireHistories.Remove(questionnaireHistory);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<int> SaveChangeAsync()
         {
             return await _context.SaveChangesAsync();

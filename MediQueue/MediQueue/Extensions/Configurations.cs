@@ -16,7 +16,6 @@ namespace MediQueue.Extensions
             services.Configure<JwtOptions>(
                 configuration.GetSection(nameof(JwtOptions)));
             services.AddAuthentication();
-            services.AddAuthentication();
         }
     }
 }

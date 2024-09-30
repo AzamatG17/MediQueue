@@ -108,7 +108,7 @@ public class QuestionnaireService : IQuestionnaireService
 
     public async Task DeleteQuestionnaireAsync(int id)
     {
-        await _questionnaireRepository.DeleteAsync(id);
+        await _questionnaireRepository.DeleteWithOutQuestionnaryHistory(id);
     }
 
     private async Task<int> GenerateUniqueQuestionnaireIdAsync()

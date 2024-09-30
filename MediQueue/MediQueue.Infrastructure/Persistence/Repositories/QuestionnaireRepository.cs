@@ -68,7 +68,7 @@ public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionn
             .ThenInclude(q => q.Account)
             .Include(a => a.QuestionnaireHistories)
             .ThenInclude(q => q.Services)
-            .SingleOrDefaultAsync(c => c.Id == Id);
+            .SingleOrDefaultAsync(c => c.Id == Id);  
     }
 
     public async Task<Questionnaire> FindByQuestionnaireIdAsync(string passportSeria)
@@ -87,5 +87,22 @@ public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionn
     {
         return await _context.Set<Questionnaire>()
             .AnyAsync(q => q.QuestionnaireId == newId);
+    }
+
+    public async Task DeleteWithOutQuestionnaryHistory(int id)
+    {
+        var questionnary = await _context.Set<Questionnaire>()
+            .Include(c => c.QuestionnaireHistories)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        ArgumentNullException.ThrowIfNull(questionnary);
+
+        foreach (var history in questionnary.QuestionnaireHistories)
+        {
+            history.QuestionnaireId = null;
+        }
+
+        _context.Questionnaires.Remove(questionnary);
+        await _context.SaveChangesAsync();
     }
 }

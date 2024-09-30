@@ -110,7 +110,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
 
     public async Task DeleteQuestionnaireHistoryAsync(int id)
     {
-        await _questionnaireHistoryRepositoty.DeleteAsync(id);
+        await _questionnaireHistoryRepositoty.DeleteWithOutService(id);
     }
 
     private async Task<QuestionnaireHistoryDto> MapToQuestionnaireHistoryDto(QuestionnaireHistory questionnaireHistory)

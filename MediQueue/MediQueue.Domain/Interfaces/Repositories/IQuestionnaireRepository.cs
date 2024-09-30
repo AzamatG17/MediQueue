@@ -10,5 +10,6 @@ namespace MediQueue.Domain.Interfaces.Repositories
         Task<Questionnaire> GetByQuestionnaireIdAsync(int? questionnaireId);
         Task<Questionnaire> GetByIdWithQuestionnaireHistory(int Id);
         Task<bool> ExistsByIdAsync(int newId);
+        Task DeleteWithOutQuestionnaryHistory(int id);
     }
 }
