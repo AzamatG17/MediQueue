@@ -1,61 +1,91 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
+using MediQueue.Domain.ResourceParameters;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediQueue.Infrastructure.Persistence.Repositories
+namespace MediQueue.Infrastructure.Persistence.Repositories;
+
+public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionnaireRepository
 {
-    public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionnaireRepository
+    public QuestionnaireRepository(MediQueueDbContext mediQueueDbContext)
+        : base(mediQueueDbContext)
     {
-        public QuestionnaireRepository(MediQueueDbContext mediQueueDbContext)
-            : base(mediQueueDbContext)
+    }
+
+    public async Task<IEnumerable<Questionnaire>> GetAllWithQuestionnaireHistoryAsync(QuestionnaireResourceParameters questionnaireResourceParameters)
+    {
+        var query = _context.Questionnaires
+                        .Include(q => q.QuestionnaireHistories)
+                        .ThenInclude(qh => qh.Account)
+                        .Include(q => q.QuestionnaireHistories)
+                        .ThenInclude(qh => qh.Services)
+                        .AsQueryable();
+
+        if (questionnaireResourceParameters.QuestionnaireId.HasValue)
         {
+            query = query.Where(q => q.QuestionnaireId == questionnaireResourceParameters.QuestionnaireId.Value);
         }
 
-        public async Task<IEnumerable<Questionnaire>> GetAllWithQuestionnaireHistoryAsync()
+        if (!string.IsNullOrEmpty(questionnaireResourceParameters.FirstName))
         {
-            var questionnaires = await _context.Questionnaires
-        .Include(q => q.QuestionnaireHistories)
-            .ThenInclude(qh => qh.Account)
-        .Include(q => q.QuestionnaireHistories)
-            .ThenInclude(qh => qh.Services)
-        .ToListAsync();
-
-            foreach (var questionnaire in questionnaires)
-            {
-                questionnaire.QuestionnaireHistories = questionnaire.QuestionnaireHistories
-                    .OrderByDescending(qh => qh.Id)
-                    .ToList();
-            }
-
-            return questionnaires;
+            query = query.Where(q => q.FirstName != null && q.FirstName.Contains(questionnaireResourceParameters.FirstName));
         }
 
-        public async Task<Questionnaire> GetByIdWithQuestionnaireHistory(int Id)
+        if (!string.IsNullOrEmpty(questionnaireResourceParameters.LastName))
         {
-            return await _context.Questionnaires
-                .Include(q => q.QuestionnaireHistories)
-                .ThenInclude(q => q.Account)
-                .Include(a => a.QuestionnaireHistories)
-                .ThenInclude(q => q.Services)
-                .SingleOrDefaultAsync(c => c.Id == Id);
+            query = query.Where(q => q.LastName != null && q.LastName.Contains(questionnaireResourceParameters.LastName));
         }
 
-        public async Task<Questionnaire> FindByQuestionnaireIdAsync(string passportSeria)
+        if (!string.IsNullOrEmpty(questionnaireResourceParameters.SurName))
         {
-            return await _context.Set<Questionnaire>()
-                .FirstOrDefaultAsync(x => x.PassportSeria == passportSeria);
+            query = query.Where(q => q.SurName != null && q.SurName.Contains(questionnaireResourceParameters.SurName));
         }
 
-        public async Task<Questionnaire> GetByQuestionnaireIdAsync(int? questionnaireId)
+        if (!string.IsNullOrEmpty(questionnaireResourceParameters.PassportPinfl))
         {
-            return await _context.Set<Questionnaire>()
-                .FirstOrDefaultAsync(x => x.QuestionnaireId == questionnaireId);
+            query = query.Where(q => q.PassportPinfl != null && q.PassportPinfl.Contains(questionnaireResourceParameters.PassportPinfl));
         }
 
-        public async Task<bool> ExistsByIdAsync(int newId)
+        if (!string.IsNullOrEmpty(questionnaireResourceParameters.PassportSeria))
         {
-            return await _context.Set<Questionnaire>()
-                .AnyAsync(q => q.QuestionnaireId == newId);
+            query = query.Where(q => q.PassportSeria != null && q.PassportSeria.Contains(questionnaireResourceParameters.PassportSeria));
         }
+
+        query = questionnaireResourceParameters.OrderBy switch
+        {
+            "idDesc" => query.OrderByDescending(q => q.Id),
+            "idAsc" => query.OrderBy(q => q.Id),
+            _ => query
+        };
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<Questionnaire> GetByIdWithQuestionnaireHistory(int Id)
+    {
+        return await _context.Questionnaires
+            .Include(q => q.QuestionnaireHistories)
+            .ThenInclude(q => q.Account)
+            .Include(a => a.QuestionnaireHistories)
+            .ThenInclude(q => q.Services)
+            .SingleOrDefaultAsync(c => c.Id == Id);
+    }
+
+    public async Task<Questionnaire> FindByQuestionnaireIdAsync(string passportSeria)
+    {
+        return await _context.Set<Questionnaire>()
+            .FirstOrDefaultAsync(x => x.PassportPinfl == passportSeria);
+    }
+
+    public async Task<Questionnaire> GetByQuestionnaireIdAsync(int? questionnaireId)
+    {
+        return await _context.Set<Questionnaire>()
+            .FirstOrDefaultAsync(x => x.QuestionnaireId == questionnaireId);
+    }
+
+    public async Task<bool> ExistsByIdAsync(int newId)
+    {
+        return await _context.Set<Questionnaire>()
+            .AnyAsync(q => q.QuestionnaireId == newId);
     }
 }

@@ -5,199 +5,198 @@ using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Domain.ResourceParameters;
 
-namespace MediQueue.Services
+namespace MediQueue.Services;
+
+public class QuestionnaireService : IQuestionnaireService
 {
-    public class QuestionnaireService : IQuestionnaireService
+    private readonly IQuestionnaireRepository _questionnaireRepository;
+    private readonly IMapper _mapper;
+    private readonly IQuestionnaireHistoryService _questionnaireHistoryService;
+
+    public QuestionnaireService(IQuestionnaireRepository questionnaireRepository, IMapper mapper, IQuestionnaireHistoryService questionnaireHistoryService)
     {
-        private readonly IQuestionnaireRepository _questionnaireRepository;
-        private readonly IMapper _mapper;
-        private readonly IQuestionnaireHistoryService _questionnaireHistoryService;
+        _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _questionnaireHistoryService = questionnaireHistoryService ?? throw new ArgumentNullException(nameof(questionnaireHistoryService));
+    }
 
-        public QuestionnaireService(IQuestionnaireRepository questionnaireRepository, IMapper mapper, IQuestionnaireHistoryService questionnaireHistoryService)
+    public async Task<IEnumerable<QuestionnaireDto>> GetAllQuestionnairesAsync(QuestionnaireResourceParameters questionnaireResourceParameters)
+    {
+        var quest = await _questionnaireRepository.GetAllWithQuestionnaireHistoryAsync(questionnaireResourceParameters);
+
+        return quest.Select(MapToQuestionnaireDto).ToList();
+    }
+
+    public async Task<QuestionnaireDto> GetQuestionnaireByIdAsync(int id)
+    {
+        var quest = await _questionnaireRepository.GetByIdWithQuestionnaireHistory(id);
+        if (quest == null)
         {
-            _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _questionnaireHistoryService = questionnaireHistoryService ?? throw new ArgumentNullException(nameof(questionnaireHistoryService));
+            throw new KeyNotFoundException($"Questionnaire with {id} not found");
         }
 
-        public async Task<IEnumerable<QuestionnaireDto>> GetAllQuestionnairesAsync()
-        {
-            var quest = await _questionnaireRepository.GetAllWithQuestionnaireHistoryAsync();
+        return MapToQuestionnaireDto(quest);
+    }
 
-            return quest.Select(MapToQuestionnaireDto).ToList();
+    public async Task<QuestionnaireDto> CreateQuestionnaireAsync(QuestionnaireForCreateDto questionnaireForCreateDto)
+    {
+        int uniqueQuestionnaireId = await GenerateUniqueQuestionnaireIdAsync();
+
+        var quest = new Questionnaire
+        {
+            QuestionnaireId = uniqueQuestionnaireId,
+            Balance = questionnaireForCreateDto.Balance,
+            Gender = questionnaireForCreateDto.Gender,
+            PassportSeria = questionnaireForCreateDto.PassportSeria,
+            PassportPinfl = questionnaireForCreateDto.PassportPinfl,
+            PhoneNumber = questionnaireForCreateDto.PhoneNumber,
+            FirstName = questionnaireForCreateDto.FirstName,
+            LastName = questionnaireForCreateDto.LastName,
+            SurName = questionnaireForCreateDto.SurName,
+            DateIssue = questionnaireForCreateDto.DateIssue ?? default(DateTime),
+            DateBefore = questionnaireForCreateDto.DateBefore ?? default(DateTime),
+            Region = questionnaireForCreateDto.Region,
+            District = questionnaireForCreateDto.District,
+            Posolos = questionnaireForCreateDto.Posolos,
+            Address = questionnaireForCreateDto.Address,
+            Bithdate = questionnaireForCreateDto.Bithdate ?? default(DateTime),
+            SocialSattus = questionnaireForCreateDto.SocialSattus,
+            AdvertisingChannel = questionnaireForCreateDto.AdvertisingChannel,
+            PhotoBase64 = questionnaireForCreateDto.PhotoBase64 ?? default(string),
+        };
+
+        await _questionnaireRepository.CreateAsync(quest);
+
+        await CreateQuestionnaireHistory
+            (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.DateCreated, questionnaireForCreateDto.IsPayed, questionnaireForCreateDto.AccountId, uniqueQuestionnaireId, questionnaireForCreateDto.ServiceIds);
+
+        return MapToQuestionnaireDto(quest);
+    }
+
+    public async Task<QuestionnaireDto> CreateOrGetBId(QuestionnaireForCreateDto questionnaireForCreateDto)
+    {
+        var question = await _questionnaireRepository.FindByQuestionnaireIdAsync(questionnaireForCreateDto.PassportPinfl);
+
+        if (question == null)
+        {
+            var result = await CreateQuestionnaireAsync(questionnaireForCreateDto);
+
+            return result;
         }
 
-        public async Task<QuestionnaireDto> GetQuestionnaireByIdAsync(int id)
-        {
-            var quest = await _questionnaireRepository.GetByIdWithQuestionnaireHistory(id);
-            if (quest == null)
-            {
-                throw new KeyNotFoundException($"Questionnaire with {id} not found");
-            }
+        await CreateQuestionnaireHistory
+            (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.DateCreated, questionnaireForCreateDto.IsPayed, questionnaireForCreateDto.AccountId, question.QuestionnaireId, questionnaireForCreateDto.ServiceIds);
 
-            return MapToQuestionnaireDto(quest);
+        return MapToQuestionnaireDto(question);
+    }
+
+    public async Task<QuestionnaireDto> UpdateQuestionnaireAsync(QuestionnaireForUpdateDto questionnaireForUpdateDto)
+    {
+        if (questionnaireForUpdateDto == null)
+        {
+            throw new ArgumentNullException(nameof(questionnaireForUpdateDto));
         }
 
-        public async Task<QuestionnaireDto> CreateQuestionnaireAsync(QuestionnaireForCreateDto questionnaireForCreateDto)
+        var quest = _mapper.Map<Questionnaire>(questionnaireForUpdateDto);
+
+        await _questionnaireRepository.UpdateAsync(quest);
+
+        return MapToQuestionnaireDto(quest);
+    }
+
+    public async Task DeleteQuestionnaireAsync(int id)
+    {
+        await _questionnaireRepository.DeleteAsync(id);
+    }
+
+    private async Task<int> GenerateUniqueQuestionnaireIdAsync()
+    {
+        // Генерация уникального идентификатора
+        int newId;
+        do
         {
-            int uniqueQuestionnaireId = await GenerateUniqueQuestionnaireIdAsync();
+            newId = GenerateRandomId();
+        } while (await _questionnaireRepository.ExistsByIdAsync(newId));
 
-            var quest = new Questionnaire
-            {
-                QuestionnaireId = uniqueQuestionnaireId,
-                Balance = questionnaireForCreateDto.Balance,
-                Gender = questionnaireForCreateDto.Gender,
-                PassportSeria = questionnaireForCreateDto.PassportSeria,
-                PassportPinfl = questionnaireForCreateDto.PassportPinfl,
-                PhoneNumber = questionnaireForCreateDto.PhoneNumber,
-                FirstName = questionnaireForCreateDto.FirstName,
-                LastName = questionnaireForCreateDto.LastName,
-                SurName = questionnaireForCreateDto.SurName,
-                DateIssue = questionnaireForCreateDto.DateIssue ?? default(DateTime),
-                DateBefore = questionnaireForCreateDto.DateBefore ?? default(DateTime),
-                Region = questionnaireForCreateDto.Region,
-                District = questionnaireForCreateDto.District,
-                Posolos = questionnaireForCreateDto.Posolos,
-                Address = questionnaireForCreateDto.Address,
-                Bithdate = questionnaireForCreateDto.Bithdate ?? default(DateTime),
-                SocialSattus = questionnaireForCreateDto.SocialSattus,
-                AdvertisingChannel = questionnaireForCreateDto.AdvertisingChannel,
-                PhotoBase64 = questionnaireForCreateDto.PhotoBase64 ?? default(string),
-            };
+        return newId;
+    }
 
-            await _questionnaireRepository.CreateAsync(quest);
+    private int GenerateRandomId()
+    {
+        Random random = new Random();
+        return random.Next(1000000, 999999999);
+    }
 
-            await CreateQuestionnaireHistory
-                (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.DateCreated, questionnaireForCreateDto.IsPayed, questionnaireForCreateDto.AccountId, uniqueQuestionnaireId, questionnaireForCreateDto.ServiceIds);
+    private async Task CreateQuestionnaireHistory(string? HistoryDiscription, DateTime? DateCreated, bool? IsPayed, int? AccountId, int? QuestionnaireId, List<int>? ServiceIds)
+    {
+        var questonnaireForCreate = new QuestionnaireHistoryForCreateDto(
+            HistoryDiscription,
+            DateCreated,
+            0,
+            IsPayed ?? false,
+            AccountId,
+            QuestionnaireId,
+            ServiceIds
+            );
 
+        await _questionnaireHistoryService.CreateQuestionnaireHistoryAsync(questonnaireForCreate);
+    }
 
-            return MapToQuestionnaireDto(quest);
-        }
+    private QuestionnaireDto MapToQuestionnaireDto(Questionnaire questionnaire)
+    {
+        return new QuestionnaireDto(
+            questionnaire.Id,
+            questionnaire.QuestionnaireId,
+            questionnaire.Balance,
+            questionnaire.Gender,
+            questionnaire.PassportSeria,
+            questionnaire.PassportPinfl,
+            questionnaire.PhoneNumber,
+            questionnaire.FirstName,
+            questionnaire.LastName,
+            questionnaire.SurName,
+            questionnaire.DateIssue,
+            questionnaire.DateBefore,
+            questionnaire.Region,
+            questionnaire.District,
+            questionnaire.Posolos,
+            questionnaire.Address,
+            questionnaire.Bithdate,
+            questionnaire.SocialSattus,
+            questionnaire.AdvertisingChannel,
+            questionnaire.PhotoBase64,
+            questionnaire.QuestionnaireHistories != null
+                ? questionnaire.QuestionnaireHistories.Select(MapToQuestionnaireHistoryDto).ToList()
+                : new List<QuestionnaireHistoryWithServiceDto>()
+            );
+    }
 
-        public async Task<QuestionnaireDto> CreateOrGetBId(QuestionnaireForCreateDto questionnaireForCreateDto)
-        {
-            var question = await _questionnaireRepository.FindByQuestionnaireIdAsync(questionnaireForCreateDto.PassportSeria);
+    private QuestionnaireHistoryWithServiceDto MapToQuestionnaireHistoryDto(QuestionnaireHistory questionnaire)
+    {
+        return new QuestionnaireHistoryWithServiceDto(
+            questionnaire.Id,
+            questionnaire.Historyid,
+            questionnaire.HistoryDiscription,
+            questionnaire.DateCreated,
+            questionnaire.Balance,
+            questionnaire.IsPayed,
+            questionnaire.AccountId,
+            questionnaire.Account != null
+            ? $"{questionnaire.Account.FirstName} {questionnaire.Account.LastName} {questionnaire.Account.SurName}"
+                : "No Account Data",
+            questionnaire.QuestionnaireId,
+            questionnaire.Services != null
+            ? questionnaire.Services.Select(MapToServiceDto).ToList()
+            : new List<GroupInfoResponse>());
+    }
 
-            if (question == null)
-            {
-                var result = await CreateQuestionnaireAsync(questionnaireForCreateDto);
-
-                return result;
-            }
-
-            await CreateQuestionnaireHistory
-                (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.DateCreated, questionnaireForCreateDto.IsPayed, questionnaireForCreateDto.AccountId, question.QuestionnaireId, questionnaireForCreateDto.ServiceIds);
-
-            return MapToQuestionnaireDto(question);
-        }
-
-        public async Task<QuestionnaireDto> UpdateQuestionnaireAsync(QuestionnaireForUpdateDto questionnaireForUpdateDto)
-        {
-            if (questionnaireForUpdateDto == null)
-            {
-                throw new ArgumentNullException(nameof(questionnaireForUpdateDto));
-            }
-
-            var quest = _mapper.Map<Questionnaire>(questionnaireForUpdateDto);
-
-            await _questionnaireRepository.UpdateAsync(quest);
-
-            return MapToQuestionnaireDto(quest);
-        }
-
-        public async Task DeleteQuestionnaireAsync(int id)
-        {
-            await _questionnaireRepository.DeleteAsync(id);
-        }
-
-        private async Task<int> GenerateUniqueQuestionnaireIdAsync()
-        {
-            // Генерация уникального идентификатора
-            int newId;
-            do
-            {
-                newId = GenerateRandomId();
-            } while (await _questionnaireRepository.ExistsByIdAsync(newId));
-
-            return newId;
-        }
-
-        private int GenerateRandomId()
-        {
-            Random random = new Random();
-            return random.Next(1000000, 999999999);
-        }
-
-        private async Task CreateQuestionnaireHistory(string? HistoryDiscription, DateTime? DateCreated, bool? IsPayed, int? AccountId, int? QuestionnaireId, List<int>? ServiceIds)
-        {
-            var questonnaireForCreate = new QuestionnaireHistoryForCreateDto(
-                HistoryDiscription,
-                DateCreated,
-                0,
-                IsPayed ?? false,
-                AccountId,
-                QuestionnaireId,
-                ServiceIds
-                );
-
-            await _questionnaireHistoryService.CreateQuestionnaireHistoryAsync(questonnaireForCreate);
-        }
-
-        private QuestionnaireDto MapToQuestionnaireDto(Questionnaire questionnaire)
-        {
-            return new QuestionnaireDto(
-                questionnaire.Id,
-                questionnaire.QuestionnaireId,
-                questionnaire.Balance,
-                questionnaire.Gender,
-                questionnaire.PassportSeria,
-                questionnaire.PassportPinfl,
-                questionnaire.PhoneNumber,
-                questionnaire.FirstName,
-                questionnaire.LastName,
-                questionnaire.SurName,
-                questionnaire.DateIssue,
-                questionnaire.DateBefore,
-                questionnaire.Region,
-                questionnaire.District,
-                questionnaire.Posolos,
-                questionnaire.Address,
-                questionnaire.Bithdate,
-                questionnaire.SocialSattus,
-                questionnaire.AdvertisingChannel,
-                questionnaire.PhotoBase64,
-                questionnaire.QuestionnaireHistories != null
-                    ? questionnaire.QuestionnaireHistories.Select(MapToQuestionnaireHistoryDto).ToList()
-                    : new List<QuestionnaireHistoryWithServiceDto>()
-                );
-        }
-
-        private QuestionnaireHistoryWithServiceDto MapToQuestionnaireHistoryDto(QuestionnaireHistory questionnaire)
-        {
-            return new QuestionnaireHistoryWithServiceDto(
-                questionnaire.Id,
-                questionnaire.Historyid,
-                questionnaire.HistoryDiscription,
-                questionnaire.DateCreated,
-                questionnaire.Balance,
-                questionnaire.IsPayed,
-                questionnaire.AccountId,
-                questionnaire.Account != null
-                ? $"{questionnaire.Account.FirstName} {questionnaire.Account.LastName} {questionnaire.Account.SurName}"
-                    : "No Account Data",
-                questionnaire.QuestionnaireId,
-                questionnaire.Services != null
-                ? questionnaire.Services.Select(MapToServiceDto).ToList()
-                : new List<GroupInfoResponse>());
-        }
-
-        private GroupInfoResponse MapToServiceDto(Service service)
-        {
-            return new GroupInfoResponse(
-                service.Id,
-                service.Name
-                );
-        }
+    private GroupInfoResponse MapToServiceDto(Service service)
+    {
+        return new GroupInfoResponse(
+            service.Id,
+            service.Name
+            );
     }
 }

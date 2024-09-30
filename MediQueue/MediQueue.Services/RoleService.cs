@@ -5,96 +5,95 @@ using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using System.Data;
 
-namespace MediQueue.Services
+namespace MediQueue.Services;
+
+public class RoleService : IRoleService
 {
-    public class RoleService : IRoleService
+    private readonly IRoleRepository _roleRepository;
+    private readonly IMapper _mapper;
+
+    public RoleService(IRoleRepository roleRepository, IMapper mapper)
     {
-        private readonly IRoleRepository _roleRepository;
-        private readonly IMapper _mapper;
+        _roleRepository = roleRepository ?? throw new ArgumentNullException(nameof(roleRepository));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+    }
 
-        public RoleService(IRoleRepository roleRepository, IMapper mapper)
+    public async Task<IEnumerable<RoleDto>> GetAllRolesAsync()
+    {
+        var role = await _roleRepository.FindAllAsync();
+
+        var roleDtos = role.Select(role => new RoleDto(
+            role.Id,
+            role.Name
+            ));
+
+        return roleDtos;
+    }
+
+    public async Task<RoleDto> GetRoleByIdAsync(int id)
+    {
+        var role = await _roleRepository.FindByIdAsync(id);
+
+        if (role == null)
         {
-            _roleRepository = roleRepository ?? throw new ArgumentNullException(nameof(roleRepository));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            throw new KeyNotFoundException($"Role with {id} not found");
         }
 
-        public async Task<IEnumerable<RoleDto>> GetAllRolesAsync()
+        var roleDto = new RoleDto(
+            role.Id,
+            role.Name
+            );
+
+        return roleDto;
+    }
+
+    public async Task<RoleDto> CreateRoleAsync(RoleForCreateDto roleForCreateDto)
+    {
+        if (roleForCreateDto == null)
         {
-            var role = await _roleRepository.FindAllAsync();
-
-            var roleDtos = role.Select(role => new RoleDto(
-                role.Id,
-                role.Name
-                ));
-
-            return roleDtos;
+            throw new ArgumentNullException(nameof(roleForCreateDto));
         }
 
-        public async Task<RoleDto> GetRoleByIdAsync(int id)
+        var role = new Role
         {
-            var role = await _roleRepository.FindByIdAsync(id);
+            Name = roleForCreateDto.Name,
+        };
 
-            if (role == null)
-            {
-                throw new KeyNotFoundException($"Role with {id} not found");
-            }
+        await _roleRepository.CreateAsync(role);
 
-            var roleDto = new RoleDto(
-                role.Id,
-                role.Name
-                );
+        var roleDto = new RoleDto(
+            role.Id,
+            role.Name
+            );
 
-            return roleDto;
+        return roleDto;
+    }
+
+    public async Task<RoleDto> UpdateRoleAsync(RoleForUpdateDto roleForUpdateDto)
+    {
+        if (roleForUpdateDto == null)
+        {
+            throw new ArgumentNullException(nameof(roleForUpdateDto));
         }
 
-        public async Task<RoleDto> CreateRoleAsync(RoleForCreateDto roleForCreateDto)
+        var role = new Role
         {
-            if (roleForCreateDto == null)
-            {
-                throw new ArgumentNullException(nameof(roleForCreateDto));
-            }
+            Id = roleForUpdateDto.Id,
+            Name = roleForUpdateDto.Name,
+        };
 
-            var role = new Role
-            {
-                Name = roleForCreateDto.Name,
-            };
+        await _roleRepository.UpdateAsync(role);
 
-            await _roleRepository.CreateAsync(role);
+        var roleDto = new RoleDto(
+            Id: role.Id,
+            Name: role.Name
+            );
 
-            var roleDto = new RoleDto(
-                role.Id,
-                role.Name
-                );
+        return roleDto;
+    }
 
-            return roleDto;
-        }
-
-        public async Task<RoleDto> UpdateRoleAsync(RoleForUpdateDto roleForUpdateDto)
-        {
-            if (roleForUpdateDto == null)
-            {
-                throw new ArgumentNullException(nameof(roleForUpdateDto));
-            }
-
-            var role = new Role
-            {
-                Id = roleForUpdateDto.Id,
-                Name = roleForUpdateDto.Name,
-            };
-
-            await _roleRepository.UpdateAsync(role);
-
-            var roleDto = new RoleDto(
-                Id: role.Id,
-                Name: role.Name
-                );
-
-            return roleDto;
-        }
-
-        public async Task DeleteRoleAsync(int id)
-        {
-            await _roleRepository.DeleteAsync(id);
-        }
+    public async Task DeleteRoleAsync(int id)
+    {
+        await _roleRepository.DeleteAsync(id);
     }
 }

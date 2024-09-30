@@ -6,7 +6,7 @@ namespace MediQueue.Domain.Interfaces.Services
     public interface IAuthorizationService
     {
         Task<LoginResponse> Login(AccountForLoginDto accountForLoginDto);
-        Task<string> Register(AccountForCreateDto accountForCreateDto);
+        //Task<string> Register(AccountForCreateDto accountForCreateDto);
         Task Logout(string sessionId);
     }
 }
