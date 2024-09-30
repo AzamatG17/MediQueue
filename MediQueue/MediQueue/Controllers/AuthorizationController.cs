@@ -18,27 +18,34 @@ public class AuthorizationController : BaseController
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login(AccountForLoginDto accountForLogin)
     {
-        var token = await _authorizationService.Login(accountForLogin);
-
-        if (token == null)
+        try
         {
-            return Unauthorized(CreateErrorResponse("Invalid login or password"));
+            var token = await _authorizationService.Login(accountForLogin);
+
+            if (token == null)
+            {
+                return Unauthorized(CreateErrorResponse("Invalid login or password"));
+            }
+
+            HttpContext.Response.Cookies.Append("mediks-cookies", token.Token);
+
+            return Ok(token);
         }
-
-        HttpContext.Response.Cookies.Append("mediks-cookies", token.Token);
-
-        return Ok(token);
+        catch (Exception ex)
+        {
+            return HandleError(ex);
+        }
     }
 
     [Authorize]
-    [HttpPost]
+    [HttpPost("logout")]
     public async Task<ActionResult> Logout()
     {
         var sessionId = User.FindFirst("SessionId")?.Value;
 
         if (string.IsNullOrEmpty(sessionId))
         {
-            return BadRequest("Session not found.");
+            return BadRequest(CreateErrorResponse("Session not found."));
         }
 
         await _authorizationService.Logout(sessionId);

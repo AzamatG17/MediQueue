@@ -7,155 +7,154 @@ using MediQueue.Domain.Entities.Responses;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
-namespace MediQueue.Services
+namespace MediQueue.Services;
+
+public class GroupService : IGroupService
 {
-    public class GroupService : IGroupService
+    private readonly IGroupRepository _groupRepository;
+    private readonly ICategoryRepository _categoryRepository;
+    private readonly IMapper _mapper;
+
+    public GroupService(IGroupRepository groupRepository, IMapper mapper, ICategoryRepository categoryRepository)
     {
-        private readonly IGroupRepository _groupRepository;
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly IMapper _mapper;
+        _groupRepository = groupRepository ?? throw new ArgumentNullException(nameof(groupRepository));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
+    }
 
-        public GroupService(IGroupRepository groupRepository, IMapper mapper, ICategoryRepository categoryRepository)
+    public async Task<IEnumerable<GroupForAllDateDto>> GetAllGroupsAsync()
+    {
+        var group = await _groupRepository.GetGroupWithGroupsAsync();
+
+        return group.Select(MapToGroupAllDateDto).ToList();
+    }
+
+    public async Task<GroupForAllDateDto> GetGroupByIdAsync(int id)
+    {
+        var group = await _groupRepository.FindByIdWithGroupAsync(id);
+        if (group == null)
         {
-            _groupRepository = groupRepository ?? throw new ArgumentNullException(nameof(groupRepository));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
+            throw new KeyNotFoundException($"Group with {id} not found");
         }
 
-        public async Task<IEnumerable<GroupForAllDateDto>> GetAllGroupsAsync()
-        {
-            var group = await _groupRepository.GetGroupWithGroupsAsync();
+        return MapToGroupAllDateDto(group);
+    }
 
-            return group.Select(MapToGroupAllDateDto).ToList();
+    public async Task<GroupDto> CreateGroupAsync(GroupForCreateDto groupForCreateDto)
+    {
+        if (groupForCreateDto == null)
+        {
+            throw new ArgumentNullException(nameof(groupForCreateDto));
         }
 
-        public async Task<GroupForAllDateDto> GetGroupByIdAsync(int id)
-        {
-            var group = await _groupRepository.FindByIdWithGroupAsync(id);
-            if (group == null)
-            {
-                throw new KeyNotFoundException($"Group with {id} not found");
-            }
+        var group = await MapToCategoryAsync(groupForCreateDto);
 
-            return MapToGroupAllDateDto(group);
+        await _groupRepository.CreateAsync(group);
+
+        return MapToCategoryDto(group);
+    }
+
+    public async Task<GroupDto> UpdateGroupAsync(GroupForUpdateDto groupForUpdateDto)
+    {
+        if (groupForUpdateDto == null)
+        {
+            throw new ArgumentNullException(nameof(groupForUpdateDto));
         }
 
-        public async Task<GroupDto> CreateGroupAsync(GroupForCreateDto groupForCreateDto)
+        var group = await _groupRepository.FindByIdAsync(groupForUpdateDto.Id);
+        if (group == null)
         {
-            if (groupForCreateDto == null)
-            {
-                throw new ArgumentNullException(nameof(groupForCreateDto));
-            }
-
-            var group = await MapToCategoryAsync(groupForCreateDto);
-
-            await _groupRepository.CreateAsync(group);
-
-            return MapToCategoryDto(group);
+            throw new KeyNotFoundException($"Group with {groupForUpdateDto.Id} not found");
         }
 
-        public async Task<GroupDto> UpdateGroupAsync(GroupForUpdateDto groupForUpdateDto)
+        group.GroupName = groupForUpdateDto.GroupName;
+
+        // Получаем существующие категории
+        var existingCategoryIds = group.Categories.Select(c => c.Id).ToList();
+
+        // Находим новые категории на основе переданных Id
+        var updatedCategories = await _categoryRepository.FindByGroupIdsAsync(groupForUpdateDto.CategoryIds);
+        var updatedCategoryIds = updatedCategories.Select(c => c.Id).ToList();
+
+        // Найти категории, которые нужно добавить (новые отношения)
+        var categoriesToAdd = updatedCategories.Where(c => !existingCategoryIds.Contains(c.Id)).ToList();
+
+        // Найти категории, которые нужно удалить (старые отношения, отсутствующие в обновленном списке)
+        var categoriesToRemove = group.Categories.Where(c => !updatedCategoryIds.Contains(c.Id)).ToList();
+
+        // Удаляем старые категории, которые больше не принадлежат группе
+        foreach (var categoryToRemove in categoriesToRemove)
         {
-            if (groupForUpdateDto == null)
-            {
-                throw new ArgumentNullException(nameof(groupForUpdateDto));
-            }
-
-            var group = await _groupRepository.FindByIdAsync(groupForUpdateDto.Id);
-            if (group == null)
-            {
-                throw new KeyNotFoundException($"Group with {groupForUpdateDto.Id} not found");
-            }
-
-            group.GroupName = groupForUpdateDto.GroupName;
-
-            // Получаем существующие категории
-            var existingCategoryIds = group.Categories.Select(c => c.Id).ToList();
-
-            // Находим новые категории на основе переданных Id
-            var updatedCategories = await _categoryRepository.FindByGroupIdsAsync(groupForUpdateDto.CategoryIds);
-            var updatedCategoryIds = updatedCategories.Select(c => c.Id).ToList();
-
-            // Найти категории, которые нужно добавить (новые отношения)
-            var categoriesToAdd = updatedCategories.Where(c => !existingCategoryIds.Contains(c.Id)).ToList();
-
-            // Найти категории, которые нужно удалить (старые отношения, отсутствующие в обновленном списке)
-            var categoriesToRemove = group.Categories.Where(c => !updatedCategoryIds.Contains(c.Id)).ToList();
-
-            // Удаляем старые категории, которые больше не принадлежат группе
-            foreach (var categoryToRemove in categoriesToRemove)
-            {
-                group.Categories.Remove(categoryToRemove);
-            }
-
-            // Добавляем новые категории, которые пришли с обновлением
-            foreach (var categoryToAdd in categoriesToAdd)
-            {
-                group.Categories.Add(categoryToAdd);
-            }
-
-            // Сохраняем изменения
-            await _groupRepository.UpdateAsync(group);
-
-            return MapToCategoryDto(group);
+            group.Categories.Remove(categoryToRemove);
         }
 
-        public async Task DeleteGroupAsync(int id)
+        // Добавляем новые категории, которые пришли с обновлением
+        foreach (var categoryToAdd in categoriesToAdd)
         {
-            await _groupRepository.DeleteAsync(id); 
+            group.Categories.Add(categoryToAdd);
         }
 
-        private async Task<Group> MapToCategoryAsync(GroupForCreateDto groupForCreateDto)
-        {
-            var groups = await _categoryRepository.FindByGroupIdsAsync(groupForCreateDto.CategoryIds);
-            return new Group
-            {
-                GroupName = groupForCreateDto.GroupName,
-                Categories = groups.ToList()
-            };
-        }
+        // Сохраняем изменения
+        await _groupRepository.UpdateAsync(group);
 
-        private GroupDto MapToCategoryDto(Group category)
-        {
-            var groupInfos = category.Categories.Select(g => new GroupInfoResponse(
-                g.Id,
-                g.CategoryName
-                )).ToList();
+        return MapToCategoryDto(group);
+    }
 
-            return new GroupDto(
-                category.Id,
-                category.GroupName,
-                groupInfos
-            );
-        }
+    public async Task DeleteGroupAsync(int id)
+    {
+        await _groupRepository.DeleteAsync(id); 
+    }
 
-        private GroupForAllDateDto MapToGroupAllDateDto(Group group)
+    private async Task<Group> MapToCategoryAsync(GroupForCreateDto groupForCreateDto)
+    {
+        var groups = await _categoryRepository.FindByGroupIdsAsync(groupForCreateDto.CategoryIds);
+        return new Group
         {
-            return new GroupForAllDateDto(
-                group.Id,
-                group.GroupName,
-                group.Categories.Select(MapToCategoryDto).ToList()
-            );
-        }
+            GroupName = groupForCreateDto.GroupName,
+            Categories = groups.ToList()
+        };
+    }
 
-        private CategoryForGroupDto MapToCategoryDto(Category category)
-        {
-            return new CategoryForGroupDto(
-                category.Id,
-                category.CategoryName,
-                category.Services.Select(MapToServiceDto).ToList()
-            );
-        }
+    private GroupDto MapToCategoryDto(Group category)
+    {
+        var groupInfos = category.Categories.Select(g => new GroupInfoResponse(
+            g.Id,
+            g.CategoryName
+            )).ToList();
 
-        private ServiceDtos MapToServiceDto(Service service)
-        {
-            return new ServiceDtos(
-                service.Id,
-                service.Name,
-                service.Amount,
-                service.CategoryId,
-                service.Category?.CategoryName
-            );
-        }
+        return new GroupDto(
+            category.Id,
+            category.GroupName,
+            groupInfos
+        );
+    }
+
+    private GroupForAllDateDto MapToGroupAllDateDto(Group group)
+    {
+        return new GroupForAllDateDto(
+            group.Id,
+            group.GroupName,
+            group.Categories.Select(MapToCategoryDto).ToList()
+        );
+    }
+
+    private CategoryForGroupDto MapToCategoryDto(Category category)
+    {
+        return new CategoryForGroupDto(
+            category.Id,
+            category.CategoryName,
+            category.Services.Select(MapToServiceDto).ToList()
+        );
+    }
+
+    private ServiceDtos MapToServiceDto(Service service)
+    {
+        return new ServiceDtos(
+            service.Id,
+            service.Name,
+            service.Amount,
+            service.CategoryId,
+            service.Category?.CategoryName
+        );
     }
 }

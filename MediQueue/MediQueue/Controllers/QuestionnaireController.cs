@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Questionnaire;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Domain.ResourceParameters;
 using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,11 +22,11 @@ public class QuestionnaireController : BaseController
 
     [PermissionAuthorize(9, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetAsync()
+    public async Task<ActionResult> GetAsync([FromQuery] QuestionnaireResourceParameters questionnaireResourceParameters)
     {
         try
         {
-            var accounts = await _questionnaireService.GetAllQuestionnairesAsync();
+            var accounts = await _questionnaireService.GetAllQuestionnairesAsync(questionnaireResourceParameters);
             return Ok(accounts);
         }
         catch (Exception ex)

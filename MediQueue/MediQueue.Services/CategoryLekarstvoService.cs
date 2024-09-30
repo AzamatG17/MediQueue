@@ -4,98 +4,97 @@ using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
-namespace MediQueue.Services
+namespace MediQueue.Services;
+
+public class CategoryLekarstvoService : ICategoryLekarstvoService
 {
-    public class CategoryLekarstvoService : ICategoryLekarstvoService
+    private readonly ICategoryLekarstvoRepository _categoryLekarstvoRepository;
+
+    public CategoryLekarstvoService(ICategoryLekarstvoRepository categoryLekarstvoRepository)
     {
-        private readonly ICategoryLekarstvoRepository _categoryLekarstvoRepository;
+        _categoryLekarstvoRepository = categoryLekarstvoRepository ?? throw new ArgumentNullException(nameof(categoryLekarstvoRepository));
+    }
 
-        public CategoryLekarstvoService(ICategoryLekarstvoRepository categoryLekarstvoRepository)
+    public async Task<IEnumerable<CategoryLekarstvoDto>> GetAllCategoryLekarstvosAsync()
+    {
+        var cateforyLekarstvo = await _categoryLekarstvoRepository.FindAllCategoryLekarstvo();
+
+        return cateforyLekarstvo.Select(MapToCategoryLekarstvoDto).ToList();
+    }
+
+    public async Task<CategoryLekarstvoDto> GetCategoryLekarstvoByIdAsync(int id)
+    {
+        var categoryLekarstvo = await _categoryLekarstvoRepository.FindByIdCategoryLekarstvo(id);
+
+        return MapToCategoryLekarstvoDto(categoryLekarstvo);
+    }
+
+    public async Task<CategoryLekarstvoDto> CreateCategoryLekarstvoAsync(CategoryLekarstvoForCreateDto lekarstvoForCreateDto)
+    {
+        if (lekarstvoForCreateDto == null)
         {
-            _categoryLekarstvoRepository = categoryLekarstvoRepository ?? throw new ArgumentNullException(nameof(categoryLekarstvoRepository));
+            throw new ArgumentNullException(nameof(lekarstvoForCreateDto));
         }
 
-        public async Task<IEnumerable<CategoryLekarstvoDto>> GetAllCategoryLekarstvosAsync()
+        var categoryLekarstvo = new CategoryLekarstvo
         {
-            var cateforyLekarstvo = await _categoryLekarstvoRepository.FindAllCategoryLekarstvo();
+            Name = lekarstvoForCreateDto.Name,
+        };
 
-            return cateforyLekarstvo.Select(MapToCategoryLekarstvoDto).ToList();
+        await _categoryLekarstvoRepository.CreateAsync(categoryLekarstvo);
+
+        return MapToCategoryLekarstvoDto(categoryLekarstvo);
+    }
+
+    public async Task<CategoryLekarstvoDto> UpdateCategoryLekarstvoAsync(CategoryLekarstvoForUpdateDto lekarstvoForUpdateDto)
+    {
+        if (lekarstvoForUpdateDto == null)
+        {
+            throw new ArgumentNullException(nameof(lekarstvoForUpdateDto));
         }
 
-        public async Task<CategoryLekarstvoDto> GetCategoryLekarstvoByIdAsync(int id)
+        var lakarstvo = new CategoryLekarstvo
         {
-            var categoryLekarstvo = await _categoryLekarstvoRepository.FindByIdCategoryLekarstvo(id);
+            Id = lekarstvoForUpdateDto.Id,
+            Name = lekarstvoForUpdateDto.Name
+        };
 
-            return MapToCategoryLekarstvoDto(categoryLekarstvo);
-        }
+        await _categoryLekarstvoRepository.UpdateAsync(lakarstvo);
 
-        public async Task<CategoryLekarstvoDto> CreateCategoryLekarstvoAsync(CategoryLekarstvoForCreateDto lekarstvoForCreateDto)
-        {
-            if (lekarstvoForCreateDto == null)
-            {
-                throw new ArgumentNullException(nameof(lekarstvoForCreateDto));
-            }
+        return MapToCategoryLekarstvoDto(lakarstvo);
+    }
 
-            var categoryLekarstvo = new CategoryLekarstvo
-            {
-                Name = lekarstvoForCreateDto.Name,
-            };
+    public async Task DeleteCategoryLekarstvoAsync(int id)
+    {
+        await _categoryLekarstvoRepository.DeleteAsync(id);
+    }
 
-            await _categoryLekarstvoRepository.CreateAsync(categoryLekarstvo);
+    private CategoryLekarstvoDto MapToCategoryLekarstvoDto(CategoryLekarstvo lekarstvo)
+    {
+        return new CategoryLekarstvoDto(
+            lekarstvo.Id,
+            lekarstvo.Name,
+            lekarstvo.Lekarstvos != null
+                ? lekarstvo.Lekarstvos.Select(MapToLekarstvoDto).ToList()
+                : new List<LekarstvoDto>()
+            );
+    }
 
-            return MapToCategoryLekarstvoDto(categoryLekarstvo);
-        }
-
-        public async Task<CategoryLekarstvoDto> UpdateCategoryLekarstvoAsync(CategoryLekarstvoForUpdateDto lekarstvoForUpdateDto)
-        {
-            if (lekarstvoForUpdateDto == null)
-            {
-                throw new ArgumentNullException(nameof(lekarstvoForUpdateDto));
-            }
-
-            var lakarstvo = new CategoryLekarstvo
-            {
-                Id = lekarstvoForUpdateDto.Id,
-                Name = lekarstvoForUpdateDto.Name
-            };
-
-            await _categoryLekarstvoRepository.UpdateAsync(lakarstvo);
-
-            return MapToCategoryLekarstvoDto(lakarstvo);
-        }
-
-        public async Task DeleteCategoryLekarstvoAsync(int id)
-        {
-            await _categoryLekarstvoRepository.DeleteAsync(id);
-        }
-
-        private CategoryLekarstvoDto MapToCategoryLekarstvoDto(CategoryLekarstvo lekarstvo)
-        {
-            return new CategoryLekarstvoDto(
-                lekarstvo.Id,
-                lekarstvo.Name,
-                lekarstvo.Lekarstvos != null
-                    ? lekarstvo.Lekarstvos.Select(MapToLekarstvoDto).ToList()
-                    : new List<LekarstvoDto>()
-                );
-        }
-
-        private LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
-        {
-            return new LekarstvoDto(
-                lekarstvo.Id,
-                lekarstvo.Name,
-                lekarstvo.PurchasePrice,
-                lekarstvo.SalePrice,
-                lekarstvo.ExpirationDate,
-                lekarstvo.BeforeDate,
-                lekarstvo.PhotoBase64,
-                lekarstvo.MeasurementUnit,
-                lekarstvo.CategoryLekarstvoId,
-                lekarstvo.CategoryLekarstvo.Name ?? null,
-                lekarstvo.ScladId,
-                lekarstvo.Sclad.Name ?? null
-                );
-        }
+    private LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
+    {
+        return new LekarstvoDto(
+            lekarstvo.Id,
+            lekarstvo.Name,
+            lekarstvo.PurchasePrice,
+            lekarstvo.SalePrice,
+            lekarstvo.ExpirationDate,
+            lekarstvo.BeforeDate,
+            lekarstvo.PhotoBase64,
+            lekarstvo.MeasurementUnit,
+            lekarstvo.CategoryLekarstvoId,
+            lekarstvo.CategoryLekarstvo.Name ?? null,
+            lekarstvo.ScladId,
+            lekarstvo.Sclad.Name ?? null
+            );
     }
 }

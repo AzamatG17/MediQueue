@@ -39,7 +39,7 @@ namespace MediQueue.Services
 
             if (existingSession != null && DateTime.UtcNow - existingSession.LastActivitytime < TimeSpan.FromHours(1))
             {
-                return null;
+                throw new InvalidOperationException("The user is already logged in.");
             }
 
             string sessionId;
@@ -81,41 +81,40 @@ namespace MediQueue.Services
             }
         }
 
-        public async Task<string> Register(AccountForCreateDto accountForCreateDto)
-        {
-            if (string.IsNullOrWhiteSpace(accountForCreateDto.Login) || string.IsNullOrWhiteSpace(accountForCreateDto.Password))
-            {
-                throw new ArgumentException("Login and Password are required");
-            }
+        //public async Task<string> Register(AccountForCreateDto accountForCreateDto)
+        //{
+        //    if (string.IsNullOrWhiteSpace(accountForCreateDto.Login) || string.IsNullOrWhiteSpace(accountForCreateDto.Password))
+        //    {
+        //        throw new ArgumentException("Login and Password are required");
+        //    }
 
-            var existingUser = await _context.Accounts
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Login == accountForCreateDto.Login);
+        //    var existingUser = await _context.Accounts
+        //        .AsNoTracking()
+        //        .FirstOrDefaultAsync(u => u.Login == accountForCreateDto.Login);
 
-            if (existingUser != null)
-            {
-                throw new InvalidOperationException("User already exists");
-            }
+        //    if (existingUser != null)
+        //    {
+        //        throw new InvalidOperationException("User already exists");
+        //    }
 
+        //    var newUser = new Account
+        //    {
+        //        Login = accountForCreateDto.Login,
+        //        Password = accountForCreateDto.Password,
+        //        Bithdate = accountForCreateDto.Bithdate,
+        //        FirstName = accountForCreateDto.FirstName,
+        //        LastName = accountForCreateDto.LastName,
+        //        PhoneNumber = accountForCreateDto.PhoneNumber,
+        //        RoleId = accountForCreateDto.RoleId
+        //    };
 
-            var newUser = new Account
-            {
-                Login = accountForCreateDto.Login,
-                Password = accountForCreateDto.Password,
-                Bithdate = accountForCreateDto.Bithdate,
-                FirstName = accountForCreateDto.FirstName,
-                LastName = accountForCreateDto.LastName,
-                PhoneNumber = accountForCreateDto.PhoneNumber,
-                RoleId = accountForCreateDto.RoleId
-            };
+        //    _context.Accounts.Add(newUser);
+        //    await _context.SaveChangesAsync();
 
-            _context.Accounts.Add(newUser);
-            await _context.SaveChangesAsync();
+        //    var token = _jwtProvider.GenerateToken(newUser);
 
-            var token = _jwtProvider.GenerateToken(newUser);
-
-            return token;
-        }
+        //    return token;
+        //}
 
         private async Task<Account> GetByEmailAsync(string login, string password)
         {
