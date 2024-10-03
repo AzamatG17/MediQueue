@@ -1,5 +1,5 @@
 ﻿using MediQueue.Domain.DTOs.Account;
-using MediQueue.Domain.Entities;
+using MediQueue.Domain.Entities.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

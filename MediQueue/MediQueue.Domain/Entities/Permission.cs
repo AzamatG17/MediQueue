@@ -1,9 +1,8 @@
 ﻿using MediQueue.Domain.Common;
 
-namespace MediQueue.Domain.Entities
+namespace MediQueue.Domain.Entities;
+
+public class Permission : EntityBase
 {
-    public class Permission : EntityBase
-    {
-        public string Name { get; set; }
-    }
+    public string Name { get; set; }
 }

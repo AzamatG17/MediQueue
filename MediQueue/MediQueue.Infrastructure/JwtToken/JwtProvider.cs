@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace MediQueue.Infrastructure.JwtToken
@@ -36,12 +37,17 @@ namespace MediQueue.Infrastructure.JwtToken
             var jwtSecurityToken = new JwtSecurityToken(
                 claims: claimForToken,
                 signingCredentials: signingCredentials,
-                expires: DateTime.UtcNow.AddHours(_options.ExpiresHours));
+                expires: DateTime.UtcNow.AddMinutes(_options.ExpiresHours));
 
             var token = new JwtSecurityTokenHandler()
                 .WriteToken(jwtSecurityToken);
 
             return token;
+        }
+
+        public string GenerateRefreshToken()
+        {
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
     }
 }

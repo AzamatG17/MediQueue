@@ -1,6 +1,5 @@
-
 using MediQueue.Extensions;
-using System.Configuration;
+using MediQueue.Infrastructure.JwtToken;
 
 namespace MediQueue
 {

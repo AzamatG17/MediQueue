@@ -1,21 +1,19 @@
 ﻿using MediQueue.Domain.Common;
 using MediQueue.Domain.Entities.Enums;
 
-namespace MediQueue.Domain.Entities
+namespace MediQueue.Domain.Entities;
+
+public class PaymentService : EntityBase
 {
-    public class PaymentService : EntityBase
-    {
-        public decimal? TotalAmount { get; set; }
-        public decimal? PaidAmount { get; set; }    
-        public decimal? OutstandingAmount { get; set; } // Долг
-        public DateTime? PaymentDate { get; set; } 
+    public decimal? TotalAmount { get; set; }
+    public decimal? PaidAmount { get; set; }    
+    public decimal? OutstandingAmount { get; set; }
+    public DateTime? PaymentDate { get; set; } 
 
-        public PaymentType? PaymentType { get; set; }
-        public PaymentStatus? PaymentStatus { get; set; }
-
-        public int? ServiceId { get; set; }
-        public Service? Service { get; set; }
-        public int? QuestionnaireHistoryId { get; set; }
-        public QuestionnaireHistory? QuestionnaireHistory { get; set; }
-    }
+    public PaymentType? PaymentType { get; set; }
+    public PaymentStatus? PaymentStatus { get; set; }
+    public int? ServiceId { get; set; }
+    public Service? Service { get; set; }
+    public int? QuestionnaireHistoryId { get; set; }
+    public QuestionnaireHistory? QuestionnaireHistory { get; set; }
 }

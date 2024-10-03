@@ -16,6 +16,8 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.LastActivitytime);
 
+            builder.Property(x => x.RefreshTokenExpiry);
+
             builder.Property(x => x.IsLoggedOut)
                 .IsRequired();
 

@@ -12,137 +12,136 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace MediQueue.Extensions
+namespace MediQueue.Extensions;
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+    public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)
-        {
-            AddDatabaseContext(services, configuration);
-            AddAuthentication(services, configuration);
-            AddAuthorization(services);
-            AddServices(services);
-            AddRepositories(services);
-            AddAutoMapper(services);
+        AddDatabaseContext(services, configuration);
+        AddAuthentication(services, configuration);
+        AddAuthorization(services);
+        AddServices(services);
+        AddRepositories(services);
+        AddAutoMapper(services);
 
-            services.AddCors(options =>
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", builder =>
             {
-                options.AddPolicy("AllowAll", builder =>
-                {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
-                });
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
             });
+        });
 
-            return services;
+        return services;
+    }
+
+    private static void AddDatabaseContext(IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("MediQueueConnection");
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new InvalidOperationException($"Invalid connection string.");
         }
 
-        private static void AddDatabaseContext(IServiceCollection services, IConfiguration configuration)
-        {
-            var connectionString = configuration.GetConnectionString("MediQueueConnection");
+        services.AddDbContext<MediQueueDbContext>(options =>
+            options.UseSqlServer(connectionString));
+    }
 
-            if (string.IsNullOrEmpty(connectionString))
+    private static void AddAutoMapper(IServiceCollection services)
+    {
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+    }
+
+    private static void AddServices(IServiceCollection services)
+    {
+        services.AddScoped<IJwtProvider, JwtProvider>();
+        services.AddScoped<MediQueue.Domain.Interfaces.Services.IAuthorizationService, AuthorizationService>();
+        services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<ICategoryService, CategoriesService>();
+        services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IQuestionnaireService, QuestionnaireService>();
+        services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IPermissionService, PermissonService>();
+        services.AddScoped<IServicesService, ServicesService>();
+        services.AddScoped<IQuestionnaireHistoryService, QuestionnaireHistoryService>();
+        services.AddScoped<IPaymentServiceService, PaymentServiceService>();
+        services.AddScoped<IBranchService, BranchService>();
+        services.AddScoped<IScladService, ScladService>();
+        services.AddScoped<ILekarstvoService, LekarstvoService>();
+        services.AddScoped<ICategoryLekarstvoService, CategoryLekarstvoService>();
+
+        services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
+        services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
+    }
+
+    private static void AddRepositories(IServiceCollection services)
+    {
+        services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IQuestionnaireRepository, QuestionnaireRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IPermissionRepository, PermissionRepository>();
+        services.AddScoped<IServiceRepository, ServiceRepository>();
+        services.AddScoped<IQuestionnaireHistoryRepositoty, QuestionnaireHistoryRepository>();
+        services.AddScoped<IPaymentServiceRepository, PaymentServiceRepository>();
+        services.AddScoped<IBranchRepository, BranchRepository>();
+        services.AddScoped<IScladRepository, ScladRepository>();
+        services.AddScoped<ILekarstvoRepository, LekarstvoRepository>();
+        services.AddScoped<ICategoryLekarstvoRepository, CategoryLekarstvoRepository>();
+    }
+
+    private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
+    {
+        var jwtOptions = configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
+
+        services
+            .AddAuthentication(options =>
             {
-                throw new InvalidOperationException($"Invalid connection string.");
-            }
-
-            services.AddDbContext<MediQueueDbContext>(options =>
-                options.UseSqlServer(connectionString));
-        }
-        private static void AddAutoMapper(IServiceCollection services)
-        {
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-        }
-
-        private static void AddServices(IServiceCollection services)
-        {
-            services.AddScoped<IJwtProvider, JwtProvider>();
-            services.AddScoped<MediQueue.Domain.Interfaces.Services.IAuthorizationService, AuthorizationService>();
-            services.AddScoped<IAccountService, AccountService>();
-            services.AddScoped<ICategoryService, CategoriesService>();
-            services.AddScoped<IGroupService, GroupService>();
-            services.AddScoped<IQuestionnaireService, QuestionnaireService>();
-            services.AddScoped<IRoleService, RoleService>();
-            services.AddScoped<IPermissionService, PermissonService>();
-            services.AddScoped<IServicesService, ServicesService>();
-            services.AddScoped<IQuestionnaireHistoryService, QuestionnaireHistoryService>();
-            services.AddScoped<IPaymentServiceService, PaymentServiceService>();
-            services.AddScoped<IBranchService, BranchService>();
-            services.AddScoped<IScladService, ScladService>();
-            services.AddScoped<ILekarstvoService, LekarstvoService>();
-            services.AddScoped<ICategoryLekarstvoService, CategoryLekarstvoService>();
-
-            services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
-            services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
-            //services.AddScoped<IAuthorizationFilter, PermissionAuthorizeAttribute>();
-        }
-
-        private static void AddRepositories(IServiceCollection services)
-        {
-            services.AddScoped<IAccountRepository, AccountRepository>();
-            services.AddScoped<ICategoryRepository, CategoryRepository>();
-            services.AddScoped<IGroupRepository, GroupRepository>();
-            services.AddScoped<IQuestionnaireRepository, QuestionnaireRepository>();
-            services.AddScoped<IRoleRepository, RoleRepository>();
-            services.AddScoped<IPermissionRepository, PermissionRepository>();
-            services.AddScoped<IServiceRepository, ServiceRepository>();
-            services.AddScoped<IQuestionnaireHistoryRepositoty, QuestionnaireHistoryRepository>();
-            services.AddScoped<IPaymentServiceRepository, PaymentServiceRepository>();
-            services.AddScoped<IBranchRepository, BranchRepository>();
-            services.AddScoped<IScladRepository, ScladRepository>();
-            services.AddScoped<ILekarstvoRepository, LekarstvoRepository>();
-            services.AddScoped<ICategoryLekarstvoRepository, CategoryLekarstvoRepository>();
-        }
-
-        private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
-        {
-            var jwtOptions = configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
-
-            services
-                .AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-                {
-                    options.RequireHttpsMetadata = true;
-                    options.SaveToken = true;
-
-                    options.TokenValidationParameters = new()
-                    {
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtOptions!.SecretKey))
-                    };
-
-                    options.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = context =>
-                        {
-                            context.Token = context.Request.Cookies["mediks-cookies"];
-
-                            return Task.CompletedTask;
-                        }
-                    };
-                });
-        }
-
-        private static void AddAuthorization(IServiceCollection services)
-        {
-            services.AddHttpContextAccessor();
-            services.AddAuthorization(options =>
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                options.AddPolicy("HasPermission", policy =>
+                options.RequireHttpsMetadata = true;
+                options.SaveToken = true;
+
+                options.TokenValidationParameters = new()
                 {
-                    policy.Requirements.Add(new JwtPermissionRequirement());
-                });
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtOptions!.SecretKey))
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["mediks-cookies"];
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
-        }
+    }
+
+    private static void AddAuthorization(IServiceCollection services)
+    {
+        services.AddHttpContextAccessor();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("HasPermission", policy =>
+            {
+                policy.Requirements.Add(new JwtPermissionRequirement());
+            });
+        });
     }
 }

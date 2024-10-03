@@ -164,6 +164,8 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             questionnaireHistory.AccountId,
             $"{questionnaireHistory.Account?.FirstName} {questionnaireHistory.Account?.LastName} {questionnaireHistory.Account?.SurName}",
             questionnaireHistory.QuestionnaireId,
+            questionnaireHistory.Questionnaire?.PassportPinfl ?? "",
+            questionnaireHistory.Questionnaire?.PhoneNumber ?? "",
             updatedServices,
             paymentDtos
         );
