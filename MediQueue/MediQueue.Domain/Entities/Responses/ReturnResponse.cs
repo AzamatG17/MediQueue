@@ -1,9 +1,8 @@
-﻿namespace MediQueue.Domain.Entities.Responses
+﻿namespace MediQueue.Domain.Entities.Responses;
+
+public class ReturnResponse
 {
-    public class ReturnResponse
-    {
-        public int Code { get; set; }
-        public string Message { get; set; }
-        public bool Success { get; set; }
-    }
+    public int Code { get; set; }
+    public string Message { get; set; }
+    public bool Success { get; set; }
 }

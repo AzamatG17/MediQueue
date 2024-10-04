@@ -37,6 +37,43 @@ public class AuthorizationController : BaseController
         }
     }
 
+    [HttpPost("refresh")]
+    public async Task<ActionResult> Refresh()
+    {
+        try
+        {
+            var authorizationHeader = Request.Headers["Cookie"].ToString();
+
+            if (string.IsNullOrEmpty(authorizationHeader))
+            {
+                return BadRequest(CreateErrorResponse("Access token is missing or invalid."));
+            }
+
+            var tokenCookie = authorizationHeader.Split(';')
+            .FirstOrDefault(c => c.Trim().StartsWith("mediks-cookies="));
+
+            if (tokenCookie == null)
+            {
+                return BadRequest(CreateErrorResponse("Access token not found in Cookie."));
+            }
+
+            var accessToken = tokenCookie.Substring("mediks-cookies=".Length).Trim();
+
+            var newToken = await _authorizationService.RefreshToken(accessToken);
+
+            if (newToken == null)
+            {
+                return BadRequest(CreateErrorResponse("Access token not found."));
+            }
+
+            return Ok(newToken);
+        }
+        catch (Exception ex)
+        {
+            return HandleError(ex);
+        }
+    }
+
     [Authorize]
     [HttpPost("logout")]
     public async Task<ActionResult> Logout()
