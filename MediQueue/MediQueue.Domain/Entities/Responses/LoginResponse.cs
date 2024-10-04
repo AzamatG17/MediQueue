@@ -1,9 +1,7 @@
-﻿namespace MediQueue.Domain.Entities.Responses
+﻿namespace MediQueue.Domain.Entities.Responses;
+
+public class LoginResponse
 {
-    public class LoginResponse
-    {
-        public string Token { get; set; }
-        public Account User { get; set; }
-        public string RefreshToken { get; set; }
-    }
+    public string Token { get; set; }
+    public Account User { get; set; }
 }

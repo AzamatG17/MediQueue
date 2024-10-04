@@ -55,34 +55,32 @@ public class AuthorizationService : IAuthorizationService
         }
         while (await _context.AccountSessions.AnyAsync(s => s.SessionId == sessionId));
 
-        var newRefreshToken = _jwtProvider.GenerateRefreshToken();
+        var token = _jwtProvider.GenerateToken(user, sessionId);
 
         var newSession = new AccountSession
         {
             AccountId = user.Id,
             SessionId = sessionId,
             LastActivitytime = DateTime.UtcNow,
-            RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
+            RefreshTokenExpiry = DateTime.UtcNow.AddHours(12),
             IsLoggedOut = false,
+            AccessToken = token
         };
 
         _context.AccountSessions.Add(newSession);
         await _context.SaveChangesAsync();
 
-        var token = _jwtProvider.GenerateToken(user, sessionId);
-
         return new LoginResponse
         {
             Token = token,
-            User = user,
-            RefreshToken = newRefreshToken
+            User = user
         };
     }
 
     public async Task<LoginResponse> RefreshToken(string refreshToken)
-    {
+    {    
         var session = await _context.AccountSessions
-            .FirstOrDefaultAsync(s => s.RefreshToken == refreshToken && !s.IsLoggedOut);
+            .FirstOrDefaultAsync(s => s.AccessToken == refreshToken && !s.IsLoggedOut);
 
         if (session == null || session.RefreshTokenExpiry < DateTime.UtcNow)
         {
@@ -91,18 +89,16 @@ public class AuthorizationService : IAuthorizationService
 
         var account = await _context.Accounts.FindAsync(session.AccountId);
         var newAccessToken = _jwtProvider.GenerateToken(account, session.SessionId);
-        var newRefreshToken = _jwtProvider.GenerateRefreshToken();
 
-        session.RefreshToken = newRefreshToken; // Обновляем refresh token
-        session.RefreshTokenExpiry = DateTime.UtcNow.AddHours(1); // Устанавливаем новый срок действия
+        session.AccessToken = newAccessToken; // Обновляем refresh token
+        session.RefreshTokenExpiry = DateTime.UtcNow.AddHours(12); // Устанавливаем новый срок действия
 
         await _context.SaveChangesAsync();
 
         return new LoginResponse
         {
             Token = newAccessToken,
-            User = account,
-            RefreshToken = newRefreshToken
+            User = account
         };
     }
 

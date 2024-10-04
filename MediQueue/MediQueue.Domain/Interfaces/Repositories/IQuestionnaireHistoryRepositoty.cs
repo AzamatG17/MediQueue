@@ -1,10 +1,11 @@
 ﻿using MediQueue.Domain.Entities;
+using MediQueue.Domain.ResourceParameters;
 
 namespace MediQueue.Domain.Interfaces.Repositories
 {
     public interface IQuestionnaireHistoryRepositoty : IRepositoryBase<QuestionnaireHistory>
     {
-        Task<IEnumerable<QuestionnaireHistory>> GetAllQuestionnaireHistoriesAsync();
+        Task<IEnumerable<QuestionnaireHistory>> GetAllQuestionnaireHistoriesAsync(QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs);
         Task<QuestionnaireHistory> GetQuestionnaireHistoryByIdAsync(int? id);
         Task<QuestionnaireHistory> GetQuestionnaireHistoryByHistoryIdAsync(int? id);
         Task<bool> ExistsByIdAsync(int newId);

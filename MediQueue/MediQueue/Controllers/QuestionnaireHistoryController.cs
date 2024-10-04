@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.QuestionnaireHistory;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Domain.ResourceParameters;
 using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,11 +22,11 @@ public class QuestionnaireHistoryController : BaseController
 
     [PermissionAuthorize(10, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetAsync()
+    public async Task<ActionResult> GetAsync([FromQuery] QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs)
     {
         try
         {
-            var accounts = await _questionnaireHistoryService.GetAllQuestionnaireHistoriessAsync();
+            var accounts = await _questionnaireHistoryService.GetAllQuestionnaireHistoriessAsync(questionnaireHistoryResourceParametrs);
             return Ok(accounts);
         }
         catch (Exception ex)

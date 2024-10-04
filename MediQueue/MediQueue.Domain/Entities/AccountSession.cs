@@ -9,5 +9,5 @@ public class AccountSession : EntityBase
     public DateTime LastActivitytime { get; set; }
     public DateTime RefreshTokenExpiry { get; set; }
     public bool IsLoggedOut { get; set; }
-    public string RefreshToken { get; set; }
+    public string AccessToken { get; set; }
 }

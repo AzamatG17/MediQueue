@@ -4,4 +4,4 @@ using MediQueue.Domain.DTOs.Service;
 namespace MediQueue.Domain.DTOs.QuestionnaireHistory;
 
 public record QuestionnaireHistoryDto(
-    int id, int Historyid, string? HistoryDiscription, DateTime? DateCreated, decimal? Balance, bool? IsPayed, int? AccountId, string? AccountName, int? QuestionnaireId, string? PassportPinfl, string? PhoneNumber, List<ServiceDtos>? ServiceDtos, List<PaymentServiceDto>? PaymentServices);
+    int id, int Historyid, string? HistoryDiscription, DateTime? DateCreated, decimal? Balance, bool? IsPayed, int? AccountId, string? AccountName, int? QuestionnaireId, string? PassportPinfl, string? PassportSeria, string? PhoneNumber, string? QuestionnaireName, DateTime? Bithdate, string? PhotoBase64, List<ServiceDtos>? ServiceDtos, List<PaymentServiceDto>? PaymentServices);

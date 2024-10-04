@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
+using MediQueue.Domain.ResourceParameters;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediQueue.Infrastructure.Persistence.Repositories
@@ -11,14 +12,28 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
         }
 
-        public async Task<IEnumerable<QuestionnaireHistory>> GetAllQuestionnaireHistoriesAsync()
+        public async Task<IEnumerable<QuestionnaireHistory>> GetAllQuestionnaireHistoriesAsync(QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs)
         {
-            return await _context.QuestionnaireHistories
+            var query = _context.QuestionnaireHistories
                 .Include(a => a.Account)
                 .Include(q => q.Questionnaire)
                 .Include(s => s.Services)
                 .Include(p => p.PaymentServices)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (questionnaireHistoryResourceParametrs.QuestionnaireId.HasValue)
+            {
+                query = query.Where(q => q.QuestionnaireId == questionnaireHistoryResourceParametrs.QuestionnaireId.Value);
+            }
+
+            query = questionnaireHistoryResourceParametrs.OrderBy switch
+            {
+                "idDesc" => query.OrderByDescending(q => q.Id),
+                "idAsc" => query.OrderBy(q => q.Id),
+                _ => query
+            };
+
+            return await query.ToListAsync();
         }
 
         public async Task<QuestionnaireHistory> GetQuestionnaireHistoryByIdAsync(int? id)

@@ -23,6 +23,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.SessionId)
                 .IsRequired();
+
+            builder.Property(x => x.AccessToken)
+                .IsRequired();
         }
     }
 }

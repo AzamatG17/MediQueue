@@ -3,6 +3,7 @@ using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Domain.ResourceParameters;
 
 namespace MediQueue.Services;
 
@@ -18,9 +19,9 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
     }
 
-    public async Task<IEnumerable<QuestionnaireHistoryDto>> GetAllQuestionnaireHistoriessAsync()
+    public async Task<IEnumerable<QuestionnaireHistoryDto>> GetAllQuestionnaireHistoriessAsync(QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs)
     {
-        var questionn = await _questionnaireHistoryRepositoty.GetAllQuestionnaireHistoriesAsync();
+        var questionn = await _questionnaireHistoryRepositoty.GetAllQuestionnaireHistoriesAsync(questionnaireHistoryResourceParametrs);
 
         var tasks = questionn.Select(MapToQuestionnaireHistoryDto);
 
@@ -165,7 +166,11 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             $"{questionnaireHistory.Account?.FirstName} {questionnaireHistory.Account?.LastName} {questionnaireHistory.Account?.SurName}",
             questionnaireHistory.QuestionnaireId,
             questionnaireHistory.Questionnaire?.PassportPinfl ?? "",
+            questionnaireHistory.Questionnaire?.PassportSeria ?? "",
             questionnaireHistory.Questionnaire?.PhoneNumber ?? "",
+            $"{questionnaireHistory.Questionnaire?.FirstName} {questionnaireHistory.Questionnaire?.LastName} {questionnaireHistory.Questionnaire?.SurName}",
+            questionnaireHistory.Questionnaire?.Bithdate,
+            questionnaireHistory.Questionnaire?.PhotoBase64 ?? "",
             updatedServices,
             paymentDtos
         );
