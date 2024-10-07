@@ -25,6 +25,10 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             {
                 query = query.Where(q => q.QuestionnaireId == questionnaireHistoryResourceParametrs.QuestionnaireId.Value);
             }
+            if (questionnaireHistoryResourceParametrs.IsPayed.HasValue)
+            {
+                query = query.Where(q => q.IsPayed == questionnaireHistoryResourceParametrs.IsPayed.Value);
+            }
 
             query = questionnaireHistoryResourceParametrs.OrderBy switch
             {

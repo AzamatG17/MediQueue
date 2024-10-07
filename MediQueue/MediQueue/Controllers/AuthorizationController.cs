@@ -24,7 +24,7 @@ public class AuthorizationController : BaseController
 
             if (token == null)
             {
-                return Unauthorized(CreateErrorResponse("Invalid login or password"));
+                return Ok(CreateErrorResponse("Invalid login or password"));
             }
 
             HttpContext.Response.Cookies.Append("mediks-cookies", token.Token);

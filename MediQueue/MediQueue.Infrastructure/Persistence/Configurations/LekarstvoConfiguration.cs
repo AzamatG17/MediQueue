@@ -21,6 +21,12 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(x => x.SalePrice)
                 .HasColumnType("decimal(18,2)");
 
+            builder.Property(x => x.TotalQuantity)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Property(x => x.PriceQuantity)
+                .HasColumnType("decimal(18,2)");
+
             builder.Property(x => x.ExpirationDate)
                 .HasColumnType("datetime");
 

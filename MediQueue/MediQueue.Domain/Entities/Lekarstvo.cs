@@ -11,6 +11,8 @@ namespace MediQueue.Domain.Entities
         public DateTime? ExpirationDate { get; set; }
         public DateTime? BeforeDate { get; set; }
         public string? PhotoBase64 { get; set; }
+        public decimal? TotalQuantity { get; set; }
+        public decimal? PriceQuantity { get; set; } = 1;
         public MeasurementUnit? MeasurementUnit { get; set; }
 
         public int? CategoryLekarstvoId { get; set; }

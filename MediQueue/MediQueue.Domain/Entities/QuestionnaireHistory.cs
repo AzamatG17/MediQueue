@@ -8,7 +8,7 @@ public class QuestionnaireHistory : EntityBase
     public string? HistoryDiscription { get; set; }
     public DateTime? DateCreated { get; set; }
     public decimal? Balance { get; set; }
-    public bool? IsPayed { get; set; }
+    public bool? IsPayed { get; set; } = false;
 
     public int? AccountId { get; set; }
     public Account? Account { get; set; }

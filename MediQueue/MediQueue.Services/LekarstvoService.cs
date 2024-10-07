@@ -61,6 +61,41 @@ public class LekarstvoService : ILekarstvoService
         await _repository.DeleteAsync(id);
     }
 
+    public async Task UseLekarstvoAsync(int id, decimal amount)
+    {
+        var lekarstvo = await _repository.FindByIdAsync(id);
+        if (lekarstvo == null)
+        {
+            throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
+        }
+
+        if (amount <= 0)
+            throw new ArgumentException("Количество должно быть включено.");
+
+        if (amount > lekarstvo.TotalQuantity - lekarstvo.PriceQuantity)
+            throw new InvalidOperationException("Недостаточно лекарства для использования.");
+
+        lekarstvo.TotalQuantity -= amount;
+
+        await _repository.UpdateAsync(lekarstvo);
+    }
+
+    public async Task AddLekarstvoQuantityAsync(int id, decimal amount)
+    {
+        var lekarstvo = await _repository.FindByIdAsync(id);
+        if (lekarstvo == null)
+        {
+            throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
+        }
+
+        if (amount <= 0)
+            throw new ArgumentException("Количество должно быть положительным.");
+
+        lekarstvo.TotalQuantity += amount;
+
+        await _repository.UpdateAsync(lekarstvo);
+    }
+
     private async Task<Lekarstvo> MapToLekarstvoUpdate(LekarstvoForUpdateDto lekarstvo)
     {
         return new Lekarstvo
@@ -88,6 +123,8 @@ public class LekarstvoService : ILekarstvoService
             ExpirationDate = lekarstvo.ExpirationDate,
             BeforeDate = lekarstvo.BeforeDate,
             PhotoBase64 = lekarstvo.PhotoBase64,
+            TotalQuantity = lekarstvo.TotalQuantity,
+            PriceQuantity = lekarstvo.PriceQuantity,
             MeasurementUnit = lekarstvo.MeasurementUnit,
             CategoryLekarstvoId = lekarstvo.CategoryLekarstvoId,
             ScladId = lekarstvo.ScladId
@@ -104,6 +141,8 @@ public class LekarstvoService : ILekarstvoService
             lekarstvo.ExpirationDate,
             lekarstvo.BeforeDate,
             lekarstvo.PhotoBase64,
+            lekarstvo.TotalQuantity,
+            lekarstvo.PriceQuantity,
             lekarstvo.MeasurementUnit,
             lekarstvo.CategoryLekarstvoId,
             lekarstvo.CategoryLekarstvo?.Name ?? "",
