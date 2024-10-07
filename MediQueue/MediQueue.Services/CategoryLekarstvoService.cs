@@ -90,6 +90,8 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
             lekarstvo.ExpirationDate,
             lekarstvo.BeforeDate,
             lekarstvo.PhotoBase64,
+            lekarstvo.TotalQuantity,
+            lekarstvo.PriceQuantity,
             lekarstvo.MeasurementUnit,
             lekarstvo.CategoryLekarstvoId,
             lekarstvo.CategoryLekarstvo.Name ?? null,

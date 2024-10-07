@@ -28,7 +28,6 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         // Ожидаем завершения всех задач
         var results = await Task.WhenAll(tasks);
 
-        // Преобразуем результаты в список
         return results.ToList();
     }
 
@@ -163,12 +162,13 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             questionnaireHistory.Balance,
             questionnaireHistory.IsPayed,
             questionnaireHistory.AccountId,
-            $"{questionnaireHistory.Account?.FirstName} {questionnaireHistory.Account?.LastName} {questionnaireHistory.Account?.SurName}",
+            $"{questionnaireHistory.Account?.LastName} {questionnaireHistory.Account?.FirstName} {questionnaireHistory.Account?.SurName}",
             questionnaireHistory.QuestionnaireId,
+            questionnaireHistory.Questionnaire?.QuestionnaireId,
             questionnaireHistory.Questionnaire?.PassportPinfl ?? "",
             questionnaireHistory.Questionnaire?.PassportSeria ?? "",
             questionnaireHistory.Questionnaire?.PhoneNumber ?? "",
-            $"{questionnaireHistory.Questionnaire?.FirstName} {questionnaireHistory.Questionnaire?.LastName} {questionnaireHistory.Questionnaire?.SurName}",
+            $"{questionnaireHistory.Questionnaire?.LastName} {questionnaireHistory.Questionnaire?.FirstName} {questionnaireHistory.Questionnaire?.SurName}",
             questionnaireHistory.Questionnaire?.Bithdate,
             questionnaireHistory.Questionnaire?.PhotoBase64 ?? "",
             updatedServices,

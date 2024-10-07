@@ -77,9 +77,8 @@ public class AccountService : IAccountService
             .Select(dto => MapToRolePermission(dto, accountEntity.Id))
             .ToList();
 
-        _dbContext.RolePermissions.AddRange(rolePermissions); // Здесь await не нужен
+        _dbContext.RolePermissions.AddRange(rolePermissions);
 
-        // Сохраняем изменения в базе данных
         await _dbContext.SaveChangesAsync();
 
 

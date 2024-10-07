@@ -117,6 +117,8 @@ public class BranchService : IBranchService
             lekarstvo.ExpirationDate,
             lekarstvo.BeforeDate,
             lekarstvo.PhotoBase64,
+            lekarstvo.TotalQuantity,
+            lekarstvo.PriceQuantity,
             lekarstvo.MeasurementUnit,
             lekarstvo.CategoryLekarstvoId,
             lekarstvo.CategoryLekarstvo.Name,
