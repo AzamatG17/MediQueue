@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Http;
-using System.Net.Http;
 
 namespace MediQueue.Infrastructure.JwtToken
 {
@@ -89,6 +88,7 @@ namespace MediQueue.Infrastructure.JwtToken
                 "Role" => 11,
                 "Sclad" => 12,
                 "Service" => 13,
+                "Medicine" => 14,
                 _ => 0
             };
         }
