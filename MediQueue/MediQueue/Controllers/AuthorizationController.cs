@@ -14,7 +14,7 @@ public class AuthorizationController : BaseController
     {
         _authorizationService = authorizationService;
     }
-
+    
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login(AccountForLoginDto accountForLogin)
     {
@@ -87,6 +87,6 @@ public class AuthorizationController : BaseController
 
         await _authorizationService.Logout(sessionId);
 
-        return Ok("Logged out successfully.");
+        return Ok(CreateSuccessResponse("Logged out successfully."));
     }
 }

@@ -1,4 +1,5 @@
 using MediQueue.Extensions;
+using MediQueue.Infrastructure.JwtToken;
 
 namespace MediQueue
 {
@@ -39,6 +40,8 @@ namespace MediQueue
             //app.UseHttpsRedirection();
 
             app.UseCors("AllowAll");
+
+            app.UseMiddleware<TokenValidationMiddleware>();
 
             app.UseAuthorization();
 
