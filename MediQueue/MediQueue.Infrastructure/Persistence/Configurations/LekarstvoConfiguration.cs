@@ -12,8 +12,8 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Name)
-            .IsRequired()
-            .HasMaxLength(100);
+                .IsRequired()
+                .HasMaxLength(100);
 
             builder.Property(x => x.PurchasePrice)
                 .HasColumnType("decimal(18,2)");
@@ -41,11 +41,13 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.HasOne(x => x.CategoryLekarstvo)
                 .WithMany(l => l.Lekarstvos)
-                .HasForeignKey(x => x.CategoryLekarstvoId);
+                .HasForeignKey(x => x.CategoryLekarstvoId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(x => x.Sclad)
                 .WithMany(l => l.Lekarstvos)
-                .HasForeignKey(x => x.ScladId);
+                .HasForeignKey(x => x.ScladId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.Navigation(x => x.CategoryLekarstvo)
                 .AutoInclude();

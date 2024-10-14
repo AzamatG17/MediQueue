@@ -19,4 +19,5 @@ public class Lekarstvo : EntityBase
     public CategoryLekarstvo? CategoryLekarstvo { get; set; }
     public int? ScladId { get; set; }
     public Sclad? Sclad { get; set; }
+    public virtual ICollection<Conclusion> Conclusions { get; set; }
 }
