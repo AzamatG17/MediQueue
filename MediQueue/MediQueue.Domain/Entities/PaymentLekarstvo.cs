@@ -1,8 +1,9 @@
-﻿using MediQueue.Domain.Entities.Enums;
+﻿using MediQueue.Domain.Common;
+using MediQueue.Domain.Entities.Enums;
 
 namespace MediQueue.Domain.Entities;
 
-public class PaymentLekarstvo
+public class PaymentLekarstvo : EntityBase
 {
     public decimal? TotalAmount { get; set; }
     public decimal? PaidAmount { get; set; }

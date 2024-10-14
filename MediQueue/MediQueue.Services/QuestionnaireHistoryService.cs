@@ -1,4 +1,7 @@
-﻿using MediQueue.Domain.DTOs.QuestionnaireHistory;
+﻿using MediQueue.Domain.DTOs.Conclusion;
+using MediQueue.Domain.DTOs.Lekarstvo;
+using MediQueue.Domain.DTOs.PaymentLekarstvo;
+using MediQueue.Domain.DTOs.QuestionnaireHistory;
 using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
@@ -150,8 +153,57 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             p.PaymentDate,
             p.PaymentType,
             p.PaymentStatus,
+            p.AccountId,
+            $"{p.Account?.LastName} {p.Account?.FirstName} {p.Account?.SurName}" ?? "",
             p.ServiceId,
+            p.Service?.Name ?? "",
             p.QuestionnaireHistoryId
+        )).ToList();
+
+        // Маппинг Conclusions на DTO
+        var conclusionDtos = questionnaireHistory.Conclusions?.Select(conclusion => new ConclusionDto(
+            conclusion.Id,
+            conclusion.Discription,
+            conclusion.DateCreated,
+            conclusion.HealthStatus,
+            conclusion.IsFullyRecovered,
+            conclusion.ServiceId,
+            conclusion.Service?.Name ?? "",
+            conclusion.AccountId,
+            $"{conclusion.Account?.LastName} {conclusion.Account?.FirstName} {conclusion.Account?.SurName}",
+            conclusion.QuestionnaireHistoryId,
+            conclusion.LekarstvaUsedByDoctor?.Select(lekarstvo => new LekarstvoDto(
+                lekarstvo.Id,
+                lekarstvo.Name,
+                lekarstvo.PurchasePrice,
+                lekarstvo.SalePrice,
+                lekarstvo.ExpirationDate,
+                lekarstvo.BeforeDate,
+                lekarstvo.PhotoBase64,
+                lekarstvo.TotalQuantity,
+                lekarstvo.PriceQuantity,
+                lekarstvo.MeasurementUnit,
+                lekarstvo.CategoryLekarstvoId,
+                lekarstvo.CategoryLekarstvo?.Name ?? "",
+                lekarstvo.ScladId,
+                lekarstvo.Sclad?.Name ?? ""
+            )).ToList()
+        )).ToList();
+
+        // Маппинг PaymentLekarstva на DTO
+        var paymentLekarstvoDtos = questionnaireHistory.PaymentLekarstvos?.Select(pl => new PaymentLekarstvoDto(
+            pl.Id,
+            pl.TotalAmount,
+            pl.PaidAmount,
+            pl.OutstandingAmount,
+            pl.PaymentDate,
+            pl.PaymentType,
+            pl.PaymentStatus,
+            pl.AccountId,
+            $"{pl.Account?.LastName} {pl.Account?.FirstName} {pl.Account?.SurName}" ?? "",
+            pl.LekarstvoId,
+            pl.Lekarstvo?.Name ?? "",
+            pl.QuestionnaireHistoryId
         )).ToList();
 
         return new QuestionnaireHistoryDto(
@@ -172,7 +224,9 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             questionnaireHistory.Questionnaire?.Bithdate,
             questionnaireHistory.Questionnaire?.PhotoBase64 ?? "",
             updatedServices,
-            paymentDtos
+            paymentDtos,
+            conclusionDtos,
+            paymentLekarstvoDtos
         );
     }
 

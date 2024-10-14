@@ -1,5 +1,4 @@
 ﻿using MediQueue.Domain.DTOs.Account;
-using MediQueue.Domain.Entities;
 
 namespace MediQueue.Domain.Interfaces.Services
 {

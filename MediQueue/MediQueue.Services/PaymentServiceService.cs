@@ -22,14 +22,14 @@ public class PaymentServiceService : IPaymentServiceService
 
     public async Task<IEnumerable<PaymentServiceDto>> GetAllPaymentsAsync()
     {
-        var payments = await _repository.FindAllAsync();
+        var payments = await _repository.GetAllPaymentServicesAsync();
 
         return _mapper.Map<IEnumerable<PaymentServiceDto>>(payments);
     }
 
     public async Task<PaymentServiceDto> GetPaymentByIdAsync(int id)
     {
-        var payment = await _repository.FindByIdAsync(id);
+        var payment = await _repository.GetByIdPaymentServiceAsync(id);
         if (payment == null)
         {
             throw new KeyNotFoundException(nameof(payment));
@@ -113,7 +113,10 @@ public class PaymentServiceService : IPaymentServiceService
                     p.PaymentDate,
                     p.PaymentType,
                     p.PaymentStatus,
+                    p.AccountId,
+                    $"{p.Account?.LastName} {p.Account?.FirstName} {p.Account?.SurName}" ?? "",
                     p.ServiceId,
+                    $"{p.Service?.Name}" ?? "",
                     p.QuestionnaireHistoryId)).ToList();
     }
 

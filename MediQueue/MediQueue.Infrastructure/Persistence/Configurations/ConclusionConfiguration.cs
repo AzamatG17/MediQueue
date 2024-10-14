@@ -1,0 +1,30 @@
+﻿using MediQueue.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MediQueue.Infrastructure.Persistence.Configurations
+{
+    public class ConclusionConfiguration : IEntityTypeConfiguration<Conclusion>
+    {
+        public void Configure(EntityTypeBuilder<Conclusion> builder)
+        {
+            builder.ToTable(nameof(Conclusion));
+            builder.HasKey(c => c.Id);
+
+            builder.Property(c => c.Discription)
+                .HasMaxLength(2000);
+
+            builder.HasOne(c => c.Service)
+               .WithMany()
+               .HasForeignKey(c => c.ServiceId);
+
+            builder.HasOne(c => c.Account)
+                   .WithMany()
+                   .HasForeignKey(c => c.AccountId);
+
+            builder.HasMany(c => c.LekarstvaUsedByDoctor)
+                   .WithMany(l => l.Conclusions)
+                   .UsingEntity(j => j.ToTable("ConclusionLekarstva"));
+        }
+    }
+}

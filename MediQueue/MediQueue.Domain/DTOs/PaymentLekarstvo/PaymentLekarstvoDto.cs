@@ -1,9 +1,9 @@
 ﻿using MediQueue.Domain.Entities.Enums;
 
-namespace MediQueue.Domain.DTOs.PaymentService;
+namespace MediQueue.Domain.DTOs.PaymentLekarstvo;
 
-public record PaymentServiceDto(
-    int id, 
+public record PaymentLekarstvoDto(
+    int id,
     decimal? TotalAmount, 
     decimal? PaidAmount, 
     decimal? OutstandingAmount,
@@ -12,6 +12,7 @@ public record PaymentServiceDto(
     PaymentStatus? PaymentStatus,
     int? AccountId,
     string? AccountName,
-    int? ServiceId, 
-    string? ServiceName, 
-    int? QuestionnaireHistoryId);
+    int? LekarstvoId,
+    string? LekarstvoName,
+    int? QuestionnaireHistoryId
+    );
