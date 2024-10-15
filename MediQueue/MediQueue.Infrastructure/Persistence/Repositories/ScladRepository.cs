@@ -16,6 +16,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Sclads
                 .Include(x => x.Lekarstvos)
                 .ThenInclude(l => l.CategoryLekarstvo)
+                .AsNoTracking()
                 .ToListAsync();
         }
 

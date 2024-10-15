@@ -1,4 +1,4 @@
-﻿using MediQueue.Domain.DTOs.Lekarstvo;
+﻿using MediQueue.Domain.DTOs.LekarstvaUsage;
 using MediQueue.Domain.Entities.Enums;
 
 namespace MediQueue.Domain.DTOs.Conclusion;
@@ -14,5 +14,5 @@ public record ConclusionDto(
     int? AccountId,
     string? AccountFullName,
     int? QuestionnaireHistoryId,
-    List<LekarstvoDto>? LekarstvoDtos
+    List<LekarstvoUsageForHelpDto>? LekarstvoUsages
     );

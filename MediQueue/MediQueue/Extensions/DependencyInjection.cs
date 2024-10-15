@@ -1,4 +1,5 @@
-﻿using MediQueue.Domain.Interfaces.Auth;
+﻿using MediQueue.Domain.Entities;
+using MediQueue.Domain.Interfaces.Auth;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.JwtToken;
@@ -72,6 +73,8 @@ public static class DependencyInjection
         services.AddScoped<IScladService, ScladService>();
         services.AddScoped<ILekarstvoService, LekarstvoService>();
         services.AddScoped<ICategoryLekarstvoService, CategoryLekarstvoService>();
+        services.AddScoped<IConclusionService, ConclusionService>();
+        services.AddScoped<IPaymentLekarstvoService, PaymentLekarstvoService>();
 
         services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
         services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
@@ -92,6 +95,8 @@ public static class DependencyInjection
         services.AddScoped<IScladRepository, ScladRepository>();
         services.AddScoped<ILekarstvoRepository, LekarstvoRepository>();
         services.AddScoped<ICategoryLekarstvoRepository, CategoryLekarstvoRepository>();
+        services.AddScoped<IConclusionRepository, ConclusionRepository>();
+        services.AddScoped<IPaymentLekarstvoRepository, PaymentLekarstvoRepository>();
     }
 
     private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)

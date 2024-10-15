@@ -22,6 +22,9 @@ namespace MediQueue.Infrastructure.Persistence
         public virtual DbSet<Lekarstvo> Lekarstvos { get; set; }
         public virtual DbSet<Controllers> Controllers { get; set; }
         public virtual DbSet<AccountSession> AccountSessions { get; set; }
+        public virtual DbSet<Conclusion> Conclusion { get; set; }
+        public virtual DbSet<PaymentLekarstvo> PaymentLekarstvos { get; set; }
+        public virtual DbSet<LekarstvoUsage> LekarstvoUsages { get; set; }
 
         public MediQueueDbContext(DbContextOptions<MediQueueDbContext> options)
             :base(options)

@@ -5,5 +5,6 @@ public enum HealthStatus
     Healthy,
     Unhealthy,
     UnderTreatment,
-    FullyRecovered
+    FullyRecovered,
+    DefaultValue
 }

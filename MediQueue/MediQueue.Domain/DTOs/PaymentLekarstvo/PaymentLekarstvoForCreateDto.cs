@@ -2,8 +2,7 @@
 
 namespace MediQueue.Domain.DTOs.PaymentLekarstvo;
 
-public record PaymentLekarstvoForUpdate(
-    int? id,
+public record PaymentLekarstvoForCreateDto(
     decimal? TotalAmount,
     decimal? PaidAmount,
     decimal? OutstandingAmount,

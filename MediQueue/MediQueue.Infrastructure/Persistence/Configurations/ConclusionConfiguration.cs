@@ -21,10 +21,6 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasOne(c => c.Account)
                    .WithMany()
                    .HasForeignKey(c => c.AccountId);
-
-            builder.HasMany(c => c.LekarstvaUsedByDoctor)
-                   .WithMany(l => l.Conclusions)
-                   .UsingEntity(j => j.ToTable("ConclusionLekarstva"));
         }
     }
 }

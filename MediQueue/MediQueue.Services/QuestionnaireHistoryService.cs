@@ -1,5 +1,5 @@
 ﻿using MediQueue.Domain.DTOs.Conclusion;
-using MediQueue.Domain.DTOs.Lekarstvo;
+using MediQueue.Domain.DTOs.LekarstvaUsage;
 using MediQueue.Domain.DTOs.PaymentLekarstvo;
 using MediQueue.Domain.DTOs.QuestionnaireHistory;
 using MediQueue.Domain.DTOs.Service;
@@ -160,7 +160,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             p.QuestionnaireHistoryId
         )).ToList();
 
-        // Маппинг Conclusions на DTO
+        //Маппинг Conclusions на DTO
         var conclusionDtos = questionnaireHistory.Conclusions?.Select(conclusion => new ConclusionDto(
             conclusion.Id,
             conclusion.Discription,
@@ -172,21 +172,15 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             conclusion.AccountId,
             $"{conclusion.Account?.LastName} {conclusion.Account?.FirstName} {conclusion.Account?.SurName}",
             conclusion.QuestionnaireHistoryId,
-            conclusion.LekarstvaUsedByDoctor?.Select(lekarstvo => new LekarstvoDto(
+            conclusion.LekarstvoUsages?.Select(lekarstvo => new LekarstvoUsageForHelpDto(
                 lekarstvo.Id,
-                lekarstvo.Name,
-                lekarstvo.PurchasePrice,
-                lekarstvo.SalePrice,
-                lekarstvo.ExpirationDate,
-                lekarstvo.BeforeDate,
-                lekarstvo.PhotoBase64,
-                lekarstvo.TotalQuantity,
-                lekarstvo.PriceQuantity,
-                lekarstvo.MeasurementUnit,
-                lekarstvo.CategoryLekarstvoId,
-                lekarstvo.CategoryLekarstvo?.Name ?? "",
-                lekarstvo.ScladId,
-                lekarstvo.Sclad?.Name ?? ""
+                lekarstvo.ConclusionId,
+                lekarstvo.LekarstvoId,
+                lekarstvo.Lekarstvo?.Name ?? "",
+                lekarstvo.Lekarstvo?.SalePrice ?? 0,
+                lekarstvo.QuantityUsed,
+                lekarstvo.TotalPrice,
+                lekarstvo.Amount
             )).ToList()
         )).ToList();
 
@@ -200,7 +194,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             pl.PaymentType,
             pl.PaymentStatus,
             pl.AccountId,
-            $"{pl.Account?.LastName} {pl.Account?.FirstName} {pl.Account?.SurName}" ?? "",
+            $"{pl.Account?.LastName} {pl.Account?.FirstName} {pl.Account?.SurName}",
             pl.LekarstvoId,
             pl.Lekarstvo?.Name ?? "",
             pl.QuestionnaireHistoryId
