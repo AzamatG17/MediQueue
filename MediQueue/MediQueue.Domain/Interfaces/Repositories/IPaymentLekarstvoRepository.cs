@@ -4,5 +4,7 @@ namespace MediQueue.Domain.Interfaces.Repositories
 {
     public interface IPaymentLekarstvoRepository : IRepositoryBase<PaymentLekarstvo>
     {
+        Task<IEnumerable<PaymentLekarstvo>> GetAllPaymentLekarstvosAsync();
+        Task<PaymentLekarstvo> GetByIdPaymentLekarstvoAsync(int id);
     }
 }

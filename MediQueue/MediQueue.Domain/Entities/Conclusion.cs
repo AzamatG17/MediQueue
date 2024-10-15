@@ -16,5 +16,5 @@ public class Conclusion : EntityBase
     public Account? Account { get; set; }
     public int? QuestionnaireHistoryId { get; set; }
     public QuestionnaireHistory? QuestionnaireHistory { get; set; }
-    public virtual ICollection<Lekarstvo>? LekarstvaUsedByDoctor { get; set; }
+    public virtual ICollection<LekarstvoUsage>? LekarstvoUsages { get; set; }
 }

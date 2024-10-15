@@ -89,6 +89,8 @@ namespace MediQueue.Infrastructure.JwtToken
                 "Sclad" => 12,
                 "Service" => 13,
                 "Medicine" => 14,
+                "Conclusion" => 15,
+                "PaymentLekarstvo" => 16,
                 _ => 0
             };
         }

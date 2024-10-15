@@ -15,13 +15,17 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<QuestionnaireHistory>> GetAllQuestionnaireHistoriesAsync(QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs)
         {
             var query = _context.QuestionnaireHistories
+                .AsNoTracking()
                 .Include(a => a.Account)
                 .Include(q => q.Questionnaire)
                 .Include(s => s.Services)
                 .Include(p => p.PaymentServices)
                 .Include(c => c.Conclusions)
-                .ThenInclude(l => l.LekarstvaUsedByDoctor)
-                .Include(pl => pl.PaymentLekarstvos)
+                .ThenInclude(l => l.LekarstvoUsages)
+                .Include(qh => qh.PaymentLekarstvos)
+                .ThenInclude(pl => pl.Account)
+                .Include(qh => qh.PaymentLekarstvos)
+                .ThenInclude(pl => pl.Lekarstvo)
                 .AsQueryable();
 
             if (questionnaireHistoryResourceParametrs.QuestionnaireId.HasValue)
@@ -51,8 +55,11 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(s => s.Services)
                 .Include(p => p.PaymentServices)
                 .Include(c => c.Conclusions)
-                .ThenInclude(l => l.LekarstvaUsedByDoctor)
-                .Include(pl => pl.PaymentLekarstvos)
+                .ThenInclude(l => l.LekarstvoUsages)
+                .Include(qh => qh.PaymentLekarstvos)
+                .ThenInclude(pl => pl.Account)
+                .Include(qh => qh.PaymentLekarstvos)
+                .ThenInclude(pl => pl.Lekarstvo)
                 .SingleOrDefaultAsync(qh => qh.Id == id);
         }
 
@@ -64,8 +71,11 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(s => s.Services)
                 .Include(p => p.PaymentServices)
                 .Include(c => c.Conclusions)
-                .ThenInclude(l => l.LekarstvaUsedByDoctor)
-                .Include(pl => pl.PaymentLekarstvos)
+                .ThenInclude(l => l.LekarstvoUsages)
+                .Include(qh => qh.PaymentLekarstvos)
+                .ThenInclude(pl => pl.Account)
+                .Include(qh => qh.PaymentLekarstvos)
+                .ThenInclude(pl => pl.Lekarstvo)
                 .SingleOrDefaultAsync(qh => qh.QuestionnaireId == id);
         }
 
@@ -77,8 +87,9 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(s => s.Services)
                 .Include(p => p.PaymentServices)
                 .Include(c => c.Conclusions)
-                .ThenInclude(l => l.LekarstvaUsedByDoctor)
+                .ThenInclude(l => l.LekarstvoUsages)
                 .Include(pl => pl.PaymentLekarstvos)
+                .AsNoTracking()
                 .AnyAsync(q => q.Historyid == newId);
         }
 
@@ -90,7 +101,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(s => s.Services)
                 .Include(p => p.PaymentServices)
                 .Include(c => c.Conclusions)
-                .ThenInclude(l => l.LekarstvaUsedByDoctor)
+                .ThenInclude(l => l.LekarstvoUsages)
                 .Include(pl => pl.PaymentLekarstvos)
                 .FirstOrDefaultAsync(q => q.Historyid == id);
         }
@@ -101,7 +112,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(a => a.Services)
                 .Include(s => s.PaymentServices)
                 .Include(c => c.Conclusions)
-                .ThenInclude(l => l.LekarstvaUsedByDoctor)
+                .ThenInclude(l => l.LekarstvoUsages)
                 .Include(pl => pl.PaymentLekarstvos)
                 .FirstOrDefaultAsync(a => a.Id == id);
 

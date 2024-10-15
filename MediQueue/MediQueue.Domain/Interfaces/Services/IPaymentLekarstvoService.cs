@@ -2,11 +2,11 @@
 
 namespace MediQueue.Domain.Interfaces.Services;
 
-public interface IPaymentLekarstvo
+public interface IPaymentLekarstvoService
 {
     Task<IEnumerable<PaymentLekarstvoDto>> GetAllPaymentLekarstvosAsync();
     Task<PaymentLekarstvoDto> GetPaymentLekarstvoByIdAsync(int id);
-    Task<PaymentLekarstvoDto> CreatePaymentLekarstvoAsync(PaymentLekarstvoForCreate paymentLekarstvoForCreate);
-    Task<PaymentLekarstvoDto> UpdatePaymentLekarstvoAsync(PaymentLekarstvoForUpdate paymentLekarstvoForUpdate);
+    Task<IEnumerable<PaymentLekarstvoDto>> CreatePaymentLekarstvoAsync(PaymentLekarstvoHelperDto paymentLekarstvoHelperDto);
+    Task<PaymentLekarstvoDto> UpdatePaymentLekarstvoAsync(PaymentLekarstvoForUpdateDto paymentLekarstvoForUpdate);
     Task DeletePaymentLekarstvoAsync(int id);
 }
