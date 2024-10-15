@@ -26,6 +26,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .ThenInclude(pl => pl.Account)
                 .Include(qh => qh.PaymentLekarstvos)
                 .ThenInclude(pl => pl.Lekarstvo)
+                .AsSplitQuery()
                 .AsQueryable();
 
             if (questionnaireHistoryResourceParametrs.QuestionnaireId.HasValue)
