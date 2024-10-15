@@ -99,11 +99,11 @@ public class CategoriesService : ICategoryService
             )).ToList();
 
         var serviceDtos = category.Services.Select(s => new ServiceDtos(
-            s.Id, // ID из модели Service
-            s.Name, // Name из модели Service
-            s.Amount, // Amount из модели Service
-            s.CategoryId, // CategoryId из модели Service
-            s.Category.CategoryName // CategoryName из связанного Category
+            s.Id,
+            s.Name,
+            s.Amount,
+            s.CategoryId,
+            s.Category.CategoryName
             )).ToList();
 
         return new CategoryDto(

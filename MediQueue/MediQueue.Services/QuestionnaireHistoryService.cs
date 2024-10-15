@@ -154,7 +154,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             p.PaymentType,
             p.PaymentStatus,
             p.AccountId,
-            $"{p.Account?.LastName} {p.Account?.FirstName} {p.Account?.SurName}" ?? "",
+            $"{p.Account?.LastName ?? ""} {p.Account?.FirstName ?? ""} {p.Account?.SurName ?? ""}".Trim(),
             p.ServiceId,
             p.Service?.Name ?? "",
             p.QuestionnaireHistoryId
@@ -170,7 +170,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             conclusion.ServiceId,
             conclusion.Service?.Name ?? "",
             conclusion.AccountId,
-            $"{conclusion.Account?.LastName} {conclusion.Account?.FirstName} {conclusion.Account?.SurName}",
+            $"{conclusion.Account?.LastName ?? ""} {conclusion.Account?.FirstName ?? ""} {conclusion.Account?.SurName ?? ""}".Trim(),
             conclusion.QuestionnaireHistoryId,
             conclusion.LekarstvoUsages?.Select(lekarstvo => new LekarstvoUsageForHelpDto(
                 lekarstvo.Id,
@@ -194,7 +194,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             pl.PaymentType,
             pl.PaymentStatus,
             pl.AccountId,
-            $"{pl.Account?.LastName} {pl.Account?.FirstName} {pl.Account?.SurName}",
+            $"{pl.Account?.LastName ?? ""} {pl.Account?.FirstName ?? ""} {pl.Account?.SurName ?? ""}".Trim(),
             pl.LekarstvoId,
             pl.Lekarstvo?.Name ?? "",
             pl.QuestionnaireHistoryId
@@ -208,7 +208,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             questionnaireHistory.Balance,
             questionnaireHistory.IsPayed,
             questionnaireHistory.AccountId,
-            $"{questionnaireHistory.Account?.LastName} {questionnaireHistory.Account?.FirstName} {questionnaireHistory.Account?.SurName}",
+            $"{questionnaireHistory.Account?.LastName ?? ""} {questionnaireHistory.Account?.FirstName ?? ""} {questionnaireHistory.Account?.SurName ?? ""}".Trim(),
             questionnaireHistory.QuestionnaireId,
             questionnaireHistory.Questionnaire?.QuestionnaireId,
             questionnaireHistory.Questionnaire?.PassportPinfl ?? "",
