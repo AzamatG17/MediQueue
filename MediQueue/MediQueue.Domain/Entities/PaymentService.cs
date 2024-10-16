@@ -12,11 +12,14 @@ public class PaymentService : EntityBase
 
     public PaymentType? PaymentType { get; set; }
     public PaymentStatus? PaymentStatus { get; set; }
+    public MedicationType? MedicationType { get; set; }
 
     public int? AccountId { get; set; }
     public Account? Account { get; set; }
     public int? ServiceId { get; set; }
     public Service? Service { get; set; }
+    public int? LekarstvoId { get; set; }
+    public Lekarstvo? Lekarstvo { get; set; }
     public int? QuestionnaireHistoryId { get; set; }
     public QuestionnaireHistory? QuestionnaireHistory { get; set; }
 }

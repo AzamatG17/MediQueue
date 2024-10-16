@@ -1,8 +1,8 @@
 ﻿using MediQueue.Domain.DTOs.Conclusion;
 using MediQueue.Domain.DTOs.LekarstvaUsage;
-using MediQueue.Domain.DTOs.PaymentLekarstvo;
+using MediQueue.Domain.DTOs.PaymentService;
 using MediQueue.Domain.DTOs.QuestionnaireHistory;
-using MediQueue.Domain.DTOs.Service;
+using MediQueue.Domain.DTOs.ServiceUsage;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
@@ -15,11 +15,13 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
     private readonly IQuestionnaireRepository _questionnaireRepository;
     private readonly IServiceRepository _serviceRepository;
-    public QuestionnaireHistoryService(IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty, IServiceRepository serviceRepository, IQuestionnaireRepository questionnaireRepository)
+    private readonly IServiceUsageRepository _serviceUsageRepository;
+    public QuestionnaireHistoryService(IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty, IServiceRepository serviceRepository, IQuestionnaireRepository questionnaireRepository, IServiceUsageRepository serviceUsageRepository)
     {
         _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
         _serviceRepository = serviceRepository ?? throw new ArgumentNullException(nameof(serviceRepository));
         _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
+        _serviceUsageRepository = serviceUsageRepository ?? throw new ArgumentNullException(nameof(serviceUsageRepository));
     }
 
     public async Task<IEnumerable<QuestionnaireHistoryDto>> GetAllQuestionnaireHistoriessAsync(QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs)
@@ -87,23 +89,23 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         questionn.AccountId = questionnaireHistoryForUpdateDto.AccountId;
         questionn.QuestionnaireId = questionnaireHistoryForUpdateDto.QuestionnaireId;
 
-        var existiongServiceIds = questionn.Services.Select(s => s.Id).ToList();
+        var existiongServiceIds = questionn.ServiceUsages.Select(s => s.Id).ToList();
 
         var updatedServices = await _serviceRepository.FindByServiceIdsAsync(questionnaireHistoryForUpdateDto.ServiceIds);
         var updatedServiceIds = updatedServices.Select(s => s.Id).ToList();
 
         var serviceToAdd = updatedServices.Where(c => !existiongServiceIds.Contains(c.Id)).ToList();
 
-        var serviceToRemove = questionn.Services.Where(c => !updatedServiceIds.Contains(c.Id)).ToList();
+        var serviceToRemove = questionn.ServiceUsages.Where(c => !updatedServiceIds.Contains(c.Id)).ToList();
 
         foreach (var servicesToRemove in serviceToRemove)
         {
-            questionn.Services.Remove(servicesToRemove);
+            questionn.ServiceUsages.Remove(servicesToRemove);
         }
 
         foreach (var servicesToAdd in serviceToAdd)
         {
-            questionn.Services.Add(servicesToAdd);
+            //questionn.ServiceUsages.Add(servicesToAdd);
         }
 
         await _questionnaireHistoryRepositoty.UpdateAsync(questionn);
@@ -118,34 +120,23 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
 
     private async Task<QuestionnaireHistoryDto> MapToQuestionnaireHistoryDto(QuestionnaireHistory questionnaireHistory)
     {
-        var services = questionnaireHistory.Services.ToList();
+        var services = questionnaireHistory.ServiceUsages.ToList();
         var payments = questionnaireHistory.PaymentServices ?? Enumerable.Empty<PaymentService>();
 
-        // Создаём словарь для хранения общей суммы оплаченных средств для каждого сервиса
-        var servicePaidAmounts = services.ToDictionary(
-            service => service.Id,
-            service => payments
-                .Where(payment => payment.ServiceId == service.Id)
-                .Sum(payment => payment.PaidAmount ?? 0)
-        );
-
         // Обновляем сервисы с рассчитанным остатком
-        var updatedServices = services.Select(service =>
-        {
-            var totalPaidAmount = servicePaidAmounts.GetValueOrDefault(service.Id, 0);
-            var outstandingAmount = service.Amount - totalPaidAmount;
-
-            return new ServiceDtos(
-                service.Id,
-                service.Name,
-                outstandingAmount,  // Заменяем Amount на OutstandingAmount
-                service.CategoryId,
-                service.Category?.CategoryName
-            );
-        }).ToList();
+        var serviceUsage = questionnaireHistory.ServiceUsages?.Select(su => new ServiceUsageDto(
+            su.Id,
+            su.ServiceId,
+            su.Service?.Name ?? "",
+            su.QuantityUsed,
+            su.TotalPrice,
+            su.Amount,
+            su.IsPayed,
+            su.QuestionnaireHistoryId
+            )).ToList();
 
         // Маппинг PaymentServices на DTO
-        var paymentDtos = questionnaireHistory.PaymentServices?.Select(p => new Domain.DTOs.PaymentService.PaymentServiceDto(
+        var paymentDtos = questionnaireHistory.PaymentServices?.Select(p => new PaymentServiceDto(
             p.Id,
             p.TotalAmount,
             p.PaidAmount,
@@ -153,10 +144,13 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             p.PaymentDate,
             p.PaymentType,
             p.PaymentStatus,
+            p.MedicationType,
             p.AccountId,
             $"{p.Account?.LastName ?? ""} {p.Account?.FirstName ?? ""} {p.Account?.SurName ?? ""}".Trim(),
             p.ServiceId,
             p.Service?.Name ?? "",
+            p.LekarstvoId,
+            p.Lekarstvo?.Name ?? "",
             p.QuestionnaireHistoryId
         )).ToList();
 
@@ -184,22 +178,6 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             )).ToList()
         )).ToList();
 
-        // Маппинг PaymentLekarstva на DTO
-        var paymentLekarstvoDtos = questionnaireHistory.PaymentLekarstvos?.Select(pl => new PaymentLekarstvoDto(
-            pl.Id,
-            pl.TotalAmount,
-            pl.PaidAmount,
-            pl.OutstandingAmount,
-            pl.PaymentDate,
-            pl.PaymentType,
-            pl.PaymentStatus,
-            pl.AccountId,
-            $"{pl.Account?.LastName ?? ""} {pl.Account?.FirstName ?? ""} {pl.Account?.SurName ?? ""}".Trim(),
-            pl.LekarstvoId,
-            pl.Lekarstvo?.Name ?? "",
-            pl.QuestionnaireHistoryId
-        )).ToList();
-
         return new QuestionnaireHistoryDto(
             questionnaireHistory.Id,
             questionnaireHistory.Historyid,
@@ -217,16 +195,15 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             $"{questionnaireHistory.Questionnaire?.LastName} {questionnaireHistory.Questionnaire?.FirstName} {questionnaireHistory.Questionnaire?.SurName}",
             questionnaireHistory.Questionnaire?.Bithdate,
             questionnaireHistory.Questionnaire?.PhotoBase64 ?? "",
-            updatedServices,
+            serviceUsage,
             paymentDtos,
-            conclusionDtos,
-            paymentLekarstvoDtos
+            conclusionDtos
         );
     }
 
     private async Task<QuestionnaireHistory> MapToQuestionnaryHistory(QuestionnaireHistoryForCreateDto questionnaireHistoryForCreateDto)
     {
-        var questionn = await _serviceRepository.FindByServiceIdsAsync(questionnaireHistoryForCreateDto.ServiceIds);
+        var questionn = await _serviceUsageRepository.FindByServiceUsageIdsAsync(questionnaireHistoryForCreateDto.ServiceIds);
         int historyid = await GenerateUniqueQuestionnaireIdAsync();
 
         if (questionnaireHistoryForCreateDto.QuestionnaireId == null)
@@ -246,7 +223,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             IsPayed = questionnaireHistoryForCreateDto?.IsPayed,
             AccountId = questionnaireHistoryForCreateDto?.AccountId,
             QuestionnaireId = questionnaryId.Id,
-            Services = questionn.ToList()
+            ServiceUsages = questionn.ToList()
         };
     }
 

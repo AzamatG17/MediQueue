@@ -14,8 +14,7 @@ public class QuestionnaireHistory : EntityBase
     public Account? Account { get; set; }
     public int? QuestionnaireId { get; set; }
     public Questionnaire? Questionnaire { get; set; }
-    public virtual ICollection<Service>? Services { get; set; }
+    public virtual ICollection<ServiceUsage>? ServiceUsages { get; set; }
     public virtual ICollection<PaymentService>? PaymentServices { get; set; }
     public virtual ICollection<Conclusion>? Conclusions { get; set; }
-    public virtual ICollection<PaymentLekarstvo>? PaymentLekarstvos { get; set; }
 }

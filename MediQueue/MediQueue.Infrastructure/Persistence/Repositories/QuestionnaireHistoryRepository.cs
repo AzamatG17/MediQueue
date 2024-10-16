@@ -18,14 +18,15 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .Include(a => a.Account)
                 .Include(q => q.Questionnaire)
-                .Include(s => s.Services)
+                .Include(s => s.ServiceUsages)
                 .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Account)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Lekarstvo)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Service)
                 .Include(c => c.Conclusions)
                 .ThenInclude(l => l.LekarstvoUsages)
-                .Include(qh => qh.PaymentLekarstvos)
-                .ThenInclude(pl => pl.Account)
-                .Include(qh => qh.PaymentLekarstvos)
-                .ThenInclude(pl => pl.Lekarstvo)
                 .AsSplitQuery()
                 .AsQueryable();
 
@@ -53,14 +54,15 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.QuestionnaireHistories
                 .Include(a => a.Account)
                 .Include(q => q.Questionnaire)
-                .Include(s => s.Services)
+                .Include(s => s.ServiceUsages)
                 .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Account)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Lekarstvo)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Service)
                 .Include(c => c.Conclusions)
                 .ThenInclude(l => l.LekarstvoUsages)
-                .Include(qh => qh.PaymentLekarstvos)
-                .ThenInclude(pl => pl.Account)
-                .Include(qh => qh.PaymentLekarstvos)
-                .ThenInclude(pl => pl.Lekarstvo)
                 .SingleOrDefaultAsync(qh => qh.Id == id);
         }
 
@@ -69,14 +71,15 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.QuestionnaireHistories
                 .Include(a => a.Account)
                 .Include(q => q.Questionnaire)
-                .Include(s => s.Services)
+                .Include(s => s.ServiceUsages)
                 .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Account)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Lekarstvo)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Service)
                 .Include(c => c.Conclusions)
                 .ThenInclude(l => l.LekarstvoUsages)
-                .Include(qh => qh.PaymentLekarstvos)
-                .ThenInclude(pl => pl.Account)
-                .Include(qh => qh.PaymentLekarstvos)
-                .ThenInclude(pl => pl.Lekarstvo)
                 .SingleOrDefaultAsync(qh => qh.QuestionnaireId == id);
         }
 
@@ -85,11 +88,10 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Set<QuestionnaireHistory>()
                 .Include(a => a.Account)
                 .Include(q => q.Questionnaire)
-                .Include(s => s.Services)
+                .Include(s => s.ServiceUsages)
                 .Include(p => p.PaymentServices)
                 .Include(c => c.Conclusions)
                 .ThenInclude(l => l.LekarstvoUsages)
-                .Include(pl => pl.PaymentLekarstvos)
                 .AsNoTracking()
                 .AnyAsync(q => q.Historyid == newId);
         }
@@ -99,22 +101,26 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Set<QuestionnaireHistory>()
                 .Include(a => a.Account)
                 .Include(q => q.Questionnaire)
-                .Include(s => s.Services)
+                .Include(s => s.ServiceUsages)
                 .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Account)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Lekarstvo)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Service)
                 .Include(c => c.Conclusions)
                 .ThenInclude(l => l.LekarstvoUsages)
-                .Include(pl => pl.PaymentLekarstvos)
+                .ThenInclude(ll => ll.Lekarstvo)
                 .FirstOrDefaultAsync(q => q.Historyid == id);
         }
 
         public async Task DeleteWithOutService(int id)
         {
             var questionnaireHistory = await _context.Set<QuestionnaireHistory>()
-                .Include(a => a.Services)
+                .Include(a => a.ServiceUsages)
                 .Include(s => s.PaymentServices)
                 .Include(c => c.Conclusions)
                 .ThenInclude(l => l.LekarstvoUsages)
-                .Include(pl => pl.PaymentLekarstvos)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             ArgumentNullException.ThrowIfNull(questionnaireHistory);

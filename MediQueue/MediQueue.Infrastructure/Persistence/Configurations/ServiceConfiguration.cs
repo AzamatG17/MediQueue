@@ -22,9 +22,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .WithMany(c => c.Services)
                 .HasForeignKey(x => x.CategoryId);
 
-            builder.HasMany(s => s.QuestionnaireHistories)
-                .WithMany(qh => qh.Services)
-                .UsingEntity(j => j.ToTable("QuestionnaireHistoryService"));
+            builder.HasMany(s => s.ServiceUsages)
+                .WithOne(qh => qh.Service)
+                .HasForeignKey(qh => qh.ServiceId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
