@@ -40,85 +40,87 @@ public class PaymentLekarstvoService : IPaymentLekarstvoService
 
     public async Task<IEnumerable<PaymentLekarstvoDto>> CreatePaymentLekarstvoAsync(PaymentLekarstvoHelperDto paymentLekarstvoHelperDto)
     {
-        if (paymentLekarstvoHelperDto == null)
-        {
-            throw new ArgumentNullException(nameof(paymentLekarstvoHelperDto));
-        }
+        //if (paymentLekarstvoHelperDto == null)
+        //{
+        //    throw new ArgumentNullException(nameof(paymentLekarstvoHelperDto));
+        //}
 
-        var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(paymentLekarstvoHelperDto.QuestionnaireHistoryId);
-        if (questionnaireHistory == null)
-        {
-            throw new KeyNotFoundException($"QuestionnairyHistory key with {paymentLekarstvoHelperDto.QuestionnaireHistoryId} not found");
-        }
+        //var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(paymentLekarstvoHelperDto.QuestionnaireHistoryId);
+        //if (questionnaireHistory == null)
+        //{
+        //    throw new KeyNotFoundException($"QuestionnairyHistory key with {paymentLekarstvoHelperDto.QuestionnaireHistoryId} not found");
+        //}
 
-        var createdPayments = new List<PaymentLekarstvo>();
+        //var createdPayments = new List<PaymentLekarstvo>();
 
-        foreach(var payment in paymentLekarstvoHelperDto.PaymentLekarstvoForCreateDtos)
-        {
-            var lekarstvoUsage = questionnaireHistory.Conclusions
-                                .SelectMany(c => c.LekarstvoUsages)
-                                .FirstOrDefault(l => l.LekarstvoId == payment.LekarstvoId);
+        //foreach(var payment in paymentLekarstvoHelperDto.PaymentLekarstvoForCreateDtos)
+        //{
+        //    var lekarstvoUsage = questionnaireHistory.Conclusions
+        //                        .SelectMany(c => c.LekarstvoUsages)
+        //                        .FirstOrDefault(l => l.LekarstvoId == payment.LekarstvoId);
 
-            if (lekarstvoUsage == null)
-            {
-                throw new KeyNotFoundException($"Lekarstvo with ID {payment.LekarstvoId} not found in associated Conclusions.");
-            }
+        //    if (lekarstvoUsage == null)
+        //    {
+        //        throw new KeyNotFoundException($"Lekarstvo with ID {payment.LekarstvoId} not found in associated Conclusions.");
+        //    }
 
-            var existingPayments = questionnaireHistory.PaymentLekarstvos.Where(p => p.LekarstvoId == payment.LekarstvoId);
-            var totalPaidAmount = existingPayments.Sum(p => p.PaidAmount ?? 0);
-            var remainingAmount = lekarstvoUsage.Amount ?? (lekarstvoUsage.TotalPrice - totalPaidAmount);
+        //    var existingPayments = questionnaireHistory.PaymentLekarstvos.Where(p => p.LekarstvoId == payment.LekarstvoId);
+        //    var totalPaidAmount = existingPayments.Sum(p => p.PaidAmount ?? 0);
+        //    var remainingAmount = lekarstvoUsage.Amount ?? (lekarstvoUsage.TotalPrice - totalPaidAmount);
 
-            if (payment.PaidAmount > remainingAmount)
-            {
-                throw new InvalidOperationException($"Paid amount exceeds the remaining amount for lekarstvo ID {payment.LekarstvoId}.");
-            }
+        //    if (payment.PaidAmount > remainingAmount)
+        //    {
+        //        throw new InvalidOperationException($"Paid amount exceeds the remaining amount for lekarstvo ID {payment.LekarstvoId}.");
+        //    }
 
-            var paymentLekarstvo = new PaymentLekarstvo
-            {
-                TotalAmount = lekarstvoUsage.TotalPrice,
-                PaidAmount = payment.PaidAmount,
-                OutstandingAmount = remainingAmount - payment.PaidAmount,
-                PaymentDate = payment.PaymentDate ?? DateTime.Now,
-                PaymentType = payment.PaymentType ?? PaymentType.Cash,
-                QuestionnaireHistoryId = questionnaireHistory.Id,
-                LekarstvoId = payment.LekarstvoId,
-                AccountId = payment.AccountId,
-            };
+        //    var paymentLekarstvo = new PaymentLekarstvo
+        //    {
+        //        TotalAmount = lekarstvoUsage.TotalPrice,
+        //        PaidAmount = payment.PaidAmount,
+        //        OutstandingAmount = remainingAmount - payment.PaidAmount,
+        //        PaymentDate = payment.PaymentDate ?? DateTime.Now,
+        //        PaymentType = payment.PaymentType ?? PaymentType.Cash,
+        //        QuestionnaireHistoryId = questionnaireHistory.Id,
+        //        LekarstvoId = payment.LekarstvoId,
+        //        AccountId = payment.AccountId,
+        //    };
 
-            paymentLekarstvo.PaymentStatus = DeterminePaymentStatus(payment.PaidAmount, remainingAmount);
+        //    paymentLekarstvo.PaymentStatus = DeterminePaymentStatus(payment.PaidAmount, remainingAmount);
 
-            questionnaireHistory.Balance -= payment.PaidAmount;
-            if (questionnaireHistory.Balance <= 0)
-            {
-                questionnaireHistory.IsPayed = true;
-            }
+        //    questionnaireHistory.Balance -= payment.PaidAmount;
+        //    if (questionnaireHistory.Balance <= 0)
+        //    {
+        //        questionnaireHistory.IsPayed = true;
+        //    }
 
-            if (lekarstvoUsage.Amount < payment.PaidAmount)
-            {
-                throw new InvalidOperationException($"Insufficient amount for lekarstvo ID {payment.LekarstvoId}. Cannot reduce by {payment.PaidAmount}.");
-            }
+        //    if (lekarstvoUsage.Amount < payment.PaidAmount)
+        //    {
+        //        throw new InvalidOperationException($"Insufficient amount for lekarstvo ID {payment.LekarstvoId}. Cannot reduce by {payment.PaidAmount}.");
+        //    }
 
-            lekarstvoUsage.Amount = remainingAmount - payment.PaidAmount;
+        //    lekarstvoUsage.Amount = remainingAmount - payment.PaidAmount;
 
-            questionnaireHistory.PaymentLekarstvos.Add(paymentLekarstvo);
-            createdPayments.Add(paymentLekarstvo);
-        }
+        //    questionnaireHistory.PaymentLekarstvos.Add(paymentLekarstvo);
+        //    createdPayments.Add(paymentLekarstvo);
+        //}
 
-        await _questionnaireHistoryRepositoty.SaveChangeAsync();
+        //await _questionnaireHistoryRepositoty.SaveChangeAsync();
 
-        return createdPayments.Select(p => new PaymentLekarstvoDto(
-                    p.Id,
-                    p.TotalAmount,
-                    p.PaidAmount,
-                    p.OutstandingAmount,
-                    p.PaymentDate,
-                    p.PaymentType,
-                    p.PaymentStatus,
-                    p.AccountId,
-                    $"{p.Account?.LastName} {p.Account?.FirstName} {p.Account?.SurName}" ?? "",
-                    p.LekarstvoId,
-                    $"{p.Lekarstvo?.Name}" ?? "",
-                    p.QuestionnaireHistoryId)).ToList();
+        //return createdPayments.Select(p => new PaymentLekarstvoDto(
+        //            p.Id,
+        //            p.TotalAmount,
+        //            p.PaidAmount,
+        //            p.OutstandingAmount,
+        //            p.PaymentDate,
+        //            p.PaymentType,
+        //            p.PaymentStatus,
+        //            p.AccountId,
+        //            $"{p.Account?.LastName} {p.Account?.FirstName} {p.Account?.SurName}" ?? "",
+        //            p.LekarstvoId,
+        //            $"{p.Lekarstvo?.Name}" ?? "",
+        //            p.QuestionnaireHistoryId)).ToList();
+
+        return null;
     }
 
     public Task<PaymentLekarstvoDto> UpdatePaymentLekarstvoAsync(PaymentLekarstvoForUpdateDto paymentLekarstvoForUpdate)

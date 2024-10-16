@@ -27,9 +27,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .HasForeignKey(qh => qh.AccountId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            builder.HasMany(qh => qh.Services)
-                .WithMany(s => s.QuestionnaireHistories)
-                .UsingEntity(j => j.ToTable("QuestionnaireHistoryService"));
+            builder.HasMany(qh => qh.ServiceUsages)
+                .WithOne(su => su.QuestionnaireHistory)
+                .HasForeignKey(su => su.QuestionnaireHistoryId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasMany(qh => qh.PaymentServices)
                 .WithOne(ps => ps.QuestionnaireHistory)
@@ -40,11 +41,6 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .WithOne(c => c.QuestionnaireHistory)
                 .HasForeignKey(c => c.QuestionnaireHistoryId)
                 .OnDelete(DeleteBehavior.SetNull);
-
-            builder.HasMany(qh => qh.PaymentLekarstvos)
-               .WithOne(pl => pl.QuestionnaireHistory)
-               .HasForeignKey(pl => pl.QuestionnaireHistoryId)
-               .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

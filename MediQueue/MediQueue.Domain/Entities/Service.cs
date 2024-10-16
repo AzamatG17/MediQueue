@@ -11,4 +11,5 @@ public class Service : EntityBase
     public Category Category { get; set; }
 
     public virtual ICollection<QuestionnaireHistory>? QuestionnaireHistories { get; set; }
+    public virtual ICollection<ServiceUsage> ServiceUsages { get; set; }
 }

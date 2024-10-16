@@ -1,7 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Conclusion;
-using MediQueue.Domain.DTOs.PaymentLekarstvo;
 using MediQueue.Domain.DTOs.PaymentService;
-using MediQueue.Domain.DTOs.Service;
+using MediQueue.Domain.DTOs.ServiceUsage;
 
 namespace MediQueue.Domain.DTOs.QuestionnaireHistory;
 
@@ -22,8 +21,7 @@ public record QuestionnaireHistoryDto(
     string? QuestionnaireName, 
     DateTime? Bithdate, 
     string? PhotoBase64,
-    List<ServiceDtos>? ServiceDtos,
+    List<ServiceUsageDto>? ServiceUsages,
     List<PaymentServiceDto>? PaymentServices,
-    List<ConclusionDto>? ConclusionDtos,
-    List<PaymentLekarstvoDto>? PaymentLekarstvoDtos
+    List<ConclusionDto>? ConclusionDtos
     );

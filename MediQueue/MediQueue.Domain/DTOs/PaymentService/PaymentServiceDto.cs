@@ -10,8 +10,11 @@ public record PaymentServiceDto(
     DateTime? PaymentDate,
     PaymentType? PaymentType,
     PaymentStatus? PaymentStatus,
+    MedicationType? MedicationType,
     int? AccountId,
     string? AccountName,
     int? ServiceId, 
     string? ServiceName, 
+    int? LekarstvoId,
+    string? LekarstvoName,
     int? QuestionnaireHistoryId);

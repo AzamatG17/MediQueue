@@ -18,7 +18,7 @@ public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionn
                         .Include(q => q.QuestionnaireHistories)
                         .ThenInclude(qh => qh.Account)
                         .Include(q => q.QuestionnaireHistories)
-                        .ThenInclude(qh => qh.Services)
+                        .ThenInclude(qh => qh.ServiceUsages)
                         .AsNoTracking()
                         .AsQueryable();
 
@@ -68,7 +68,7 @@ public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionn
             .Include(q => q.QuestionnaireHistories)
             .ThenInclude(q => q.Account)
             .Include(a => a.QuestionnaireHistories)
-            .ThenInclude(q => q.Services)
+            .ThenInclude(q => q.ServiceUsages)
             .SingleOrDefaultAsync(c => c.Id == Id);  
     }
 

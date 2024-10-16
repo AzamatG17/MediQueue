@@ -21,6 +21,11 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasOne(c => c.Account)
                    .WithMany()
                    .HasForeignKey(c => c.AccountId);
+
+            builder.HasOne(c => c.QuestionnaireHistory)
+                .WithMany(qh => qh.Conclusions)
+                .HasForeignKey(c => c.QuestionnaireHistoryId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

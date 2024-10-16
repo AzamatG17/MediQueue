@@ -3,5 +3,11 @@
 namespace MediQueue.Domain.DTOs.PaymentService
 {
     public record PaymentServiceForCreateDto(
-        decimal? TotalAmount, decimal? PaidAmount, decimal? OutstandingAmount, DateTime? PaymentDate, PaymentType? PaymentType, PaymentStatus? PaymentStatus, int? ServiceId, int? AccountId);
+        decimal? PaidAmount,
+        PaymentType? PaymentType,
+        MedicationType? MedicationType,
+        int? ServiceId,
+        int? LekarstvoId,
+        int? QuestionnaireHistoryId,
+        int? AccountId);
 }

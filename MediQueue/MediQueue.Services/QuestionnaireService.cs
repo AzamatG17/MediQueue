@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Questionnaire;
 using MediQueue.Domain.DTOs.QuestionnaireHistory;
+using MediQueue.Domain.DTOs.ServiceUsage;
 using MediQueue.Domain.Entities;
-using MediQueue.Domain.Entities.Responses;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Domain.ResourceParameters;
@@ -187,16 +187,22 @@ public class QuestionnaireService : IQuestionnaireService
             ? $"{questionnaire.Account.LastName} {questionnaire.Account.FirstName} {questionnaire.Account.SurName}"
                 : "No Account Data",
             questionnaire.QuestionnaireId,
-            questionnaire.Services != null
-            ? questionnaire.Services.Select(MapToServiceDto).ToList()
-            : new List<GroupInfoResponse>());
+            questionnaire.ServiceUsages != null
+            ? questionnaire.ServiceUsages.Select(MapToServiceDto).ToList()
+            : new List<ServiceUsageDto>());
     }
 
-    private GroupInfoResponse MapToServiceDto(Service service)
+    private ServiceUsageDto MapToServiceDto(ServiceUsage serviceUsage)
     {
-        return new GroupInfoResponse(
-            service.Id,
-            service.Name
+        return new ServiceUsageDto(
+            serviceUsage.Id,
+            serviceUsage.ServiceId,
+            serviceUsage.Service?.Name ?? "",
+            serviceUsage.QuantityUsed,
+            serviceUsage.TotalPrice,
+            serviceUsage.Amount,
+            serviceUsage.IsPayed,
+            serviceUsage.QuestionnaireHistoryId
             );
     }
 }

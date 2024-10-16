@@ -28,9 +28,17 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(ps => ps.PaymentStatus)
                 .HasConversion<string>();
 
+            builder.Property(ps => ps.MedicationType)
+                .HasConversion<string>();
+
             builder.HasOne(ps => ps.Service)
                 .WithMany()
                 .HasForeignKey(ps => ps.ServiceId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(ps => ps.Lekarstvo)
+                .WithMany()
+                .HasForeignKey(ps => ps.LekarstvoId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(ps => ps.QuestionnaireHistory)
