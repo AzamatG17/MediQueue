@@ -70,7 +70,7 @@ public class QuestionnaireService : IQuestionnaireService
         await _questionnaireRepository.CreateAsync(quest);
 
         await CreateQuestionnaireHistory
-            (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.DateCreated, questionnaireForCreateDto.IsPayed, questionnaireForCreateDto.AccountId, uniqueQuestionnaireId, questionnaireForCreateDto.ServiceIds);
+            (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.AccountId, uniqueQuestionnaireId, questionnaireForCreateDto.ServiceIds);
 
         return MapToQuestionnaireDto(quest);
     }
@@ -87,7 +87,7 @@ public class QuestionnaireService : IQuestionnaireService
         }
 
         await CreateQuestionnaireHistory
-            (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.DateCreated, questionnaireForCreateDto.IsPayed, questionnaireForCreateDto.AccountId, question.QuestionnaireId, questionnaireForCreateDto.ServiceIds);
+            (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.AccountId, question.QuestionnaireId, questionnaireForCreateDto.ServiceIds);
 
         return MapToQuestionnaireDto(question);
     }
@@ -129,13 +129,10 @@ public class QuestionnaireService : IQuestionnaireService
         return random.Next(1000000, 999999999);
     }
 
-    private async Task CreateQuestionnaireHistory(string? HistoryDiscription, DateTime? DateCreated, bool? IsPayed, int? AccountId, int? QuestionnaireId, List<int>? ServiceIds)
+    private async Task CreateQuestionnaireHistory(string? HistoryDiscription, int? AccountId, int? QuestionnaireId, List<int>? ServiceIds)
     {
         var questonnaireForCreate = new QuestionnaireHistoryForCreateDto(
             HistoryDiscription,
-            DateCreated,
-            0,
-            IsPayed ?? false,
             AccountId,
             QuestionnaireId,
             ServiceIds
@@ -143,7 +140,7 @@ public class QuestionnaireService : IQuestionnaireService
 
         await _questionnaireHistoryService.CreateQuestionnaireHistoryAsync(questonnaireForCreate);
     }
-
+    
     private QuestionnaireDto MapToQuestionnaireDto(Questionnaire questionnaire)
     {
         return new QuestionnaireDto(

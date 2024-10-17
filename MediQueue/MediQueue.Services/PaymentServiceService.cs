@@ -162,8 +162,8 @@ public class PaymentServiceService : IPaymentServiceService
                             payment.PaidAmount < remainingAmount ? PaymentStatus.Partial : PaymentStatus.Paid
         };
 
-        questionnaireHistory.Balance -= payment.PaidAmount;
-        if (questionnaireHistory.Balance <= 0)
+        questionnaireHistory.Balance += payment.PaidAmount;
+        if (questionnaireHistory.Balance >= 0)
         {
             questionnaireHistory.IsPayed = true;
         }

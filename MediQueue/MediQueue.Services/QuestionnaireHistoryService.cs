@@ -203,27 +203,37 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
 
     private async Task<QuestionnaireHistory> MapToQuestionnaryHistory(QuestionnaireHistoryForCreateDto questionnaireHistoryForCreateDto)
     {
-        var questionn = await _serviceUsageRepository.FindByServiceUsageIdsAsync(questionnaireHistoryForCreateDto.ServiceIds);
-        int historyid = await GenerateUniqueQuestionnaireIdAsync();
-
         if (questionnaireHistoryForCreateDto.QuestionnaireId == null)
         {
             throw new KeyNotFoundException($"QuestionnaireId with {questionnaireHistoryForCreateDto.QuestionnaireId} not found");
         }
 
+        var services = await _serviceRepository.FindByServiceIdsAsync(questionnaireHistoryForCreateDto.ServiceIds ?? new List<int>());
+        int historyid = await GenerateUniqueQuestionnaireIdAsync();
+
         var questionnaryId = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForCreateDto.QuestionnaireId);
 
+        var serviceUsages = services.Select(service => new ServiceUsage
+        {
+            ServiceId = service.Id,
+            Service = service,
+            Amount = -1 * service.Amount,
+            TotalPrice = service.Amount,
+            IsPayed = false
+        }).ToList();
+
         decimal balanceAmount = await GenerateBalanse(questionnaireHistoryForCreateDto.ServiceIds);
+
         return new QuestionnaireHistory
         {
             Historyid = historyid,
             HistoryDiscription = questionnaireHistoryForCreateDto.HistoryDiscription,
-            DateCreated = questionnaireHistoryForCreateDto.DateCreated,
+            DateCreated = DateTime.Now,
             Balance = balanceAmount,
-            IsPayed = questionnaireHistoryForCreateDto?.IsPayed,
+            IsPayed = false,
             AccountId = questionnaireHistoryForCreateDto?.AccountId,
             QuestionnaireId = questionnaryId.Id,
-            ServiceUsages = questionn.ToList()
+            ServiceUsages = serviceUsages
         };
     }
 
@@ -231,7 +241,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     {
         var services = await _serviceRepository.FindByServiceIdsAsync(serviceIds);
 
-        decimal totalBalance = services.Sum(service => service.Amount);
+        decimal totalBalance = -1 * services.Sum(service => service.Amount);
 
         return totalBalance;
     }
