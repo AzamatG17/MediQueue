@@ -8,5 +8,6 @@ public record LekarstvoUsageForHelpDto(
     decimal? SalePrice,
     decimal? QuantityUsed,
     decimal? TotalPrice,
-    decimal? Amount
+    decimal? Amount,
+    bool? IsPayed
     );

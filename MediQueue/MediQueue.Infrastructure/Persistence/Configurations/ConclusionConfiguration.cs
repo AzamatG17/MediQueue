@@ -14,9 +14,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(c => c.Discription)
                 .HasMaxLength(2000);
 
-            builder.HasOne(c => c.Service)
+            builder.HasOne(c => c.ServiceUsage)
                .WithMany()
-               .HasForeignKey(c => c.ServiceId);
+               .HasForeignKey(c => c.ServiceUsageId);
 
             builder.HasOne(c => c.Account)
                    .WithMany()

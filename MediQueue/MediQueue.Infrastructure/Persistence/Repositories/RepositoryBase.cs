@@ -45,6 +45,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             var entity = await FindByIdAsync(id);
 
             _context.Set<T>().Remove(entity);
+
+            await _context.SaveChangesAsync();
         }
     }
 }

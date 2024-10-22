@@ -47,6 +47,12 @@ public class ServicesService : IServicesService
 
     public async Task<ServiceDtos> CreateServiceAsync(ServiceForCreateDto serviceForCreateDto)
     {
+        var category = await _categoryRepository.FindByIdAsync(serviceForCreateDto.CategoryId);
+        if (category == null)
+        {
+            throw new KeyNotFoundException($"Category with ID {serviceForCreateDto.CategoryId} not found.");
+        }
+
         var service = new Service
         {
             Name = serviceForCreateDto.Name,
@@ -55,12 +61,6 @@ public class ServicesService : IServicesService
         };
 
         var result = await _repository.CreateAsync(service);
-
-        var category = await _categoryRepository.FindByIdAsync(serviceForCreateDto.CategoryId);
-        if (category == null)
-        {
-            throw new KeyNotFoundException($"Category with {serviceForCreateDto.CategoryId} not found");
-        }
 
         var serviceDto = new ServiceDtos(
                 result.Id,
@@ -74,10 +74,7 @@ public class ServicesService : IServicesService
 
     public async Task<ServiceDtos> UpdateServiceAsync(ServiceForUpdateDto serviceForUpdateDto)
     {
-        if (serviceForUpdateDto == null)
-        {
-            throw new ArgumentNullException(nameof(serviceForUpdateDto));
-        }
+        ArgumentNullException.ThrowIfNull(nameof(serviceForUpdateDto));
 
         var existingService = await _repository.GetByIdWithCategory(serviceForUpdateDto.id);
         if (existingService == null)
@@ -96,7 +93,7 @@ public class ServicesService : IServicesService
             existingService.Name,
             existingService.Amount,
             existingService.CategoryId,
-            existingService.Category.CategoryName
+            existingService.Category?.CategoryName ?? ""
         );
     }
 

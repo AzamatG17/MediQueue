@@ -10,8 +10,8 @@ public class Conclusion : EntityBase
     public HealthStatus HealthStatus { get; set; }
     public bool IsFullyRecovered { get; set; } = false;
 
-    public int? ServiceId { get; set; }
-    public Service? Service { get; set; }
+    public int? ServiceUsageId { get; set; }
+    public ServiceUsage? ServiceUsage { get; set; }
     public int? AccountId { get; set; }
     public Account? Account { get; set; }
     public int? QuestionnaireHistoryId { get; set; }

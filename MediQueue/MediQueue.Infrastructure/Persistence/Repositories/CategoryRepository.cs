@@ -31,7 +31,6 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Categories
                     .Include(c => c.Groups)
                     .Include(c => c.Services)
-                    .ThenInclude(s => s.Category)
                     .SingleOrDefaultAsync(c => c.Id == id);
         }
     }

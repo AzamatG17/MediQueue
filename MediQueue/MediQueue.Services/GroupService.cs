@@ -61,7 +61,7 @@ public class GroupService : IGroupService
             throw new ArgumentNullException(nameof(groupForUpdateDto));
         }
 
-        var group = await _groupRepository.FindByIdAsync(groupForUpdateDto.Id);
+        var group = await _groupRepository.FindByIdWithGroupAsync(groupForUpdateDto.Id);
         if (group == null)
         {
             throw new KeyNotFoundException($"Group with {groupForUpdateDto.Id} not found");
@@ -102,22 +102,20 @@ public class GroupService : IGroupService
 
     public async Task DeleteGroupAsync(int id)
     {
-        await _groupRepository.DeleteAsync(id); 
+        await _groupRepository.DeleteGroupAsync(id);
     }
 
     private async Task<Group> MapToCategoryAsync(GroupForCreateDto groupForCreateDto)
     {
-        var groups = await _categoryRepository.FindByGroupIdsAsync(groupForCreateDto.CategoryIds);
         return new Group
         {
-            GroupName = groupForCreateDto.GroupName,
-            Categories = groups.ToList()
+            GroupName = groupForCreateDto.GroupName
         };
     }
 
     private GroupDto MapToCategoryDto(Group category)
     {
-        var groupInfos = category.Categories.Select(g => new GroupInfoResponse(
+        var groupInfos = category.Categories?.Select(g => new GroupInfoResponse(
             g.Id,
             g.CategoryName
             )).ToList();

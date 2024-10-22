@@ -29,10 +29,6 @@ namespace MediQueue.Infrastructure.JwtToken
             var signingCredentials = new SigningCredentials(securityKey,
                 SecurityAlgorithms.HmacSha256);
 
-            var claimsForToken = new List<Claim>();
-            claimsForToken.Add(new Claim("sub", account.FirstName));
-            claimsForToken.Add(new Claim("name", account.LastName));
-
             var jwtSecurityToken = new JwtSecurityToken(
                 claims: claimForToken,
                 signingCredentials: signingCredentials,

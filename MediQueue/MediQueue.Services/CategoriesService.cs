@@ -12,15 +12,17 @@ public class CategoriesService : ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IGroupRepository _groupRepository;
+    private readonly IServiceRepository _serviceRepository;
     private readonly IMapper _mapper;
 
-    public CategoriesService(ICategoryRepository categoryRepository, IMapper mapper, IGroupRepository groupRepository)
+    public CategoriesService(ICategoryRepository categoryRepository, IMapper mapper, IGroupRepository groupRepository, IServiceRepository serviceRepository)
     {
         _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _groupRepository = groupRepository ?? throw new ArgumentNullException(nameof(groupRepository));
+        _serviceRepository = serviceRepository ?? throw new ArgumentNullException(nameof(serviceRepository));
     }
-    
+
     public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
     {
         var categories = await _categoryRepository.GetCategoriesWithGroupsAsync();
@@ -60,7 +62,7 @@ public class CategoriesService : ICategoryService
             throw new ArgumentNullException(nameof(categoryForUpdateDto));
         }
 
-        var category = await _categoryRepository.FindByIdAsync(categoryForUpdateDto.Id);
+        var category = await _categoryRepository.FindByIdWithGroupAsync(categoryForUpdateDto.Id);
         if (category == null)
         {
             throw new KeyNotFoundException($"Category with {categoryForUpdateDto.Id} not found");
@@ -68,11 +70,16 @@ public class CategoriesService : ICategoryService
 
         category.CategoryName = categoryForUpdateDto.CategoryName;
 
-        var groups = await _groupRepository.FindByGroupIdsAsync(categoryForUpdateDto.GroupIds);
-        category.Groups = groups.ToList();
+        // Update Groups
+        await UpdateGroupsAsync(category, categoryForUpdateDto.GroupIds);
 
+        // Update Services
+        //await UpdateServicesAsync(category, categoryForUpdateDto.ServiceIds);
+
+        // Persist the changes to the repository
         await _categoryRepository.UpdateAsync(category);
 
+        // Map and return the updated category DTO
         return MapToCategoryDto(category);
     }
 
@@ -84,6 +91,14 @@ public class CategoriesService : ICategoryService
     private async Task<Category> MapToCategoryAsync(CategoryForCreateDto categoryForCreateDto)
     {
         var groups = await _groupRepository.FindByGroupIdsAsync(categoryForCreateDto.GroupIds);
+
+        var missingGroupIds = categoryForCreateDto.GroupIds.Except(groups.Select(g => g.Id)).ToList();
+
+        if (missingGroupIds.Any())
+        {
+            throw new ArgumentException($"The following group IDs were not found: {string.Join(", ", missingGroupIds)}");
+        }
+
         return new Category
         {
             CategoryName = categoryForCreateDto.CategoryName,
@@ -98,7 +113,7 @@ public class CategoriesService : ICategoryService
             g.GroupName
             )).ToList();
 
-        var serviceDtos = category.Services.Select(s => new ServiceDtos(
+        var serviceDtos = category.Services?.Select(s => new ServiceDtos(
             s.Id,
             s.Name,
             s.Amount,
@@ -112,5 +127,59 @@ public class CategoriesService : ICategoryService
             groupInfos,
             serviceDtos
         );
+    }
+
+    private async Task UpdateGroupsAsync(Category category, List<int> newGroupIds)
+    {
+        // Get existing group IDs
+        var existingGroups = category.Groups.ToList();
+        var existingGroupIds = existingGroups.Select(g => g.Id).ToHashSet();
+
+        // Retrieve updated groups from the repository
+        var updatedGroups = await _groupRepository.FindByGroupIdsAsync(newGroupIds);
+        var updatedGroupIds = updatedGroups.Select(g => g.Id).ToHashSet();
+
+        // Determine which groups to add and which to remove
+        var groupsToAdd = updatedGroups.Where(g => !existingGroupIds.Contains(g.Id)).ToList();
+        var groupsToRemove = existingGroups.Where(g => !updatedGroupIds.Contains(g.Id)).ToList();
+
+        // Remove groups that are no longer associated with the category
+        foreach (var groupToRemove in groupsToRemove)
+        {
+            category.Groups.Remove(groupToRemove);
+        }
+
+        // Add new groups to the category
+        foreach (var groupToAdd in groupsToAdd)
+        {
+            category.Groups.Add(groupToAdd);
+        }
+    }
+
+    private async Task UpdateServicesAsync(Category category, List<int> newServiceIds)
+    {
+        // Get existing service IDs
+        var existingServices = category.Services.ToList();
+        var existingServiceIds = existingServices.Select(s => s.Id).ToHashSet();
+
+        // Retrieve updated services from the repository
+        var updatedServices = await _serviceRepository.FindByServiceIdsAsync(newServiceIds);
+        var updatedServiceIds = updatedServices.Select(s => s.Id).ToHashSet();
+
+        // Determine which services to add and which to remove
+        var servicesToAdd = updatedServices.Where(s => !existingServiceIds.Contains(s.Id)).ToList();
+        var servicesToRemove = existingServices.Where(s => !updatedServiceIds.Contains(s.Id)).ToList();
+
+        // Remove services that are no longer associated with the category
+        foreach (var serviceToRemove in servicesToRemove)
+        {
+            category.Services.Remove(serviceToRemove);
+        }
+
+        // Add new services to the category
+        foreach (var serviceToAdd in servicesToAdd)
+        {
+            category.Services.Add(serviceToAdd);
+        }
     }
 }

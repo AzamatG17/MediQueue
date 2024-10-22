@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 
 namespace MediQueue.Infrastructure.Persistence.Repositories
 {
@@ -34,6 +35,19 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(c => c.Services)
                     .AsSplitQuery()
                     .SingleOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task DeleteGroupAsync(int id)
+        {
+            var entity = await FindByIdAsync(id);
+
+            if (entity == null)
+            {
+                throw new KeyNotFoundException($"Entity with ID {id} was not found.");
+            }
+
+            _context.Set<Group>().Remove(entity);
+            await _context.SaveChangesAsync();
         }
     }
 }
