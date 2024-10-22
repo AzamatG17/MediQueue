@@ -4,6 +4,7 @@ using MediQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediQueue.Infrastructure.persistence.Migrations
 {
     [DbContext(typeof(MediQueueDbContext))]
-    partial class MediQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241022043510_AddAnalysisResultTables")]
+    partial class AddAnalysisResultTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,8 +144,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<string>("MeasuredValue")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhotoBase64")
                         .HasColumnType("nvarchar(max)");
@@ -157,9 +159,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
+                        .HasColumnType("int");
 
                     b.Property<int>("Unit")
                         .HasColumnType("int");
@@ -170,7 +170,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.HasIndex("ServiceUsageId");
 
-                    b.ToTable("AnalysisResult", (string)null);
+                    b.ToTable("AnalysisResult");
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.Branch", b =>
@@ -794,8 +794,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 {
                     b.HasOne("MediQueue.Domain.Entities.QuestionnaireHistory", "QuestionnaireHistory")
                         .WithMany("AnalysisResults")
-                        .HasForeignKey("QuestionnaireHistoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("QuestionnaireHistoryId");
 
                     b.HasOne("MediQueue.Domain.Entities.ServiceUsage", "ServiceUsage")
                         .WithMany()

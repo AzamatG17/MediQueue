@@ -9,6 +9,7 @@ public record ConclusionDto(
     DateTime? DateCreated,
     HealthStatus? HealthStatus,
     bool? IsFullyRecovered,
+    int? ServiceUsageId,
     int? ServiceId,
     string? ServiceName,
     int? AccountId,

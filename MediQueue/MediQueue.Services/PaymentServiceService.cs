@@ -55,17 +55,14 @@ public class PaymentServiceService : IPaymentServiceService
 
         foreach (var payment in paymentServiceHelperDto.PaymentServiceForCreateDtos)
         {
+            if (payment.PaidAmount <= 0)
+            {
+                throw new InvalidOperationException($"The paid amount must be greater than zero. Provided: {payment.PaidAmount}.");
+            }
+
             if (payment.MedicationType == MedicationType.Service)
             {
-                var serviceUsage = questionnaireHistory.ServiceUsages
-                        .FirstOrDefault(s => s.Id == payment.ServiceId);
-
-                if (serviceUsage == null)
-                {
-                    throw new KeyNotFoundException($"Service with ID {payment.ServiceId} not found in QuestionnaireHistory.");
-                }
-
-                var paymentService = await PaymentForService(payment, serviceUsage);
+                var paymentService = await PaymentForService(payment, questionnaireHistory);
                 createdPayments.Add(paymentService);
             }
             else if (payment.MedicationType == MedicationType.Lekarstvo)
@@ -99,36 +96,50 @@ public class PaymentServiceService : IPaymentServiceService
             p.QuestionnaireHistoryId)).ToList();
     }
 
-    private async Task<PaymentService> PaymentForService(PaymentServiceForCreateDto payment, ServiceUsage serviceUsage)
+    private async Task<PaymentService> PaymentForService(PaymentServiceForCreateDto payment, QuestionnaireHistory questionnaireHistory)
     {
+        var serviceUsage = questionnaireHistory.ServiceUsages
+                       .FirstOrDefault(s => s.Id == payment.ServiceId);
+
+        if (serviceUsage == null)
+        {
+            throw new KeyNotFoundException($"Service with ID {payment.ServiceId} not found in QuestionnaireHistory.");
+        }
+
         var existingPayments = serviceUsage.QuestionnaireHistory.PaymentServices
                                     .Where(p => p.ServiceId == serviceUsage.Id);
         var totalPaidAmount = existingPayments.Sum(p => p.PaidAmount ?? 0);
-        var remainingAmount = serviceUsage.Amount - totalPaidAmount;
+        var remainingAmount = serviceUsage.Amount ?? serviceUsage.TotalPrice - totalPaidAmount;
 
-        if (payment.PaidAmount > remainingAmount)
+        if (payment.PaidAmount > remainingAmount * -1)
         {
             throw new InvalidOperationException($"Paid amount exceeds the remaining amount for Service ID {serviceUsage.Id}.");
         }
 
         var paymentService = new PaymentService
         {
-            TotalAmount = serviceUsage.Amount,
+            TotalAmount = serviceUsage.TotalPrice,
             PaidAmount = payment.PaidAmount,
-            OutstandingAmount = remainingAmount - payment.PaidAmount,
+            OutstandingAmount = remainingAmount + payment.PaidAmount,
             PaymentDate = DateTime.Now,
             PaymentType = payment.PaymentType ?? PaymentType.Cash,
             QuestionnaireHistoryId = serviceUsage.QuestionnaireHistoryId,
+            AccountId = payment.AccountId,
             ServiceId = serviceUsage.Id,
-            PaymentStatus = payment.PaidAmount == 0 ? PaymentStatus.Unpaid :
-                            payment.PaidAmount < remainingAmount ? PaymentStatus.Partial : PaymentStatus.Paid
+            MedicationType = payment.MedicationType,
+            PaymentStatus = DeterminePaymentStatus(payment.PaidAmount, remainingAmount)
         };
 
-        serviceUsage.QuestionnaireHistory.Balance -= payment.PaidAmount;
-        if (serviceUsage.QuestionnaireHistory.Balance <= 0)
-        {
-            serviceUsage.QuestionnaireHistory.IsPayed = true;
-        }
+        questionnaireHistory.PaymentServices.Add(paymentService);
+
+        questionnaireHistory.Balance += payment.PaidAmount;
+
+        questionnaireHistory.IsPayed = questionnaireHistory.Balance >= 0;
+
+        serviceUsage.Amount = remainingAmount +payment.PaidAmount;
+        serviceUsage.IsPayed = serviceUsage.Amount == 0;
+
+        await _questionnaireHistoryRepositoty.SaveChangeAsync();
 
         return paymentService;
     }
@@ -137,14 +148,19 @@ public class PaymentServiceService : IPaymentServiceService
     {
         var lekarstvoUsage = questionnaireHistory.Conclusions
                                         .SelectMany(c => c.LekarstvoUsages)
-                                        .FirstOrDefault(l => l.LekarstvoId == payment.LekarstvoId);
+                                        .FirstOrDefault(l => l.LekarstvoId == payment.LekarstvoId && l.Amount < 0);
+
+        if (lekarstvoUsage == null)
+        {
+            throw new InvalidOperationException($"No pending payment found for Lekarstvo ID {payment.LekarstvoId}.");
+        }
 
         var existingPayments = questionnaireHistory.PaymentServices
                                     .Where(p => p.LekarstvoId == lekarstvoUsage.LekarstvoId);
         var totalPaidAmount = existingPayments.Sum(p => p.PaidAmount ?? 0);
         var remainingAmount = lekarstvoUsage.Amount ?? lekarstvoUsage.TotalPrice - totalPaidAmount;
 
-        if (payment.PaidAmount > remainingAmount)
+        if (payment.PaidAmount > remainingAmount * -1)
         {
             throw new InvalidOperationException($"Paid amount exceeds the remaining amount for Lekarstvo ID {lekarstvoUsage.LekarstvoId}.");
         }
@@ -153,27 +169,24 @@ public class PaymentServiceService : IPaymentServiceService
         {
             TotalAmount = lekarstvoUsage.TotalPrice,
             PaidAmount = payment.PaidAmount,
-            OutstandingAmount = remainingAmount - payment.PaidAmount,
+            OutstandingAmount = remainingAmount + payment.PaidAmount,
             PaymentDate = DateTime.Now,
             PaymentType = payment.PaymentType ?? PaymentType.Cash,
             QuestionnaireHistoryId = lekarstvoUsage.QuestionnaireHistoryId,
+            AccountId = payment.AccountId,
             LekarstvoId = lekarstvoUsage.LekarstvoId,
-            PaymentStatus = payment.PaidAmount == 0 ? PaymentStatus.Unpaid :
-                            payment.PaidAmount < remainingAmount ? PaymentStatus.Partial : PaymentStatus.Paid
+            MedicationType = payment.MedicationType,
+            PaymentStatus = DeterminePaymentStatus(payment.PaidAmount, remainingAmount)
         };
 
+        questionnaireHistory.PaymentServices.Add(paymentService);
+
         questionnaireHistory.Balance += payment.PaidAmount;
-        if (questionnaireHistory.Balance >= 0)
-        {
-            questionnaireHistory.IsPayed = true;
-        }
 
-        if (lekarstvoUsage.Amount < payment.PaidAmount)
-        {
-            throw new InvalidOperationException($"Insufficient amount for lekarstvo ID {payment.LekarstvoId}. Cannot reduce by {payment.PaidAmount}.");
-        }
+        questionnaireHistory.IsPayed = questionnaireHistory.Balance >= 0;
 
-        lekarstvoUsage.Amount = remainingAmount - payment.PaidAmount;
+        lekarstvoUsage.Amount = remainingAmount + payment.PaidAmount;
+        lekarstvoUsage.IsPayed = lekarstvoUsage.Amount == 0;
 
         await _questionnaireHistoryRepositoty.SaveChangeAsync();
 
@@ -197,5 +210,16 @@ public class PaymentServiceService : IPaymentServiceService
     public async Task DeletePaymentAsync(int id)
     {
         await _repository.DeleteAsync(id);
+    }
+
+    private PaymentStatus DeterminePaymentStatus(decimal? paidAmount, decimal? remainingAmount)
+    {
+        if (paidAmount == 0)
+            return PaymentStatus.Unpaid;
+
+        if (paidAmount * -1 < remainingAmount)
+            return PaymentStatus.Partial;
+
+        return PaymentStatus.Paid;
     }
 }

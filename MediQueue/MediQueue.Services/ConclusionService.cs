@@ -103,7 +103,7 @@ public class ConclusionService : IConclusionService
             DateCreated = DateTime.UtcNow,
             HealthStatus = dto.HealthStatus ?? HealthStatus.DefaultValue,
             IsFullyRecovered = dto.IsFullyRecovered ?? false,
-            ServiceId = dto.ServiceId,
+            ServiceUsageId = dto.ServiceId,
             AccountId = dto.AccountId,
             QuestionnaireHistoryId = dto.QuestionnaireHistoryId,
             LekarstvoUsages = new List<LekarstvoUsage>()
@@ -118,8 +118,9 @@ public class ConclusionService : IConclusionService
             conclusion.DateCreated,
             conclusion.HealthStatus,
             conclusion.IsFullyRecovered,
-            conclusion.ServiceId,
-            conclusion.Service?.Name ?? "",
+            conclusion.ServiceUsageId,
+            conclusion.ServiceUsage?.ServiceId,
+            conclusion.ServiceUsage?.Service?.Name ?? "",
             conclusion.AccountId,
             $"{conclusion.Account?.LastName ?? ""} {conclusion.Account?.FirstName ?? ""} {conclusion.Account?.SurName ?? ""}",
             conclusion.QuestionnaireHistoryId,
@@ -131,7 +132,8 @@ public class ConclusionService : IConclusionService
                 u.Lekarstvo?.SalePrice ?? 0,
                 u.QuantityUsed,
                 u.TotalPrice,
-                u.Amount
+                u.Amount,
+                u.IsPayed
             )).ToList()
         );
     }

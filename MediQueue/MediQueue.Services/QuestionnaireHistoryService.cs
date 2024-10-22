@@ -30,7 +30,6 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
 
         var tasks = questionn.Select(MapToQuestionnaireHistoryDto);
 
-        // Ожидаем завершения всех задач
         var results = await Task.WhenAll(tasks);
 
         return results.ToList();
@@ -161,8 +160,9 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             conclusion.DateCreated,
             conclusion.HealthStatus,
             conclusion.IsFullyRecovered,
-            conclusion.ServiceId,
-            conclusion.Service?.Name ?? "",
+            conclusion.ServiceUsageId,
+            conclusion.ServiceUsage?.ServiceId,
+            conclusion.ServiceUsage?.Service?.Name ?? "",
             conclusion.AccountId,
             $"{conclusion.Account?.LastName ?? ""} {conclusion.Account?.FirstName ?? ""} {conclusion.Account?.SurName ?? ""}".Trim(),
             conclusion.QuestionnaireHistoryId,
@@ -174,7 +174,8 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
                 lekarstvo.Lekarstvo?.SalePrice ?? 0,
                 lekarstvo.QuantityUsed,
                 lekarstvo.TotalPrice,
-                lekarstvo.Amount
+                lekarstvo.Amount,
+                lekarstvo.IsPayed
             )).ToList()
         )).ToList();
 

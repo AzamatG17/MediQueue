@@ -108,7 +108,7 @@ public class GroupController : BaseController
 
     [PermissionAuthorize(5, 5)]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteGroup(int id)
+    public async Task<ActionResult> DeleteAsync(int id)
     {
         try
         {
