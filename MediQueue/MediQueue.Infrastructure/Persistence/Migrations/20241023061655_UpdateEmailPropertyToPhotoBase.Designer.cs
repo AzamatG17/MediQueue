@@ -4,6 +4,7 @@ using MediQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediQueue.Infrastructure.persistence.Migrations
 {
     [DbContext(typeof(MediQueueDbContext))]
-    partial class MediQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241023061655_UpdateEmailPropertyToPhotoBase")]
+    partial class UpdateEmailPropertyToPhotoBase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,9 +141,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("int");
-
                     b.Property<string>("MeasuredValue")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -167,8 +167,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
 
                     b.HasIndex("QuestionnaireHistoryId");
 
@@ -796,11 +794,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
             modelBuilder.Entity("MediQueue.Domain.Entities.AnalysisResult", b =>
                 {
-                    b.HasOne("MediQueue.Domain.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("MediQueue.Domain.Entities.QuestionnaireHistory", "QuestionnaireHistory")
                         .WithMany("AnalysisResults")
                         .HasForeignKey("QuestionnaireHistoryId")
@@ -811,8 +804,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasForeignKey("ServiceUsageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Account");
 
                     b.Navigation("QuestionnaireHistory");
 

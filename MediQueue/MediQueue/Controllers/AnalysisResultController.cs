@@ -1,8 +1,122 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediQueue.Domain.DTOs.AnalysisResult;
+using MediQueue.Domain.Entities.Responses;
+using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.JwtToken;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace MediQueue.Controllers
+namespace MediQueue.Controllers;
+
+[Authorize(Policy = "HasPermission")]
+[ApiController]
+[Route("api/analysis")]
+//[EnableCors("AllowSpecificOrigins")] 
+public class AnalysisResultController : BaseController
 {
-    public class AnalysisResultController : BaseController
+    private readonly IAnalysisResultService _analysisResultService;
+
+    public AnalysisResultController(IAnalysisResultService analysisResultService)
     {
+        _analysisResultService = analysisResultService ?? throw new ArgumentNullException(nameof(analysisResultService));
+    }
+
+    [PermissionAuthorize(1, 1)]
+    [HttpGet]
+    public async Task<ActionResult> GetAsync()
+    {
+        try
+        {
+            var analysisResults = await _analysisResultService.GetAllAnalysisResultsAsync();
+            return Ok(analysisResults);
+        }
+        catch (Exception ex)
+        {
+            return HandleError(ex);
+        }
+    }
+
+    [PermissionAuthorize(1, 2)]
+    [HttpGet("{id}")]
+    public async Task<ActionResult> GetByIdAsync(int id)
+    {
+        try
+        {
+            var analysisResult = await _analysisResultService.GetAnalysisResultByIdAsync(id);
+
+            if (analysisResult is null)
+                return NotFound(CreateErrorResponse($"AnalysisReslut with id: {id} does not exist."));
+
+            return Ok(analysisResult);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(CreateErrorResponse(ex.Message + ", AnalysisResult not found."));
+        }
+        catch (Exception ex)
+        {
+            return HandleError(ex);
+        }
+    }
+
+    [PermissionAuthorize(1, 3)]
+    [HttpPost]
+    public async Task<ActionResult<ReturnResponse>> PostAsync([FromBody] AnalysisResultForCreateDto analysisResultForCreateDto)
+    {
+        if (analysisResultForCreateDto == null)
+            return BadRequest(CreateErrorResponse("AnalysisResult data is null."));
+
+        try
+        {
+            await _analysisResultService.CreateAnalysisResultAsync(analysisResultForCreateDto);
+            return Ok(CreateSuccessResponse("AnalysisResult successfully created."));
+        }
+        catch (Exception ex)
+        {
+            return HandleError(ex);
+        }
+    }
+
+    [PermissionAuthorize(1, 4)]
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ReturnResponse>> PutAsync(int id, [FromBody] AnalysisResultForUpdateDto analysisResultForUpdateDto)
+    {
+        if (analysisResultForUpdateDto == null)
+            return BadRequest(CreateErrorResponse("AnalysisResult data is null."));
+
+        if (id != analysisResultForUpdateDto.Id)
+            return BadRequest(CreateErrorResponse($"Route id: {id} does not match with parameter id: {analysisResultForUpdateDto.Id}."));
+
+        try
+        {
+            await _analysisResultService.UpdateAnalysisResultAsync(analysisResultForUpdateDto);
+            return Ok(CreateSuccessResponse("AnalysisResult successfully updated."));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(CreateErrorResponse(ex.Message + ", AnalysisResult not found."));
+        }
+        catch (Exception ex)
+        {
+            return HandleError(ex);
+        }
+    }
+
+    [PermissionAuthorize(1, 5)]
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<ReturnResponse>> DeleteAsync(int id)
+    {
+        try
+        {
+            await _analysisResultService.DeleteAnalysisResultAsync(id);
+            return Ok(CreateSuccessResponse("AnalysisResult successfully deleted."));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(CreateErrorResponse(ex.Message + ", AnalysisResult not found."));
+        }
+        catch (Exception ex)
+        {
+            return HandleError(ex);
+        }
     }
 }

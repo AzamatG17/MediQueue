@@ -13,8 +13,8 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasKey(x => x.Id);
 
             builder.Property(ar => ar.MeasuredValue)
-           .IsRequired()
-           .HasMaxLength(100);
+                .IsRequired()
+                .HasMaxLength(100);
 
             builder.Property(ar => ar.Unit)
                 .IsRequired();
@@ -31,6 +31,11 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasOne(ar => ar.ServiceUsage)
                 .WithMany()
                 .HasForeignKey(ar => ar.ServiceUsageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(ar => ar.Account)
+                .WithMany()
+                .HasForeignKey(ar => ar.AccountId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(ar => ar.QuestionnaireHistory)

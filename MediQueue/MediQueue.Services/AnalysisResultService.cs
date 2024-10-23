@@ -37,11 +37,13 @@ public class AnalysisResultService : IAnalysisResultService
 
         var analysisResult = _mapper.Map<AnalysisResult>(analysisResultForCreateDto);
 
+        analysisResult.ResultDate = DateTime.Now;
+
         await _analysisResultRepository.CreateAsync(analysisResult);
 
         return _mapper.Map<AnalysisResultDto>(analysisResult);
     }
-
+    
     public Task<AnalysisResultDto> UpdateAnalysisResultAsync(AnalysisResultForUpdateDto analysisResultForUpdateDto)
     {
         throw new NotImplementedException();

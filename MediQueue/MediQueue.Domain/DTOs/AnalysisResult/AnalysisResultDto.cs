@@ -9,6 +9,8 @@ public record AnalysisResultDto(
     string? PhotoBase64, 
     TestStatus? Status,
     DateTime? ResultDate,
+    int? AccountId,
+    string? AccountName,
     int? ServiceUsageId,
     int? ServiceId,
     string? ServiceName,
