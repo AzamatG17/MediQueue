@@ -91,6 +91,7 @@ namespace MediQueue.Infrastructure.JwtToken
                 "Medicine" => 14,
                 "Conclusion" => 15,
                 "PaymentLekarstvo" => 16,
+                "AnalysisResult" => 17,
                 _ => 0
             };
         }

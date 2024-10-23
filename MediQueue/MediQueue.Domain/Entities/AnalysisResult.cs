@@ -11,6 +11,8 @@ public class AnalysisResult : EntityBase
     public TestStatus Status { get; set; } = TestStatus.Pending;
     public DateTime? ResultDate { get; set; }
 
+    public int? AccountId { get; set; }
+    public Account? Account { get; set; }
     public int ServiceUsageId { get; set; }
     public ServiceUsage ServiceUsage { get; set; }
     public int? QuestionnaireHistoryId { get; set; }

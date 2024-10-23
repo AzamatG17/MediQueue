@@ -64,7 +64,7 @@ public class AccountService : IAccountService
             FirstName = accountForCreateDto.FirstName,
             LastName = accountForCreateDto.LastName,
             SurName = accountForCreateDto.SurName,
-            Email = accountForCreateDto.Email,
+            PhotoBase = accountForCreateDto.Email,
             Bithdate = accountForCreateDto.Bithdate,
             RoleId = accountForCreateDto.RoleId
         };
@@ -117,7 +117,7 @@ public class AccountService : IAccountService
             account.FirstName ?? "",
             account.LastName ?? "",
             account.SurName ?? "",
-            account.Email ?? "",
+            account.PhotoBase ?? "",
             account.Bithdate,
             account.RoleId,
             account.Role.Name,

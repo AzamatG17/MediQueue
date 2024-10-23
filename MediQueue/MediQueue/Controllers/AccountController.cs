@@ -44,7 +44,7 @@ public class AccountController : BaseController
             var account = await _accountService.GetAccountByIdAsync(id);
 
             if (account is null)
-                return NotFound(CreateErrorResponse("Account data is null."));
+                return NotFound(CreateErrorResponse($"Account with id: {id} does not exist."));
 
             return Ok(account);
         }

@@ -14,6 +14,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<AnalysisResult>> FindAllAnalysisResultsAsync()
         {
             return await _context.AnalysisResults
+                .Include(a => a.Account)
                 .Include(s => s.ServiceUsage)
                 .ThenInclude(ss => ss.Service)
                 .AsNoTracking()
@@ -23,6 +24,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<AnalysisResult> FindAnalysisResultByIdAsync(int id)
         {
             return await _context.AnalysisResults
+                .Include(a => a.Account)
                 .Include(s => s.ServiceUsage)
                 .ThenInclude(ss => ss.Service)
                 .FirstOrDefaultAsync(x => x.Id == id);
