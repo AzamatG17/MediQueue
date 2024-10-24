@@ -78,7 +78,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("PhotoBase")
+                    b.Property<string>("PhotoBase64")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

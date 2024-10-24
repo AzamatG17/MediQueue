@@ -16,36 +16,44 @@ public class TokenValidationMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var token = context.Request.Headers["Cookie"].ToString();
-
-        if (!string.IsNullOrEmpty(token))
+        try
         {
-            var tokenWithOutName = ExtractSessionIdFromCookie(token);
+            var token = context.Request.Headers["Authorization"].ToString();
 
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(tokenWithOutName);
-
-            var sessionIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "SessionId");
-            var sessionId = sessionIdClaim?.Value;
-
-            if (!string.IsNullOrEmpty(sessionId))
+            if (!string.IsNullOrEmpty(token) && token.StartsWith("Bearer "))
             {
-                using var scope = _scopeFactory.CreateScope();
-                var authorizationService = scope.ServiceProvider.GetRequiredService<IAuthorizationService>();
+                var tokenWithoutBearer = token.Substring("Bearer ".Length).Trim();
 
-                var session = await authorizationService.GetSessionById(sessionId);
-                if (session == null || session.IsLoggedOut || session.AccessToken != tokenWithOutName)
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(tokenWithoutBearer);
+
+                var sessionIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "SessionId");
+                var sessionId = sessionIdClaim?.Value;
+
+                if (!string.IsNullOrEmpty(sessionId))
                 {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await context.Response.WriteAsync("Unauthorized: Invalid or logged-out session.");
-                    return;
+                    using var scope = _scopeFactory.CreateScope();
+                    var authorizationService = scope.ServiceProvider.GetRequiredService<IAuthorizationService>();
+
+                    var session = await authorizationService.GetSessionById(sessionId);
+                    if (session == null || session.IsLoggedOut || session.AccessToken != tokenWithoutBearer)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await context.Response.WriteAsync("Unauthorized: Invalid or logged-out session.");
+                        return;
+                    }
+
+                    await authorizationService.UpdateSessionActivity(session);
                 }
-
-                await authorizationService.UpdateSessionActivity(session);
             }
-        }
 
-        await _next(context);
+            await _next(context);
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
     }
 
     private string ExtractSessionIdFromCookie(string cookie)
@@ -57,7 +65,7 @@ public class TokenValidationMiddleware
         foreach (var c in cookies)
         {
             var parts = c.Trim().Split('=');
-            if (parts.Length == 2 && parts[0] == "mediks-cookies")
+            if (parts.Length == 2 && parts[0] == "Bearer")
             {
                 return parts[1];
             }

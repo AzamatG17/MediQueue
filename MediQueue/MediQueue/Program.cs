@@ -1,5 +1,4 @@
 using MediQueue.Extensions;
-using MediQueue.Infrastructure.JwtToken;
 
 namespace MediQueue
 {
