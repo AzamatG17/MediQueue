@@ -35,7 +35,7 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .HasMaxLength(255)
                 .IsRequired();
 
-            builder.Property(a => a.PhotoBase);
+            builder.Property(a => a.PhotoBase64);
 
             builder.Property(a => a.PhoneNumber)
                 .HasMaxLength(255)

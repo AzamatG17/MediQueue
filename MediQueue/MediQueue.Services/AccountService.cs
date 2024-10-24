@@ -39,7 +39,7 @@ public class AccountService : IAccountService
             throw new KeyNotFoundException($"Account with id {id} not found.");
         }
 
-        return _mapper.Map<AccountDto>(account);
+        return MapToAccountDto(account);
     }
 
     public async Task<AccountDto> CreateAccountAsync(AccountForCreateDto accountForCreateDto)
@@ -64,7 +64,7 @@ public class AccountService : IAccountService
             FirstName = accountForCreateDto.FirstName,
             LastName = accountForCreateDto.LastName,
             SurName = accountForCreateDto.SurName,
-            PhotoBase = accountForCreateDto.Email,
+            PhotoBase64 = accountForCreateDto.PhotoBase64 ?? "",
             Bithdate = accountForCreateDto.Bithdate,
             RoleId = accountForCreateDto.RoleId
         };
@@ -89,16 +89,42 @@ public class AccountService : IAccountService
 
     public async Task<AccountDto> UpdateAccountAsync(AccountForUpdateDto accountForUpdateDto)
     {
-        if (accountForUpdateDto == null)
+        ArgumentNullException.ThrowIfNull(nameof(accountForUpdateDto));
+
+        var role = await _roleRepository.FindByIdAsync(accountForUpdateDto.RoleId);
+        if (role == null)
         {
-            throw new ArgumentNullException(nameof(accountForUpdateDto));
+            throw new ArgumentException("Role not found.");
         }
 
-        var account = _mapper.Map<Account>(accountForUpdateDto);
+        var account = await _accountRepository.FindByIdWithRoleAsync(accountForUpdateDto.Id);
+        if (account == null)
+        {
+            throw new ArgumentException("Account not found.");
+        }
+
+        if (account.RolePermissions != null && account.RolePermissions.Any())
+        {
+            _dbContext.RolePermissions.RemoveRange(account.RolePermissions);
+        }
+
+        _mapper.Map(accountForUpdateDto, account);
+
+        var uniquePermissions = accountForUpdateDto.RolePermissions
+            .GroupBy(rp => rp.ControllerId)
+            .Select(g => new RolePermission
+            {
+                ControllerId = g.Key,
+                Permissions = g.SelectMany(rp => rp.Permissions).Distinct().ToList()
+            }).ToList();
+
+        account.RolePermissions = uniquePermissions;
+
+        account.Role = role;
 
         await _accountRepository.UpdateAsync(account);
 
-        return _mapper.Map<AccountDto>(account);
+        return MapToAccountDto(account);
     }
 
     public async Task DeleteAccountAsync(int id)
@@ -117,7 +143,7 @@ public class AccountService : IAccountService
             account.FirstName ?? "",
             account.LastName ?? "",
             account.SurName ?? "",
-            account.PhotoBase ?? "",
+            account.PhotoBase64 ?? "",
             account.Bithdate,
             account.RoleId,
             account.Role.Name,
