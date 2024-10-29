@@ -11,6 +11,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.ToTable(nameof(PaymentLekarstvo));
             builder.HasKey(pl => pl.Id);
 
+            builder.Property(x => x.IsActive)
+                .HasDefaultValue(true);
+
             builder.Property(pl => pl.TotalAmount)
                .HasColumnType("decimal(18,2)");
 

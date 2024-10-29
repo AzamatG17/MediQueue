@@ -1,8 +1,9 @@
-﻿using MediQueue.Domain.DTOs.Lekarstvo;
-using MediQueue.Domain.DTOs.Sclad;
+﻿using MediQueue.Domain.DTOs.Sclad;
+using MediQueue.Domain.DTOs.ScladLekarstvo;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.Persistence;
 
 namespace MediQueue.Services;
 
@@ -10,16 +11,20 @@ public class ScladService : IScladService
 {
     private readonly IScladRepository _cladRepository;
     private readonly IBranchRepository _branchRepository;
+    private readonly MediQueueDbContext _context;
 
-    public ScladService(IScladRepository cladRepository, IBranchRepository branchRepository)
+    public ScladService(IScladRepository cladRepository, IBranchRepository branchRepository, MediQueueDbContext mediQueueDbContext)
     {
         _cladRepository = cladRepository ?? throw new ArgumentNullException(nameof(cladRepository));
-        _branchRepository = branchRepository ?? throw new ArgumentNullException( nameof(branchRepository));
+        _branchRepository = branchRepository ?? throw new ArgumentNullException(nameof(branchRepository));
+        _context = mediQueueDbContext ?? throw new ArgumentNullException(nameof(mediQueueDbContext));
     }
 
     public async Task<IEnumerable<ScladDto>> GetAllScladsAsync()
     {
         var sclads = await _cladRepository.FindAllScladAsync();
+
+        if (sclads == null) return null;
 
         var scladDtos = new List<ScladDto>();
 
@@ -36,6 +41,8 @@ public class ScladService : IScladService
     {
         var sclad = await _cladRepository.FindbyIdScladAsync(id);
 
+        if (sclad == null) return null;
+
         return await MapToScladDto(sclad);
     }
 
@@ -44,6 +51,12 @@ public class ScladService : IScladService
         if (scladForCreateDto == null)
         {
             throw new ArgumentNullException(nameof(scladForCreateDto));
+        }
+
+        var branchExists = await _branchRepository.ExistsAsync(scladForCreateDto.Branchid);
+        if (!branchExists)
+        {
+            throw new InvalidOperationException($"Branch with ID {scladForCreateDto.Branchid} does not exist.");
         }
 
         var sclad = await MapToScladForCreate(scladForCreateDto);
@@ -60,9 +73,18 @@ public class ScladService : IScladService
             throw new ArgumentNullException(nameof(scladForUpdateDto));
         }
 
+        var existingSclad = await _cladRepository.FindbyIdScladAsync(scladForUpdateDto.Id);
+        if (existingSclad == null)
+        {
+            throw new InvalidOperationException($"Sclad with ID {scladForUpdateDto.Id} does not exist.");
+        }
+
+        existingSclad.Name = scladForUpdateDto.Name;
+        existingSclad.Branchid = scladForUpdateDto.Branchid;
+
         var sclad = await MapToScladForUpdate(scladForUpdateDto);
 
-        await _cladRepository.UpdateAsync(sclad);
+        await _context.SaveChangesAsync();
 
         return await MapToScladDto(sclad);
     }
@@ -100,27 +122,18 @@ public class ScladService : IScladService
             sclad.Name,
             sclad.Branchid,
             branch.Name,
-            sclad.Lekarstvos != null
-                ? sclad.Lekarstvos.Select(MapToLekarstvoDto).ToList()
-                : new List<LekarstvoDto>());
+            sclad.ScladLekarstvos != null
+                ? sclad.ScladLekarstvos.Select(MapToLekarstvoDto).ToList()
+                : new List<ScladLekarstvoDto>());
     }
 
-    private LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
+    private ScladLekarstvoDto MapToLekarstvoDto(ScladLekarstvo lekarstvo)
     {
-        return new LekarstvoDto(
+        return new ScladLekarstvoDto(
             lekarstvo.Id,
-            lekarstvo.Name,
-            lekarstvo.PurchasePrice,
-            lekarstvo.SalePrice,
-            lekarstvo.ExpirationDate,
-            lekarstvo.BeforeDate,
-            lekarstvo.PhotoBase64,
-            lekarstvo.TotalQuantity,
-            lekarstvo.PriceQuantity,
-            lekarstvo.MeasurementUnit,
-            lekarstvo.CategoryLekarstvoId,
-            lekarstvo.CategoryLekarstvo.Name,
+            lekarstvo.Quantity,
             lekarstvo.ScladId,
-            lekarstvo.Sclad.Name);
+            lekarstvo.Sclad?.Name ?? "",
+            lekarstvo.PartiyaId);
     }
 }

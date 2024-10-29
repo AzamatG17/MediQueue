@@ -18,12 +18,16 @@ public class LekarstvoService : ILekarstvoService
     {
         var lekarstvo = await _repository.FindAllAsync();
 
+        if (lekarstvo == null) return null;
+
         return lekarstvo.Select(MapToLekarstvoDto).ToList();
     }
 
     public async Task<LekarstvoDto> GetLekarstvoByIdAsync(int id)
     {
         var lekarstvo = await _repository.FindByIdAsync(id);
+
+        if (lekarstvo == null) return null;
 
         return MapToLekarstvoDto(lekarstvo);
     }
@@ -63,37 +67,37 @@ public class LekarstvoService : ILekarstvoService
 
     public async Task UseLekarstvoAsync(int id, decimal amount)
     {
-        var lekarstvo = await _repository.FindByIdAsync(id);
-        if (lekarstvo == null)
-        {
-            throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
-        }
+        //var lekarstvo = await _repository.FindByIdAsync(id);
+        //if (lekarstvo == null)
+        //{
+        //    throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
+        //}
 
-        if (amount <= 0)
-            throw new ArgumentException("Количество должно быть включено.");
+        //if (amount <= 0)
+        //    throw new ArgumentException("Количество должно быть включено.");
 
-        if (amount > lekarstvo.TotalQuantity - lekarstvo.PriceQuantity)
-            throw new InvalidOperationException("Недостаточно лекарства для использования.");
+        //if (amount > lekarstvo.TotalQuantity - lekarstvo.PriceQuantity)
+        //    throw new InvalidOperationException("Недостаточно лекарства для использования.");
 
-        lekarstvo.TotalQuantity -= amount;
+        //lekarstvo.TotalQuantity -= amount;
 
-        await _repository.UpdateAsync(lekarstvo);
+        //await _repository.UpdateAsync(lekarstvo);
     }
 
     public async Task AddLekarstvoQuantityAsync(int id, decimal amount)
     {
-        var lekarstvo = await _repository.FindByIdAsync(id);
-        if (lekarstvo == null)
-        {
-            throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
-        }
+        //var lekarstvo = await _repository.FindByIdAsync(id);
+        //if (lekarstvo == null)
+        //{
+        //    throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
+        //}
 
-        if (amount <= 0)
-            throw new ArgumentException("Количество должно быть положительным.");
+        //if (amount <= 0)
+        //    throw new ArgumentException("Количество должно быть положительным.");
 
-        lekarstvo.TotalQuantity += amount;
+        //lekarstvo.TotalQuantity += amount;
 
-        await _repository.UpdateAsync(lekarstvo);
+        //await _repository.UpdateAsync(lekarstvo);
     }
 
     private async Task<Lekarstvo> MapToLekarstvoUpdate(LekarstvoForUpdateDto lekarstvo)
@@ -102,12 +106,7 @@ public class LekarstvoService : ILekarstvoService
         {
             Id = lekarstvo.Id,
             Name = lekarstvo.Name,
-            PurchasePrice = lekarstvo.PurchasePrice,
-            SalePrice = lekarstvo.SalePrice,
-            ExpirationDate = lekarstvo.ExpirationDate,
-            BeforeDate = lekarstvo.BeforeDate,
             PhotoBase64 = lekarstvo.PhotoBase64,
-            MeasurementUnit = lekarstvo.MeasurementUnit,
             CategoryLekarstvoId = lekarstvo.CategoryLekarstvoId,
             ScladId = lekarstvo.ScladId
         };
@@ -118,14 +117,7 @@ public class LekarstvoService : ILekarstvoService
         return new Lekarstvo
         {
             Name = lekarstvo.Name,
-            PurchasePrice = lekarstvo.PurchasePrice,
-            SalePrice = lekarstvo.SalePrice,
-            ExpirationDate = lekarstvo.ExpirationDate,
-            BeforeDate = lekarstvo.BeforeDate,
             PhotoBase64 = lekarstvo.PhotoBase64,
-            TotalQuantity = lekarstvo.TotalQuantity,
-            PriceQuantity = lekarstvo.PriceQuantity,
-            MeasurementUnit = lekarstvo.MeasurementUnit,
             CategoryLekarstvoId = lekarstvo.CategoryLekarstvoId,
             ScladId = lekarstvo.ScladId
         };
@@ -136,14 +128,7 @@ public class LekarstvoService : ILekarstvoService
         return new LekarstvoDto(
             lekarstvo.Id,
             lekarstvo.Name,
-            lekarstvo.PurchasePrice,
-            lekarstvo.SalePrice,
-            lekarstvo.ExpirationDate,
-            lekarstvo.BeforeDate,
             lekarstvo.PhotoBase64,
-            lekarstvo.TotalQuantity,
-            lekarstvo.PriceQuantity,
-            lekarstvo.MeasurementUnit,
             lekarstvo.CategoryLekarstvoId,
             lekarstvo.CategoryLekarstvo?.Name ?? "",
             lekarstvo.ScladId,

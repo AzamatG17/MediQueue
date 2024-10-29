@@ -11,7 +11,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             : base(mediQueueDbContext)
         {
         }
-
+        
         public async Task<IEnumerable<QuestionnaireHistory>> GetAllQuestionnaireHistoriesAsync(QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs)
         {
             var query = _context.QuestionnaireHistories
@@ -39,6 +39,10 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             if (questionnaireHistoryResourceParametrs.QuestionnaireId.HasValue)
             {
                 query = query.Where(q => q.QuestionnaireId == questionnaireHistoryResourceParametrs.QuestionnaireId.Value);
+            }
+            if (questionnaireHistoryResourceParametrs.QuestionnaireHistoryId.HasValue)
+            {
+                query = query.Where(q => q.Historyid == questionnaireHistoryResourceParametrs.QuestionnaireHistoryId.Value);
             }
             if (questionnaireHistoryResourceParametrs.IsPayed.HasValue)
             {

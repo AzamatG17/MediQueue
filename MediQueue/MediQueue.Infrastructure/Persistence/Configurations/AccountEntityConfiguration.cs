@@ -11,6 +11,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.ToTable(nameof(Account));
             builder.HasKey(x => x.Id);
 
+            builder.Property(a => a.IsActive)
+                .HasDefaultValue(true);
+
             builder.Property(a => a.Login)
                 .HasMaxLength(255)
                 .IsRequired();

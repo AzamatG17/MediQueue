@@ -53,6 +53,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -112,6 +117,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int>("AccountId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<bool>("IsLoggedOut")
                         .HasColumnType("bit");
 
@@ -140,6 +150,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<int?>("AccountId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("MeasuredValue")
                         .IsRequired()
@@ -188,6 +203,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<string>("Addres")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -210,6 +230,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.HasKey("Id");
 
                     b.ToTable("Category", (string)null);
@@ -222,6 +247,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -253,6 +283,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<int>("HealthStatus")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<bool>("IsFullyRecovered")
                         .HasColumnType("bit");
@@ -287,6 +322,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.HasKey("Id");
 
                     b.ToTable("Controllers", (string)null);
@@ -304,6 +344,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.HasKey("Id");
 
@@ -326,6 +371,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<DateTime?>("ExpirationDate")
                         .HasColumnType("datetime");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("MeasurementUnit")
                         .HasColumnType("nvarchar(max)");
@@ -376,6 +426,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int?>("ConclusionId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<bool?>("IsPayed")
                         .HasColumnType("bit");
 
@@ -412,6 +467,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<int?>("AccountId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<int?>("LekarstvoId")
                         .HasColumnType("int");
@@ -458,6 +518,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<int?>("AccountId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<int?>("LekarstvoId")
                         .HasColumnType("int");
@@ -510,6 +575,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -558,6 +628,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("LastName")
                         .HasMaxLength(255)
@@ -627,6 +702,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int>("Historyid")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<bool?>("IsPayed")
                         .HasColumnType("bit");
 
@@ -649,6 +729,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -674,6 +759,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int>("ControllerId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Permissions")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -695,6 +785,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<int>("Branchid")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -721,6 +816,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -743,6 +843,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<decimal?>("Amount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<bool?>("IsPayed")
                         .HasColumnType("bit");

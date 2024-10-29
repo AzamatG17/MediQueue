@@ -11,6 +11,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.ToTable(nameof(Sclad));
             builder.HasKey(x => x.Id);
 
+            builder.Property(x => x.IsActive)
+                .HasDefaultValue(true);
+
             builder.Property(x => x.Name)
                 .IsRequired();
 
@@ -18,9 +21,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .WithMany(b => b.Sclads)
                 .HasForeignKey(x => x.Branchid);
 
-            builder.HasMany(x => x.Lekarstvos)
+            builder.HasMany(x => x.ScladLekarstvos)
                 .WithOne(l => l.Sclad)
-                .HasForeignKey(l => l.ScladId);
+                .HasForeignKey(l => l.ScladId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.Navigation(x => x.Branch)
                 .AutoInclude();

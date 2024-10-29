@@ -27,6 +27,10 @@ public class QuestionnaireController : BaseController
         try
         {
             var accounts = await _questionnaireService.GetAllQuestionnairesAsync(questionnaireResourceParameters);
+
+            if (accounts == null || !accounts.Any())
+                return NotFound(CreateErrorResponse($"Questionnairy Service does not exist."));
+
             return Ok(accounts);
         }
         catch (Exception ex)

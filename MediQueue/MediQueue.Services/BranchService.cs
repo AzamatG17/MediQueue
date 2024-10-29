@@ -2,6 +2,7 @@
 using MediQueue.Domain.DTOs.Branch;
 using MediQueue.Domain.DTOs.Lekarstvo;
 using MediQueue.Domain.DTOs.Sclad;
+using MediQueue.Domain.DTOs.ScladLekarstvo;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
@@ -22,12 +23,16 @@ public class BranchService : IBranchService
     {
         var branches = await _repository.FindAllBranches();
 
+        if (branches == null) return null;
+
         return branches.Select(MapToBranchDto).ToList();
     }
 
     public async Task<BranchDto> GetBranchByIdAsync(int id)
     {
         var branch = await _repository.FindByIdBranch(id);
+
+        if (branch == null) return null;
 
         return MapToBranchDto(branch);
     }
@@ -101,29 +106,19 @@ public class BranchService : IBranchService
             sclad.Id,
             sclad.Name,
             sclad.Branchid,
-            sclad.Branch.Name,
-            sclad.Lekarstvos != null
-                ? sclad.Lekarstvos.Select(MapToLekarstvoDto).ToList()
-                : new List<LekarstvoDto>());
+            sclad.Branch?.Name ?? "",
+            sclad.ScladLekarstvos != null
+                ? sclad.ScladLekarstvos.Select(MapToLekarstvoDto).ToList()
+                : new List<ScladLekarstvoDto>());
     }
 
-    private LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
+    private ScladLekarstvoDto MapToLekarstvoDto(ScladLekarstvo lekarstvo)
     {
-        return new LekarstvoDto(
+        return new ScladLekarstvoDto(
             lekarstvo.Id,
-            lekarstvo.Name,
-            lekarstvo.PurchasePrice,
-            lekarstvo.SalePrice,
-            lekarstvo.ExpirationDate,
-            lekarstvo.BeforeDate,
-            lekarstvo.PhotoBase64,
-            lekarstvo.TotalQuantity,
-            lekarstvo.PriceQuantity,
-            lekarstvo.MeasurementUnit,
-            lekarstvo.CategoryLekarstvoId,
-            lekarstvo.CategoryLekarstvo.Name,
+            lekarstvo.Quantity,
             lekarstvo.ScladId,
-            lekarstvo.Sclad.Name
-            );
+            lekarstvo.Sclad?.Name ?? "",
+            lekarstvo.PartiyaId);
     }
 }

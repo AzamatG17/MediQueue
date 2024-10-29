@@ -11,6 +11,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.ToTable(nameof(AccountSession));
             builder.HasKey(x => x.Id);
 
+            builder.Property(x => x.IsActive)
+                .HasDefaultValue(true);
+
             builder.Property(x => x.AccountId)
                 .IsRequired();
 

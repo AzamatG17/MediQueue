@@ -11,6 +11,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.ToTable(nameof(Domain.Entities.Group));
             builder.HasKey(x => x.Id);
 
+            builder.Property(x => x.IsActive)
+                .HasDefaultValue(true);
+
             builder.Property(g => g.GroupName)
                 .HasMaxLength(255)
                 .IsRequired();

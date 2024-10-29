@@ -8,5 +8,5 @@ public class Sclad : EntityBase
 
     public int Branchid { get; set; }
     public Branch Branch { get; set; }
-    public virtual ICollection<Lekarstvo> Lekarstvos { get; set; }
+    public virtual ICollection<ScladLekarstvo> ScladLekarstvos { get; set; }
 }
