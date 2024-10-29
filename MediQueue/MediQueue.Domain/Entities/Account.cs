@@ -13,6 +13,7 @@ public class Account : EntityBase
     public string SurName { get; set; }
     public string PhotoBase64 { get; set; }
     public DateTime Bithdate { get; set; }
+
     public int RoleId { get; set; }
     public Role Role { get; set; }
 

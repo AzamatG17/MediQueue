@@ -10,7 +10,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
         {
             builder.ToTable(nameof(LekarstvoUsage));
             builder.HasKey(lu => lu.Id);
-            
+
+            builder.Property(x => x.IsActive)
+                .HasDefaultValue(true);
+
             builder.Property(lu => lu.QuantityUsed)
                 .HasColumnType("decimal(18,2)");
 

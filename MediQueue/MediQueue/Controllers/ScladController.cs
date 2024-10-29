@@ -25,6 +25,10 @@ public class ScladController : BaseController
         try
         {
             var accounts = await _cladService.GetAllScladsAsync();
+
+            if (accounts == null || !accounts.Any())
+                return NotFound(CreateErrorResponse($"Sclad does not exist."));
+
             return Ok(accounts);
         }
         catch (Exception ex)

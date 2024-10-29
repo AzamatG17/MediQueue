@@ -1,6 +1,8 @@
-﻿using MediQueue.Domain.Entities.Enums;
-
-namespace MediQueue.Domain.DTOs.Lekarstvo;
+﻿namespace MediQueue.Domain.DTOs.Lekarstvo;
 
 public record LekarstvoForUpdateDto(
-    int Id, string? Name, decimal? PurchasePrice, decimal? SalePrice, DateTime? ExpirationDate, DateTime? BeforeDate, string? PhotoBase64, decimal? TotalQuantity, decimal? PriceQuantity, MeasurementUnit? MeasurementUnit, int? CategoryLekarstvoId, int? ScladId);
+    int Id, 
+    string? Name,
+    string? PhotoBase64, 
+    int? CategoryLekarstvoId,
+    int? ScladId);

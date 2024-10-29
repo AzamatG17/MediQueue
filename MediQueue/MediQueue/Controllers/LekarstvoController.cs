@@ -26,6 +26,10 @@ public class LekarstvoController : BaseController
         try
         {
             var accounts = await _lekarstvoService.GetAllLekarstvosAsync();
+
+            if (accounts == null || !accounts.Any())
+                return NotFound(CreateErrorResponse($"Lekarstvo does not exist."));
+
             return Ok(accounts);
         }
         catch (Exception ex)
@@ -69,7 +73,7 @@ public class LekarstvoController : BaseController
         try
         {
             var createdAccount = await _lekarstvoService.CreateLekarstvoAsync(lekarstvoForCreateDto);
-            return Ok(CreateSuccessResponse("Group successfully created."));
+            return Ok(CreateSuccessResponse("Lekarstvo successfully created."));
         }
         catch (Exception ex)
         {

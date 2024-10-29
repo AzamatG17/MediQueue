@@ -99,7 +99,7 @@ public class PaymentServiceService : IPaymentServiceService
     private async Task<PaymentService> PaymentForService(PaymentServiceForCreateDto payment, QuestionnaireHistory questionnaireHistory)
     {
         var serviceUsage = questionnaireHistory.ServiceUsages
-                       .FirstOrDefault(s => s.Id == payment.ServiceId);
+                       .FirstOrDefault(s => s.Id == payment.ServiceId && s.Amount < 0);
 
         if (serviceUsage == null)
         {
@@ -125,7 +125,7 @@ public class PaymentServiceService : IPaymentServiceService
             PaymentType = payment.PaymentType ?? PaymentType.Cash,
             QuestionnaireHistoryId = serviceUsage.QuestionnaireHistoryId,
             AccountId = payment.AccountId,
-            ServiceId = serviceUsage.Id,
+            ServiceId = serviceUsage.ServiceId,
             MedicationType = payment.MedicationType,
             PaymentStatus = DeterminePaymentStatus(payment.PaidAmount, remainingAmount)
         };
@@ -136,7 +136,7 @@ public class PaymentServiceService : IPaymentServiceService
 
         questionnaireHistory.IsPayed = questionnaireHistory.Balance >= 0;
 
-        serviceUsage.Amount = remainingAmount +payment.PaidAmount;
+        serviceUsage.Amount = remainingAmount + payment.PaidAmount;
         serviceUsage.IsPayed = serviceUsage.Amount == 0;
 
         await _questionnaireHistoryRepositoty.SaveChangeAsync();

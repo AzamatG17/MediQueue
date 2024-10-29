@@ -26,6 +26,10 @@ public class PaymentServiceController : BaseController
         try
         {
             var accounts = await _paymentService.GetAllPaymentsAsync();
+
+            if (accounts == null || !accounts.Any())
+                return NotFound(CreateErrorResponse($"Payment Service does not exist."));
+
             return Ok(accounts);
         }
         catch (Exception ex)

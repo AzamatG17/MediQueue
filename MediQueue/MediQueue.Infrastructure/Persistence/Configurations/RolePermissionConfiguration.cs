@@ -12,6 +12,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.ToTable(nameof(RolePermission));
             builder.HasKey(rp => rp.Id);
 
+            builder.Property(x => x.IsActive)
+                .HasDefaultValue(true);
+
             builder.Property(rp => rp.ControllerId)
                 .IsRequired();
 

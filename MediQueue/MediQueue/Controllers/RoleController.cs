@@ -27,6 +27,10 @@ public class RoleController : BaseController
         try
         {
             var accounts = await _roleService.GetAllRolesAsync();
+
+            if (accounts == null || !accounts.Any())
+                return NotFound(CreateErrorResponse($"Role does not exist."));
+
             return Ok(accounts);
         }
         catch (Exception ex)

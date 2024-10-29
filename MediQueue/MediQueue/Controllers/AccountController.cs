@@ -1,4 +1,5 @@
 ﻿using MediQueue.Domain.DTOs.Account;
+using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.JwtToken;
@@ -27,6 +28,10 @@ public class AccountController : BaseController
         try
         {
             var accounts = await _accountService.GetAllAccountsAsync();
+
+            if (accounts == null || !accounts.Any())
+                return NotFound(CreateErrorResponse($"Account does not exist."));
+
             return Ok(accounts);
         }
         catch (Exception ex)

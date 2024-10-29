@@ -15,9 +15,10 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Branches
                 .Include(x => x.Sclads)
-                .ThenInclude(x => x.Lekarstvos)
-                .ThenInclude(x => x.CategoryLekarstvo)
-                .AsNoTracking()
+                .ThenInclude(sc => sc.ScladLekarstvos)
+                    .ThenInclude(l => l.Sclad)
+                .ThenInclude(sc => sc.ScladLekarstvos)
+                    .ThenInclude(l => l.Partiya)
                 .ToListAsync();
         }
 
@@ -25,9 +26,16 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Branches
                 .Include(x => x.Sclads)
-                .ThenInclude(x => x.Lekarstvos)
-                .ThenInclude(x => x.CategoryLekarstvo)
+                .ThenInclude(sc => sc.ScladLekarstvos)
+                    .ThenInclude(l => l.Sclad)
+                .ThenInclude(sc => sc.ScladLekarstvos)
+                    .ThenInclude(l => l.Partiya)
                 .FirstOrDefaultAsync(x => x.Id == Id);
+        }
+
+        public async Task<bool> ExistsAsync(int branchId)
+        {
+            return await _context.Branches.AnyAsync(b => b.Id == branchId);
         }
     }
 }

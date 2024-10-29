@@ -12,6 +12,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.ToTable(nameof(AnalysisResult));
             builder.HasKey(x => x.Id);
 
+            builder.Property(ar => ar.IsActive)
+                .HasDefaultValue(true);
+
             builder.Property(ar => ar.MeasuredValue)
                 .IsRequired()
                 .HasMaxLength(100);

@@ -6,5 +6,6 @@ namespace MediQueue.Domain.Interfaces.Repositories
     {
         Task<IEnumerable<Branch>> FindAllBranches();
         Task<Branch> FindByIdBranch(int Id);
+        Task<bool> ExistsAsync(int branchId);
     }
 }
