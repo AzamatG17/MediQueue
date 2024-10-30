@@ -52,7 +52,7 @@ public class ConclusionService : IConclusionService
             var lekarstvoUsageEntity = new LekarstvoUsage
             {
                 Conclusion = conclusion,
-                Lekarstvo = lekarstvo,
+                DoctorCabinetLekarstvo = null,
                 QuantityUsed = quantityUsed,
                 TotalPrice = totalPrice,
                 Amount = totalPrice * -1
@@ -128,8 +128,9 @@ public class ConclusionService : IConclusionService
             conclusion.LekarstvoUsages?.Select(u => new LekarstvoUsageForHelpDto(
                 u.Id,
                 u.ConclusionId,
-                u.LekarstvoId,
-                u.Lekarstvo?.Name ?? "",
+                u.DoctorCabinetLekarstvoId,
+                "",
+                //u.Lekarstvo?.Name ?? "",
                 0,
                 //u.Lekarstvo?.SalePrice ?? 0,
                 u.QuantityUsed,

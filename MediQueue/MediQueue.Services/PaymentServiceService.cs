@@ -148,7 +148,7 @@ public class PaymentServiceService : IPaymentServiceService
     {
         var lekarstvoUsage = questionnaireHistory.Conclusions
                                         .SelectMany(c => c.LekarstvoUsages)
-                                        .FirstOrDefault(l => l.LekarstvoId == payment.LekarstvoId && l.Amount < 0);
+                                        .FirstOrDefault(l => l.DoctorCabinetLekarstvoId == payment.LekarstvoId && l.Amount < 0);
 
         if (lekarstvoUsage == null)
         {
@@ -156,13 +156,13 @@ public class PaymentServiceService : IPaymentServiceService
         }
 
         var existingPayments = questionnaireHistory.PaymentServices
-                                    .Where(p => p.LekarstvoId == lekarstvoUsage.LekarstvoId);
+                                    .Where(p => p.LekarstvoId == lekarstvoUsage.DoctorCabinetLekarstvoId);
         var totalPaidAmount = existingPayments.Sum(p => p.PaidAmount ?? 0);
         var remainingAmount = lekarstvoUsage.Amount ?? lekarstvoUsage.TotalPrice - totalPaidAmount;
 
         if (payment.PaidAmount > remainingAmount * -1)
         {
-            throw new InvalidOperationException($"Paid amount exceeds the remaining amount for Lekarstvo ID {lekarstvoUsage.LekarstvoId}.");
+            throw new InvalidOperationException($"Paid amount exceeds the remaining amount for Lekarstvo ID {lekarstvoUsage.DoctorCabinetLekarstvoId}.");
         }
 
         var paymentService = new PaymentService
@@ -174,7 +174,7 @@ public class PaymentServiceService : IPaymentServiceService
             PaymentType = payment.PaymentType ?? PaymentType.Cash,
             QuestionnaireHistoryId = lekarstvoUsage.QuestionnaireHistoryId,
             AccountId = payment.AccountId,
-            LekarstvoId = lekarstvoUsage.LekarstvoId,
+            LekarstvoId = lekarstvoUsage.DoctorCabinetLekarstvoId,
             MedicationType = payment.MedicationType,
             PaymentStatus = DeterminePaymentStatus(payment.PaidAmount, remainingAmount)
         };

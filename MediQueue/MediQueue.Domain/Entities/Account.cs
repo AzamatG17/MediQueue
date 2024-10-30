@@ -19,4 +19,5 @@ public class Account : EntityBase
 
     public virtual ICollection<QuestionnaireHistory> QuestionnaireHistories { get; set; }
     public virtual ICollection<RolePermission> RolePermissions { get; set; }
+    public virtual ICollection<DoctorCabinet> DoctorCabinets { get; set; }
 }  

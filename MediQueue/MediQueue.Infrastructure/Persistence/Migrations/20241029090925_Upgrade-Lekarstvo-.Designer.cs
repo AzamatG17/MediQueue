@@ -4,6 +4,7 @@ using MediQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediQueue.Infrastructure.persistence.Migrations
 {
     [DbContext(typeof(MediQueueDbContext))]
-    partial class MediQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241029090925_Upgrade-Lekarstvo-")]
+    partial class UpgradeLekarstvo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -332,65 +335,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.ToTable("Controllers", (string)null);
                 });
 
-            modelBuilder.Entity("MediQueue.Domain.Entities.DoctorCabinet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("RoomNumber")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("DoctorCabinet", (string)null);
-                });
-
-            modelBuilder.Entity("MediQueue.Domain.Entities.DoctorCabinetLekarstvo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DoctorCabinetId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<int>("PartiyaId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DoctorCabinetId");
-
-                    b.HasIndex("PartiyaId");
-
-                    b.ToTable("DoctorCabinetLekarstvo", (string)null);
-                });
-
             modelBuilder.Entity("MediQueue.Domain.Entities.Group", b =>
                 {
                     b.Property<int>("Id")
@@ -464,9 +408,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int?>("ConclusionId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DoctorCabinetLekarstvoId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -474,6 +415,9 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<bool?>("IsPayed")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("LekarstvoId")
+                        .HasColumnType("int");
 
                     b.Property<decimal?>("QuantityUsed")
                         .HasColumnType("decimal(18,2)");
@@ -488,7 +432,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.HasIndex("ConclusionId");
 
-                    b.HasIndex("DoctorCabinetLekarstvoId");
+                    b.HasIndex("LekarstvoId");
 
                     b.HasIndex("QuestionnaireHistoryId");
 
@@ -903,9 +847,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int?>("PartiyaId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PartiyaId1")
-                        .HasColumnType("int");
-
                     b.Property<decimal?>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
@@ -915,8 +856,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PartiyaId");
-
-                    b.HasIndex("PartiyaId1");
 
                     b.HasIndex("ScladId");
 
@@ -1067,35 +1006,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Navigation("ServiceUsage");
                 });
 
-            modelBuilder.Entity("MediQueue.Domain.Entities.DoctorCabinet", b =>
-                {
-                    b.HasOne("MediQueue.Domain.Entities.Account", "Account")
-                        .WithMany("DoctorCabinets")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("MediQueue.Domain.Entities.DoctorCabinetLekarstvo", b =>
-                {
-                    b.HasOne("MediQueue.Domain.Entities.DoctorCabinet", "DoctorCabinet")
-                        .WithMany("DoctorCabinetLekarstvos")
-                        .HasForeignKey("DoctorCabinetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MediQueue.Domain.Entities.Partiya", "Partiya")
-                        .WithMany("DoctorCabinetLekarstvos")
-                        .HasForeignKey("PartiyaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DoctorCabinet");
-
-                    b.Navigation("Partiya");
-                });
-
             modelBuilder.Entity("MediQueue.Domain.Entities.Lekarstvo", b =>
                 {
                     b.HasOne("MediQueue.Domain.Entities.CategoryLekarstvo", "CategoryLekarstvo")
@@ -1116,13 +1026,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 {
                     b.HasOne("MediQueue.Domain.Entities.Conclusion", "Conclusion")
                         .WithMany("LekarstvoUsages")
-                        .HasForeignKey("ConclusionId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ConclusionId");
 
-                    b.HasOne("MediQueue.Domain.Entities.DoctorCabinetLekarstvo", "DoctorCabinetLekarstvo")
+                    b.HasOne("MediQueue.Domain.Entities.Lekarstvo", "Lekarstvo")
                         .WithMany("LekarstvoUsages")
-                        .HasForeignKey("DoctorCabinetLekarstvoId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("LekarstvoId");
 
                     b.HasOne("MediQueue.Domain.Entities.QuestionnaireHistory", "QuestionnaireHistory")
                         .WithMany()
@@ -1130,7 +1038,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Navigation("Conclusion");
 
-                    b.Navigation("DoctorCabinetLekarstvo");
+                    b.Navigation("Lekarstvo");
 
                     b.Navigation("QuestionnaireHistory");
                 });
@@ -1244,10 +1152,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .WithMany()
                         .HasForeignKey("PartiyaId");
 
-                    b.HasOne("MediQueue.Domain.Entities.Partiya", null)
-                        .WithMany("ScladLekarstvos")
-                        .HasForeignKey("PartiyaId1");
-
                     b.HasOne("MediQueue.Domain.Entities.Sclad", "Sclad")
                         .WithMany("ScladLekarstvos")
                         .HasForeignKey("ScladId")
@@ -1288,8 +1192,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
             modelBuilder.Entity("MediQueue.Domain.Entities.Account", b =>
                 {
-                    b.Navigation("DoctorCabinets");
-
                     b.Navigation("QuestionnaireHistories");
 
                     b.Navigation("RolePermissions");
@@ -1315,26 +1217,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Navigation("LekarstvoUsages");
                 });
 
-            modelBuilder.Entity("MediQueue.Domain.Entities.DoctorCabinet", b =>
-                {
-                    b.Navigation("DoctorCabinetLekarstvos");
-                });
-
-            modelBuilder.Entity("MediQueue.Domain.Entities.DoctorCabinetLekarstvo", b =>
-                {
-                    b.Navigation("LekarstvoUsages");
-                });
-
             modelBuilder.Entity("MediQueue.Domain.Entities.Lekarstvo", b =>
                 {
+                    b.Navigation("LekarstvoUsages");
+
                     b.Navigation("Partiyas");
-                });
-
-            modelBuilder.Entity("MediQueue.Domain.Entities.Partiya", b =>
-                {
-                    b.Navigation("DoctorCabinetLekarstvos");
-
-                    b.Navigation("ScladLekarstvos");
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.Questionnaire", b =>

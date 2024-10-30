@@ -37,7 +37,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
 
     public async Task<QuestionnaireHistoryDto> GetQuestionnaireHistoryByIdAsync(int id)
     {
-        var questionn = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByIdAsync(id);
+        var questionn = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(id);
         if (questionn == null)
         {
             throw new KeyNotFoundException($"QuestionnaireHistory with {id} not found");
@@ -169,8 +169,9 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             conclusion.LekarstvoUsages?.Select(lekarstvo => new LekarstvoUsageForHelpDto(
                 lekarstvo.Id,
                 lekarstvo.ConclusionId,
-                lekarstvo.LekarstvoId,
-                lekarstvo.Lekarstvo?.Name ?? "",
+                lekarstvo.DoctorCabinetLekarstvoId,
+                "",
+                //lekarstvo.Lekarstvo?.Name ?? "",
                 0,
                 //lekarstvo.Lekarstvo?.SalePrice ?? 0,
                 lekarstvo.QuantityUsed,

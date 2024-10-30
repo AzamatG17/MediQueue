@@ -8,6 +8,7 @@ namespace MediQueue.Domain.Interfaces.Repositories
         Task<IEnumerable<QuestionnaireHistory>> GetAllQuestionnaireHistoriesAsync(QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs);
         Task<QuestionnaireHistory> GetQuestionnaireHistoryByIdAsync(int? id);
         Task<QuestionnaireHistory> GetQuestionnaireHistoryByHistoryIdAsync(int? id);
+        Task<QuestionnaireHistory> GetQuestionnaireHistoryByQuestionnaireIdAsync(int? id);
         Task<bool> ExistsByIdAsync(int newId);
         Task<QuestionnaireHistory> GetByIdAsync(int? id);
         Task DeleteWithOutService(int id);

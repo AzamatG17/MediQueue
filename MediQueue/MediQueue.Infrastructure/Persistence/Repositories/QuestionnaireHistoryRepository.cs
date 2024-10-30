@@ -28,7 +28,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(ps => ps.Service)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.LekarstvoUsages)
-                    .ThenInclude(lu => lu.Lekarstvo)
+                    .ThenInclude(lu => lu.DoctorCabinetLekarstvo)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.ServiceUsage)
                 .Include(q => q.Conclusions)
@@ -74,12 +74,35 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(ps => ps.Service)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.LekarstvoUsages)
-                    .ThenInclude(lu => lu.Lekarstvo)
+                    .ThenInclude(lu => lu.DoctorCabinetLekarstvo)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.ServiceUsage)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.Account)
                 .SingleOrDefaultAsync(qh => qh.Id == id);
+        }
+
+        public async Task<QuestionnaireHistory> GetQuestionnaireHistoryByQuestionnaireIdAsync(int? id)
+        {
+            return await _context.QuestionnaireHistories
+                .Include(q => q.Account)
+                .Include(q => q.Questionnaire)
+                .Include(q => q.ServiceUsages)
+                    .ThenInclude(su => su.Service)
+                .Include(q => q.PaymentServices)
+                    .ThenInclude(ps => ps.Account)
+                .Include(q => q.PaymentServices)
+                    .ThenInclude(ps => ps.Lekarstvo)
+                .Include(q => q.PaymentServices)
+                    .ThenInclude(ps => ps.Service)
+                .Include(q => q.Conclusions)
+                    .ThenInclude(c => c.LekarstvoUsages)
+                    .ThenInclude(lu => lu.DoctorCabinetLekarstvo)
+                .Include(q => q.Conclusions)
+                    .ThenInclude(c => c.ServiceUsage)
+                .Include(q => q.Conclusions)
+                    .ThenInclude(c => c.Account)
+                .SingleOrDefaultAsync(qh => qh.Historyid == id);
         }
 
         public async Task<QuestionnaireHistory> GetQuestionnaireHistoryByHistoryIdAsync(int? id)
@@ -97,7 +120,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(ps => ps.Service)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.LekarstvoUsages)
-                    .ThenInclude(lu => lu.Lekarstvo)
+                    .ThenInclude(lu => lu.DoctorCabinetLekarstvo)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.ServiceUsage)
                 .Include(q => q.Conclusions)
@@ -132,7 +155,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .ThenInclude(pl => pl.Service)
                 .Include(c => c.Conclusions)
                 .ThenInclude(l => l.LekarstvoUsages)
-                .ThenInclude(ll => ll.Lekarstvo)
+                .ThenInclude(ll => ll.DoctorCabinetLekarstvo)
                 .FirstOrDefaultAsync(q => q.Historyid == id);
         }
 

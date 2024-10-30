@@ -5,5 +5,6 @@ public record ScladLekarstvoDto(
     decimal? Quantity,
     int? ScladId,
     string? ScladName,
-    int? PartiyaId
+    int? PartiyaId,
+    string? LekarstvoName
     );

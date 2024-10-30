@@ -2,6 +2,6 @@
 
 public record ScladLekarstvoForCreate(
     decimal? Quantity,
-    int? ScladId,
-    int? PartiyaId
+    int ScladId,
+    int PartiyaId
     );
