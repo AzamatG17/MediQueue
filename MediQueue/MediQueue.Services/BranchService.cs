@@ -119,6 +119,7 @@ public class BranchService : IBranchService
             lekarstvo.Quantity,
             lekarstvo.ScladId,
             lekarstvo.Sclad?.Name ?? "",
-            lekarstvo.PartiyaId);
+            lekarstvo.PartiyaId,
+            lekarstvo.Partiya?.Lekarstvo?.Name ?? "");
     }
 }

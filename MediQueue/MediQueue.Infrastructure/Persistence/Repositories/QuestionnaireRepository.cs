@@ -19,8 +19,14 @@ public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionn
                         .ThenInclude(qh => qh.Account)
                         .Include(q => q.QuestionnaireHistories)
                         .ThenInclude(qh => qh.ServiceUsages)
+                            .ThenInclude(s => s.Service)
                         .AsNoTracking()
                         .AsQueryable();
+
+        if (questionnaireResourceParameters.Id.HasValue)
+        {
+            query = query.Where(q => q.Id == questionnaireResourceParameters.Id.Value);
+        }
 
         if (questionnaireResourceParameters.QuestionnaireId.HasValue)
         {

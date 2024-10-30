@@ -75,6 +75,7 @@ public static class DependencyInjection
         services.AddScoped<IConclusionService, ConclusionService>();
         services.AddScoped<IPaymentLekarstvoService, PaymentLekarstvoService>();
         services.AddScoped<IAnalysisResultService, AnalysisResultService>();
+        services.AddScoped<IScladLekarstvoService, ScladLekarstvoService>();
 
         services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
         services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
@@ -99,6 +100,8 @@ public static class DependencyInjection
         services.AddScoped<IPaymentLekarstvoRepository, PaymentLekarstvoRepository>();
         services.AddScoped<IServiceUsageRepository, ServiceUsageRepository>();
         services.AddScoped<IAnalysisResultRepository, AnalysisResultRepository>();
+        services.AddScoped<IScladLekarstvoRepository, ScladLekarstvoRepository>();
+        services.AddScoped<IPartiyaRepository, PartiyaRepository>();
     }
 
     private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)

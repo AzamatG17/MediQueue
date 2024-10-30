@@ -25,11 +25,16 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.HasOne(lu => lu.Conclusion)
                 .WithMany(c => c.LekarstvoUsages)
-                .HasForeignKey(lu => lu.ConclusionId);
+                .HasForeignKey(lu => lu.ConclusionId)
+                .OnDelete(DeleteBehavior.SetNull);
 
-            builder.HasOne(lu => lu.Lekarstvo)
+            builder.HasOne(lu => lu.DoctorCabinetLekarstvo)
                 .WithMany(l => l.LekarstvoUsages)
-                .HasForeignKey(lu => lu.LekarstvoId);
+                .HasForeignKey(lu => lu.DoctorCabinetLekarstvoId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Navigation(x => x.DoctorCabinetLekarstvo)
+                .AutoInclude();
         }
     }
 }

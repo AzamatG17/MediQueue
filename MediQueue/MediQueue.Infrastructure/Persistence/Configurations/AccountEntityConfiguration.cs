@@ -50,12 +50,13 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.HasMany(a => a.QuestionnaireHistories)
                 .WithOne(h => h.Account)
-                .HasForeignKey(h => h.AccountId);
+                .HasForeignKey(h => h.AccountId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasMany(r => r.RolePermissions)
                 .WithOne(rp => rp.Account)
                 .HasForeignKey(rp => rp.AccountId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
