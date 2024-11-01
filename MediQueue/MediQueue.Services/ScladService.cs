@@ -1,4 +1,5 @@
-﻿using MediQueue.Domain.DTOs.Sclad;
+﻿using MediQueue.Domain.DTOs.Partiya;
+using MediQueue.Domain.DTOs.Sclad;
 using MediQueue.Domain.DTOs.ScladLekarstvo;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
@@ -122,19 +123,26 @@ public class ScladService : IScladService
             sclad.Name,
             sclad.Branchid,
             branch.Name,
-            sclad.ScladLekarstvos != null
-                ? sclad.ScladLekarstvos.Select(MapToLekarstvoDto).ToList()
-                : new List<ScladLekarstvoDto>());
+            sclad.Partiyas != null
+                ? sclad.Partiyas.Select(MapToLekarstvoDto).ToList()
+                : new List<PartiyaDto>());
     }
 
-    private ScladLekarstvoDto MapToLekarstvoDto(ScladLekarstvo lekarstvo)
+    private PartiyaDto MapToLekarstvoDto(Partiya p)
     {
-        return new ScladLekarstvoDto(
-            lekarstvo.Id,
-            lekarstvo.Quantity,
-            lekarstvo.ScladId,
-            lekarstvo.Sclad?.Name ?? "",
-            lekarstvo.PartiyaId,
-            lekarstvo.Partiya?.Lekarstvo?.Name ?? "");
+        return new PartiyaDto(
+            p.Id,
+            p.PurchasePrice,
+            p.SalePrice,
+            p.ExpirationDate,
+            p.BeforeDate,
+            p.TotalQuantity,
+            p.PriceQuantity,
+            p.PhotoBase64,
+            p.MeasurementUnit,
+            p.LekarstvoId,
+            p.Lekarstvo?.Name ?? "",
+            p.ScladId,
+            p.Sclad?.Name ?? "");
     }
 }

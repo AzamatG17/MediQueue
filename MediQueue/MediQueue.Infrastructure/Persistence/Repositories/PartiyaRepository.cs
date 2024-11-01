@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediQueue.Infrastructure.Persistence.Repositories
 {
@@ -8,6 +9,20 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public PartiyaRepository(MediQueueDbContext mediQueueDbContext)
             : base(mediQueueDbContext)
         {
+        }
+
+        public async Task<IEnumerable<Partiya>> FindAllPartiyaAsync()
+        {
+            return await _context.Partiyas
+                .Include(l => l.Lekarstvo)
+                .ToListAsync();
+        }
+
+        public async Task<Partiya> FindByIdPartiyaAsync(int id)
+        {
+            return await _context.Partiyas
+                .Include(l => l.Lekarstvo)
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using MediQueue.Domain.DTOs.Partiya;
-using MediQueue.Domain.DTOs.ScladLekarstvo;
 
 namespace MediQueue.Domain.Interfaces.Services
 {
@@ -7,8 +6,8 @@ namespace MediQueue.Domain.Interfaces.Services
     {
         Task<IEnumerable<PartiyaDto>> GetAllPartiyastvosAsync();
         Task<PartiyaDto> GetPartiyaByIdAsync(int id);
-        Task<PartiyaDto> CreatePartiyaAsync(ScladLekarstvoForCreate scladLekarstvoForCreate);
-        Task<PartiyaDto> UpdatePartiyaAsync(ScladLekarstvoForUpdate scladLekarstvoForUpdate);
+        Task<PartiyaDto> CreatePartiyaAsync(PartiyaForCreateDto partiya);
+        Task<PartiyaDto> UpdatePartiyaAsync(PartiyaForUpdateDto partiya);
         Task DeletePartiyaAsync(int id);
     }
 }

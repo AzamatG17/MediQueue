@@ -16,6 +16,7 @@ public class Partiya : EntityBase
 
     public int? LekarstvoId { get; set; }
     public Lekarstvo? Lekarstvo { get; set; }
-    public virtual ICollection<ScladLekarstvo>? ScladLekarstvos { get; set; }
+    public int? ScladId { get; set; }
+    public Sclad? Sclad { get; set; }
     public virtual ICollection<DoctorCabinetLekarstvo>? DoctorCabinetLekarstvos { get; set; }
 }

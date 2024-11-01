@@ -9,6 +9,4 @@ public interface ILekarstvoService
     Task<LekarstvoDto> CreateLekarstvoAsync(LekarstvoForCreateDto lekarstvoForCreateDto);
     Task<LekarstvoDto> UpdateLekarstvoAsync(LekarstvoForUpdateDto lekarstvoForUpdateDto);
     Task DeleteLekarstvoAsync(int id);
-    Task UseLekarstvoAsync(int id, decimal amount);
-    Task AddLekarstvoQuantityAsync(int id, decimal amount);
 }

@@ -21,10 +21,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .WithMany(b => b.Sclads)
                 .HasForeignKey(x => x.Branchid);
 
-            builder.HasMany(x => x.ScladLekarstvos)
-                .WithOne(l => l.Sclad)
-                .HasForeignKey(l => l.ScladId)
-                .OnDelete(DeleteBehavior.SetNull);
+            builder.HasMany(s => s.Partiyas)
+                .WithOne(sl => sl.Sclad)
+                .HasForeignKey(sl => sl.ScladId);
 
             builder.Navigation(x => x.Branch)
                 .AutoInclude();

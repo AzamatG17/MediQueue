@@ -1,4 +1,4 @@
-﻿using MediQueue.Domain.DTOs.ScladLekarstvo;
+﻿using MediQueue.Domain.DTOs.Partiya;
 
 namespace MediQueue.Domain.DTOs.Sclad;
 
@@ -7,4 +7,4 @@ public record ScladDto(
     string Name,
     int Branchid,
     string BranchName, 
-    ICollection<ScladLekarstvoDto>? Lekarstvos);
+    ICollection<PartiyaDto>? Partiyas);

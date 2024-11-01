@@ -2,6 +2,6 @@
 
 public record DoctorCabinetLekarstvoForCreateDto(
     decimal? Quantity,
-    int? DoctorCabinetId,
-    int? PartiyaId
+    int DoctorCabinetId,
+    int PartiyaId
     );

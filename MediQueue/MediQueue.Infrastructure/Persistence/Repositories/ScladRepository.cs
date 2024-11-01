@@ -14,16 +14,14 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<Sclad>> FindAllScladAsync()
         {
             return await _context.Sclads
-                .Include(x => x.ScladLekarstvos)
-                .ThenInclude(l => l.Partiya)
+                .Include(x => x.Partiyas)
                 .ToListAsync();
         }
 
         public async Task<Sclad> FindbyIdScladAsync(int id)
         {
             return await _context.Sclads
-                .Include(x => x.ScladLekarstvos)
-                .ThenInclude(l => l.Partiya)
+                .Include(x => x.Partiyas)
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
     }

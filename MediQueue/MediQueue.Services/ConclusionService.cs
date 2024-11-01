@@ -12,14 +12,21 @@ public class ConclusionService : IConclusionService
     private readonly IConclusionRepository _repository;
     private readonly ILekarstvoRepository _lekarstvoRepository;
     private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
-    private readonly ILekarstvoService _lekarstvoService;
+    private readonly IDoctorCabinetLekarstvoService _doctorCabinetLekarstvoService;
+    private readonly IDoctorCabinetLekarstvoRepository _doctorCabinetLekarstvoRepository;
 
-    public ConclusionService(IConclusionRepository repository, ILekarstvoRepository lekarstvoRepository, ILekarstvoService lekarstvoService, IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty)
+    public ConclusionService(
+        IConclusionRepository repository,
+        ILekarstvoRepository lekarstvoRepository,
+        IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty,
+        IDoctorCabinetLekarstvoService doctorCabinetLekarstvoService,
+        IDoctorCabinetLekarstvoRepository doctorCabinetLekarstvoRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _lekarstvoRepository = lekarstvoRepository ?? throw new ArgumentNullException(nameof(lekarstvoRepository));
-        _lekarstvoService = lekarstvoService ?? throw new ArgumentNullException(nameof(lekarstvoService));
         _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
+        _doctorCabinetLekarstvoRepository = doctorCabinetLekarstvoRepository ?? throw new ArgumentNullException(nameof(doctorCabinetLekarstvoRepository));
+        _doctorCabinetLekarstvoService = doctorCabinetLekarstvoService ?? throw new ArgumentNullException(nameof(doctorCabinetLekarstvoService));
     }
 
     public async Task<ConclusionDto> CreateConclusionAsync(ConclusionForCreatreDto conclusionForCreatreDto)
@@ -37,13 +44,19 @@ public class ConclusionService : IConclusionService
                 continue;
             }
 
-            await _lekarstvoService.UseLekarstvoAsync(lekarstvoId, quantityUsed);
+            await _doctorCabinetLekarstvoService.UseLekarstvoAsync(lekarstvoId, quantityUsed);
 
             var lekarstvo = await _lekarstvoRepository.FindByIdAsync(lekarstvoId);
             if (lekarstvo == null)
             {
                 throw new Exception($"Lekarstvo with ID {lekarstvoId} not found.");
             }
+
+            //var lekarstvo = _doctorCabinetLekarstvoRepository.FindByIdDoctorCabinetLekarstvoAsync(lekarstvoId);
+            //if (lekarstvo == null)
+            //{
+            //    throw new Exception($"Lekarstvo with ID {lekarstvoId} not found.");
+            //}
 
             //var totalPrice = lekarstvo.SalePrice.GetValueOrDefault() * quantityUsed;
             var totalPrice = 0;

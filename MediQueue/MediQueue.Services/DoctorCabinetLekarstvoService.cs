@@ -1,65 +1,122 @@
-﻿using MediQueue.Domain.DTOs.DoctorCabinet;
-using MediQueue.Domain.DTOs.DoctorCabinetLekarstvo;
+﻿using MediQueue.Domain.DTOs.DoctorCabinetLekarstvo;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MediQueue.Services;
 
-public class DoctorCabinetLekarstvoService : IDoctorCabinetService
+public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
 {
-    public readonly IDoctorCabinetRepository _repository;
+    private readonly IDoctorCabinetLekarstvoRepository _repository;
+    private readonly IDoctorCabinetRepository _cabinetRepository;
+    private readonly IPartiyaRepository _partiyaRepository;
 
-    public DoctorCabinetLekarstvoService(IDoctorCabinetRepository repository)
+    public DoctorCabinetLekarstvoService(IDoctorCabinetLekarstvoRepository repository, IDoctorCabinetRepository cabinetRepository, IPartiyaRepository partiyaRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _cabinetRepository = cabinetRepository ?? throw new ArgumentNullException(nameof(cabinetRepository));
+        _partiyaRepository = partiyaRepository ?? throw new ArgumentNullException(nameof(partiyaRepository));
     }
 
-    public async Task<IEnumerable<DoctorCabinetDto>> GetAllDoctorCabinetsAsync()
+    public async Task<IEnumerable<DoctorCabinetLekarstvoDto>> GetAllDoctorCabinetLekarstvosAsync()
     {
-        var doctorCabinets = await _repository.FindAllAsync();
+        var cabinetLekarstvos = await _repository.FindAllDoctorCabinetLekarstvoAsync();
 
-        if (doctorCabinets == null) return null;
+        if (cabinetLekarstvos == null) return null;
 
-        return doctorCabinets.Select(MapToDoctorCabinetDto).ToList();
+        return cabinetLekarstvos.Select(MapToDoctorCabinetLekarstvoDto).ToList();
     }
 
-    public Task<DoctorCabinetDto> GetDoctorCabinetByIdAsync(int id)
+    public async Task<DoctorCabinetLekarstvoDto> GetDoctorCabinetLekarstvoByIdAsync(int id)
+    {
+        var cabinetLekarstvo = await _repository.FindByIdDoctorCabinetLekarstvoAsync(id);
+
+        if (cabinetLekarstvo == null) return null;
+
+        return MapToDoctorCabinetLekarstvoDto(cabinetLekarstvo);
+    }
+
+    public async Task<DoctorCabinetLekarstvoDto> CreateDoctorCabinetLekarstvoAsync(DoctorCabinetLekarstvoForCreateDto doctorCabinetLekarstvoForCreateDto)
+    {
+        ArgumentNullException.ThrowIfNull(doctorCabinetLekarstvoForCreateDto);
+
+        if (!await _cabinetRepository.IsExistByIdAsync(doctorCabinetLekarstvoForCreateDto.DoctorCabinetId))
+        {
+            throw new ArgumentException($"Doctor Cabinet with id: {doctorCabinetLekarstvoForCreateDto.DoctorCabinetId} does not exist");
+        }
+
+        var partiya = await _partiyaRepository.FindByIdAsync(doctorCabinetLekarstvoForCreateDto.PartiyaId);
+        if (partiya == null)
+        {
+            throw new ArgumentException($"Partiya with id: {doctorCabinetLekarstvoForCreateDto.PartiyaId} does not exist");
+        }
+
+        if (partiya.TotalQuantity.HasValue && partiya.TotalQuantity < doctorCabinetLekarstvoForCreateDto.Quantity)
+        {
+            throw new InvalidOperationException("Not enough quantity in Partiya for this operation.");
+        }
+
+        // Deduct the quantity from Partiya
+        partiya.TotalQuantity -= doctorCabinetLekarstvoForCreateDto.Quantity;
+
+        // Update Partiya in the database
+        await _partiyaRepository.UpdateAsync(partiya);
+
+        var cabinetLekarstvo = new DoctorCabinetLekarstvo
+        {
+            Quantity = (decimal)doctorCabinetLekarstvoForCreateDto.Quantity,
+            DoctorCabinetId = doctorCabinetLekarstvoForCreateDto.DoctorCabinetId,
+            PartiyaId = doctorCabinetLekarstvoForCreateDto.PartiyaId
+        };
+
+        await _repository.CreateAsync(cabinetLekarstvo);
+
+        return MapToDoctorCabinetLekarstvoDto(cabinetLekarstvo);
+    }
+
+    public Task<DoctorCabinetLekarstvoDto> UpdateDoctorCabinetLekarstvoAsync(DoctorCabinetLekarstvoForUpdateDto doctorCabinetLekarstvoForUpdateDto)
     {
         throw new NotImplementedException();
     }
 
-    public Task<DoctorCabinetDto> CreateDoctorCabinetAsync(DoctorCabinetForCreate doctorCabinetForCreate)
+    public async Task DeleteDoctorCabinetLekarstvoAsync(int id)
     {
-        throw new NotImplementedException();
+        await _repository.DeleteAsync(id);
     }
 
-    public Task<DoctorCabinetDto> UpdateDoctorCabinetAsync(DoctorCabinetForUpdate doctorCabinetForUpdate)
+    public async Task UseLekarstvoAsync(int id, decimal amount)
     {
-        throw new NotImplementedException();
+        var lekarstvo = await _repository.FindByIdAsync(id);
+        if (lekarstvo == null)
+        {
+            throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
+        }
+
+        if (amount <= 0)
+            throw new ArgumentException("Quantity must be included.");
+
+        if (amount > lekarstvo.Quantity - lekarstvo.Partiya.PriceQuantity)
+            throw new InvalidOperationException("Not enough medicine to use.");
+
+        lekarstvo.Quantity -= amount;
+
+        await _repository.UpdateAsync(lekarstvo);
     }
 
-    public Task DeleteDoctorCabinetAsync(int id)
+    public async Task AddLekarstvoQuantityAsync(int id, decimal amount)
     {
-        throw new NotImplementedException();
-    }
+        var lekarstvo = await _repository.FindByIdAsync(id);
+        if (lekarstvo == null)
+        {
+            throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
+        }
 
-    private DoctorCabinetDto MapToDoctorCabinetDto(DoctorCabinet d)
-    {
-        return new DoctorCabinetDto(
-            d.Id,
-            d.RoomNumber,
-            d.AccountId,
-            $"{d.Account?.LastName} {d.Account?.FirstName} {d.Account?.SurName}" ?? "",
-            d.DoctorCabinetLekarstvos != null
-                ? d.DoctorCabinetLekarstvos.Select(MapToDoctorCabinetLekarstvoDto).ToList()
-                : new List<DoctorCabinetLekarstvoDto>()
-            );
+        if (amount <= 0)
+            throw new ArgumentException("Quantity must be included.");
+
+        lekarstvo.Quantity += amount;
+
+        await _repository.UpdateAsync(lekarstvo);
     }
 
     private DoctorCabinetLekarstvoDto MapToDoctorCabinetLekarstvoDto(DoctorCabinetLekarstvo d)
@@ -69,7 +126,8 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetService
             d.Quantity,
             d.DoctorCabinetId,
             $"{d.DoctorCabinet?.Account?.LastName} {d.DoctorCabinet?.Account?.FirstName} {d.DoctorCabinet?.Account?.SurName}" ?? "",
-            d.PartiyaId
+            d.PartiyaId,
+            d.Partiya?.Lekarstvo?.Name ?? ""
             );
     }
 }
