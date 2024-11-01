@@ -42,6 +42,11 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .WithMany(l => l.Partiyas)
                 .HasForeignKey(x => x.LekarstvoId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(x => x.Sclad)
+                .WithMany(s => s.Partiyas)
+                .HasForeignKey(x => x.ScladId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

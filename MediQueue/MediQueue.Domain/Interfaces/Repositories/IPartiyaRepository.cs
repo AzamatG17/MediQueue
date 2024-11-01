@@ -4,5 +4,7 @@ namespace MediQueue.Domain.Interfaces.Repositories
 {
     public interface IPartiyaRepository : IRepositoryBase<Partiya>
     {
+        Task<IEnumerable<Partiya>> FindAllPartiyaAsync();
+        Task<Partiya> FindByIdPartiyaAsync(int id);
     }
 }

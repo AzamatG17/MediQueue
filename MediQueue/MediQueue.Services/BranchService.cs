@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Branch;
 using MediQueue.Domain.DTOs.Lekarstvo;
+using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.DTOs.Sclad;
 using MediQueue.Domain.DTOs.ScladLekarstvo;
 using MediQueue.Domain.Entities;
@@ -107,19 +108,26 @@ public class BranchService : IBranchService
             sclad.Name,
             sclad.Branchid,
             sclad.Branch?.Name ?? "",
-            sclad.ScladLekarstvos != null
-                ? sclad.ScladLekarstvos.Select(MapToLekarstvoDto).ToList()
-                : new List<ScladLekarstvoDto>());
+            sclad.Partiyas != null
+                ? sclad.Partiyas.Select(MapToLekarstvoDto).ToList()
+                : new List<PartiyaDto>());
     }
 
-    private ScladLekarstvoDto MapToLekarstvoDto(ScladLekarstvo lekarstvo)
+    private PartiyaDto MapToLekarstvoDto(Partiya p)
     {
-        return new ScladLekarstvoDto(
-            lekarstvo.Id,
-            lekarstvo.Quantity,
-            lekarstvo.ScladId,
-            lekarstvo.Sclad?.Name ?? "",
-            lekarstvo.PartiyaId,
-            lekarstvo.Partiya?.Lekarstvo?.Name ?? "");
+        return new PartiyaDto(
+            p.Id,
+            p.PurchasePrice,
+            p.SalePrice,
+            p.ExpirationDate,
+            p.BeforeDate,
+            p.TotalQuantity,
+            p.PriceQuantity,
+            p.PhotoBase64,
+            p.MeasurementUnit,
+            p.LekarstvoId,
+            p.Lekarstvo?.Name ?? "",
+            p.ScladId,
+            p.Sclad?.Name ?? "");
     }
 }

@@ -3,7 +3,6 @@
 namespace MediQueue.Domain.DTOs.Partiya;
 
 public record PartiyaForCreateDto(
-    int? Id,
     decimal? PurchasePrice,
     decimal? SalePrice,
     DateTime? ExpirationDate,
@@ -12,5 +11,6 @@ public record PartiyaForCreateDto(
     decimal? PriceQuantity,
     string? PhotoBase64,
     MeasurementUnit? MeasurementUnit,
-    int? LekarstvoId
+    int LekarstvoId,
+    int ScladId
     );

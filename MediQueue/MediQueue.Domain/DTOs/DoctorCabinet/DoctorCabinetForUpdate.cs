@@ -3,5 +3,5 @@
 public record DoctorCabinetForUpdate(
     int Id,
     string? RoomNumber,
-    int? AccountId
+    int AccountId
     );

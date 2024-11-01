@@ -13,5 +13,7 @@ public record PartiyaDto(
     string? PhotoBase64,
     MeasurementUnit? MeasurementUnit,
     int? LekarstvoId,
-    string? LEkarstvoName
+    string? LekarstvoName,
+    int? ScladId,
+    string? ScladName
     );

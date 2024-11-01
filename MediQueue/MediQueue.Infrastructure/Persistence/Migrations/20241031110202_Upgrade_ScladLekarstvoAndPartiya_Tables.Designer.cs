@@ -4,6 +4,7 @@ using MediQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediQueue.Infrastructure.persistence.Migrations
 {
     [DbContext(typeof(MediQueueDbContext))]
-    partial class MediQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241031110202_Upgrade_ScladLekarstvoAndPartiya_Tables")]
+    partial class Upgrade_ScladLekarstvoAndPartiya_Tables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -532,7 +535,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<decimal?>("SalePrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("ScladId")
+                    b.Property<int?>("ScladLekarstvoId")
                         .HasColumnType("int");
 
                     b.Property<decimal?>("TotalQuantity")
@@ -542,7 +545,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.HasIndex("LekarstvoId");
 
-                    b.HasIndex("ScladId");
+                    b.HasIndex("ScladLekarstvoId");
 
                     b.ToTable("Partiya", (string)null);
                 });
@@ -892,6 +895,32 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.ToTable("Sclad", (string)null);
                 });
 
+            modelBuilder.Entity("MediQueue.Domain.Entities.ScladLekarstvo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<decimal?>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("ScladId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScladId");
+
+                    b.ToTable("ScladLekarstvo", (string)null);
+                });
+
             modelBuilder.Entity("MediQueue.Domain.Entities.Service", b =>
                 {
                     b.Property<int>("Id")
@@ -1111,14 +1140,14 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasForeignKey("LekarstvoId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("MediQueue.Domain.Entities.Sclad", "Sclad")
+                    b.HasOne("MediQueue.Domain.Entities.ScladLekarstvo", "ScladLekarstvo")
                         .WithMany("Partiyas")
-                        .HasForeignKey("ScladId")
+                        .HasForeignKey("ScladLekarstvoId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Lekarstvo");
 
-                    b.Navigation("Sclad");
+                    b.Navigation("ScladLekarstvo");
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.PaymentLekarstvo", b =>
@@ -1212,6 +1241,16 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Branch");
+                });
+
+            modelBuilder.Entity("MediQueue.Domain.Entities.ScladLekarstvo", b =>
+                {
+                    b.HasOne("MediQueue.Domain.Entities.Sclad", "Sclad")
+                        .WithMany("ScladLekarstvos")
+                        .HasForeignKey("ScladId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Sclad");
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.Service", b =>
@@ -1313,6 +1352,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.Sclad", b =>
+                {
+                    b.Navigation("ScladLekarstvos");
+                });
+
+            modelBuilder.Entity("MediQueue.Domain.Entities.ScladLekarstvo", b =>
                 {
                     b.Navigation("Partiyas");
                 });

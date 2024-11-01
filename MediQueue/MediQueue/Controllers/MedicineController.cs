@@ -28,7 +28,7 @@ public class MedicineController : BaseController
 
         try
         {
-            await _lekarstvoService.UseLekarstvoAsync(id, amount);
+            //await _lekarstvoService.UseLekarstvoAsync(id, amount);
             return Ok(CreateSuccessResponse("Lekarstvo successfully used."));
         }
         catch (KeyNotFoundException ex)
@@ -56,7 +56,7 @@ public class MedicineController : BaseController
 
         try
         {
-            await _lekarstvoService.AddLekarstvoQuantityAsync(id, amount);
+            //await _lekarstvoService.AddLekarstvoQuantityAsync(id, amount);
             return Ok(CreateSuccessResponse("Quantity successfully added to Lekarstvo."));
         }
         catch (KeyNotFoundException ex)

@@ -5,5 +5,6 @@ public record DoctorCabinetLekarstvoDto(
     decimal? Quantity,
     int? DoctorCabinetId,
     string? DoctorName,
-    int? PartiyaId
+    int? PartiyaId,
+    string? LekarstvoName
     );

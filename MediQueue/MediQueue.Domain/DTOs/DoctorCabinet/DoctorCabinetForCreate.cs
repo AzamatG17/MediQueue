@@ -2,5 +2,5 @@
 
 public record DoctorCabinetForCreate(
     string? RoomNumber,
-    int? AccountId
+    int AccountId
     );
