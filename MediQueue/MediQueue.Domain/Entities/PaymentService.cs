@@ -18,8 +18,8 @@ public class PaymentService : EntityBase
     public Account? Account { get; set; }
     public int? ServiceId { get; set; }
     public Service? Service { get; set; }
-    public int? LekarstvoId { get; set; }
-    public Lekarstvo? Lekarstvo { get; set; }
+    public int? DoctorCabinetLekarstvoId { get; set; }
+    public DoctorCabinetLekarstvo? DoctorCabinetLekarstvo { get; set; }
     public int? QuestionnaireHistoryId { get; set; }
     public QuestionnaireHistory? QuestionnaireHistory { get; set; }
 }

@@ -39,9 +39,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .HasForeignKey(ps => ps.ServiceId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            builder.HasOne(ps => ps.Lekarstvo)
+            builder.HasOne(ps => ps.DoctorCabinetLekarstvo)
                 .WithMany()
-                .HasForeignKey(ps => ps.LekarstvoId)
+                .HasForeignKey(ps => ps.DoctorCabinetLekarstvoId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(ps => ps.QuestionnaireHistory)

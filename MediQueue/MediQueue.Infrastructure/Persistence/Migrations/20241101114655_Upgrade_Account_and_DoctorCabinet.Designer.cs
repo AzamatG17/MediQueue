@@ -4,6 +4,7 @@ using MediQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediQueue.Infrastructure.persistence.Migrations
 {
     [DbContext(typeof(MediQueueDbContext))]
-    partial class MediQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241101114655_Upgrade_Account_and_DoctorCabinet")]
+    partial class Upgrade_Account_and_DoctorCabinet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -161,7 +164,8 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Property<string>("MeasuredValue")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PhotoBase64")
                         .HasColumnType("nvarchar(max)");
@@ -616,13 +620,13 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int?>("AccountId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DoctorCabinetLekarstvoId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<int?>("LekarstvoId")
+                        .HasColumnType("int");
 
                     b.Property<string>("MedicationType")
                         .HasColumnType("nvarchar(max)");
@@ -655,7 +659,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.HasIndex("DoctorCabinetLekarstvoId");
+                    b.HasIndex("LekarstvoId");
 
                     b.HasIndex("QuestionnaireHistoryId");
 
@@ -1158,9 +1162,9 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("MediQueue.Domain.Entities.DoctorCabinetLekarstvo", "DoctorCabinetLekarstvo")
+                    b.HasOne("MediQueue.Domain.Entities.Lekarstvo", "Lekarstvo")
                         .WithMany()
-                        .HasForeignKey("DoctorCabinetLekarstvoId")
+                        .HasForeignKey("LekarstvoId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("MediQueue.Domain.Entities.QuestionnaireHistory", "QuestionnaireHistory")
@@ -1175,7 +1179,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.Navigation("Account");
 
-                    b.Navigation("DoctorCabinetLekarstvo");
+                    b.Navigation("Lekarstvo");
 
                     b.Navigation("QuestionnaireHistory");
 

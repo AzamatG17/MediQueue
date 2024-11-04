@@ -19,8 +19,8 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .HasMaxLength(100);
 
             builder.HasOne(d => d.Account)
-                .WithMany(a => a.DoctorCabinets)
-                .HasForeignKey(d => d.AccountId)
+                .WithOne(a => a.DoctorCabinet)
+                .HasForeignKey<DoctorCabinet>(d => d.AccountId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasMany(d => d.DoctorCabinetLekarstvos)

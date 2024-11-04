@@ -16,8 +16,9 @@ public class Account : EntityBase
 
     public int RoleId { get; set; }
     public Role Role { get; set; }
+    public int? DoctorCabinetId { get; set; }
+    public DoctorCabinet? DoctorCabinet { get; set; }
 
     public virtual ICollection<QuestionnaireHistory> QuestionnaireHistories { get; set; }
     public virtual ICollection<RolePermission> RolePermissions { get; set; }
-    public virtual ICollection<DoctorCabinet> DoctorCabinets { get; set; }
 }  
