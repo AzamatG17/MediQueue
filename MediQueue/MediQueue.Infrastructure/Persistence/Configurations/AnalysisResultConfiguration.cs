@@ -16,8 +16,7 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .HasDefaultValue(true);
 
             builder.Property(ar => ar.MeasuredValue)
-                .IsRequired()
-                .HasMaxLength(100);
+                .IsRequired();
 
             builder.Property(ar => ar.Unit)
                 .IsRequired();

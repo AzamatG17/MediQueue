@@ -28,6 +28,8 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     {
         var questionn = await _questionnaireHistoryRepositoty.GetAllQuestionnaireHistoriesAsync(questionnaireHistoryResourceParametrs);
 
+        if (questionn == null) return null;
+
         var tasks = questionn.Select(MapToQuestionnaireHistoryDto);
 
         var results = await Task.WhenAll(tasks);
@@ -132,7 +134,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             su.Amount,
             su.IsPayed,
             su.QuestionnaireHistoryId
-            )).ToList();
+        )).ToList();
 
         // Маппинг PaymentServices на DTO
         var paymentDtos = questionnaireHistory.PaymentServices?.Select(p => new PaymentServiceDto(
@@ -148,8 +150,8 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             $"{p.Account?.LastName ?? ""} {p.Account?.FirstName ?? ""} {p.Account?.SurName ?? ""}".Trim(),
             p.ServiceId,
             p.Service?.Name ?? "",
-            p.LekarstvoId,
-            p.Lekarstvo?.Name ?? "",
+            p.DoctorCabinetLekarstvoId,
+            p.DoctorCabinetLekarstvo?.Partiya?.Lekarstvo?.Name ?? "",
             p.QuestionnaireHistoryId
         )).ToList();
 
@@ -170,10 +172,8 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
                 lekarstvo.Id,
                 lekarstvo.ConclusionId,
                 lekarstvo.DoctorCabinetLekarstvoId,
-                "",
-                //lekarstvo.Lekarstvo?.Name ?? "",
-                0,
-                //lekarstvo.Lekarstvo?.SalePrice ?? 0,
+                lekarstvo.DoctorCabinetLekarstvo?.Partiya?.Lekarstvo?.Name ?? "",
+                lekarstvo.DoctorCabinetLekarstvo?.Partiya.SalePrice ?? 0,
                 lekarstvo.QuantityUsed,
                 lekarstvo.TotalPrice,
                 lekarstvo.Amount,

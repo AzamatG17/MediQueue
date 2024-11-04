@@ -5,6 +5,7 @@ using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediQueue.Services;
 
@@ -66,25 +67,42 @@ public class AccountService : IAccountService
             SurName = accountForCreateDto.SurName,
             PhotoBase64 = accountForCreateDto.PhotoBase64 ?? "",
             Bithdate = accountForCreateDto.Bithdate,
-            RoleId = accountForCreateDto.RoleId
+            RoleId = accountForCreateDto.RoleId,
+            Role = role
         };
 
-        accountEntity.Role = role;
-
         await _accountRepository.CreateAsync(accountEntity);
+        await _dbContext.SaveChangesAsync();
+
+        var updatedAccount = await _dbContext.Accounts
+            .Include(a => a.DoctorCabinet)
+            .Include(a => a.RolePermissions)
+            .FirstOrDefaultAsync(a => a.Id == accountEntity.Id);
+
+        var doctorCabinet = new DoctorCabinet
+        {
+            RoomNumber = accountForCreateDto.RoomNumber,
+            AccountId = accountEntity.Id
+        };
+
+        await _dbContext.DoctorCabinets.AddAsync(doctorCabinet);
+        await _dbContext.SaveChangesAsync();
+
+        updatedAccount.DoctorCabinetId = doctorCabinet.Id;
 
         var rolePermissions = accountForCreateDto.RolePermissions
-            .Select(dto => MapToRolePermission(dto, accountEntity.Id))
+            .Select(dto => MapToRolePermission(dto, updatedAccount.Id))
             .ToList();
 
-        _dbContext.RolePermissions.AddRange(rolePermissions);
+        if (rolePermissions != null)
+        {
+            _dbContext.RolePermissions.AddRange(rolePermissions);
+            updatedAccount.RolePermissions = rolePermissions;
+        }
 
         await _dbContext.SaveChangesAsync();
 
-
-        accountEntity.RolePermissions = rolePermissions;
-
-        return MapToAccountDto(accountEntity);
+        return MapToAccountDto(updatedAccount);
     }
 
     public async Task<AccountDto> UpdateAccountAsync(AccountForUpdateDto accountForUpdateDto)
@@ -147,6 +165,8 @@ public class AccountService : IAccountService
             account.Bithdate,
             account.RoleId,
             account.Role.Name,
+            account.DoctorCabinetId,
+            account.DoctorCabinet?.RoomNumber,
             account.RolePermissions.Select(MapToRolePermissionDto).ToList()
             );
     }

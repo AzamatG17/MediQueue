@@ -1,4 +1,6 @@
 using MediQueue.Extensions;
+using MediQueue.Helpers;
+using Serilog;
 
 namespace MediQueue
 {
@@ -18,6 +20,16 @@ namespace MediQueue
                  });
              });
 
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .Enrich.FromLogContext()
+                .WriteTo.Console(new CustomJsonFormatter())
+                .WriteTo.File(new CustomJsonFormatter(), "logs/logs.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.File(new CustomJsonFormatter(), "logs/error_.txt", Serilog.Events.LogEventLevel.Error, rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+            builder.Host.UseSerilog();
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -36,6 +48,7 @@ namespace MediQueue
                 app.UseSwaggerUI();
             }
 
+            app.UseErrorHandler();
             //app.UseHttpsRedirection();
 
             app.UseCors("AllowAll");

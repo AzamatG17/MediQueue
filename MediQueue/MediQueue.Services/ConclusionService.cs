@@ -14,7 +14,7 @@ public class ConclusionService : IConclusionService
     private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
     private readonly IDoctorCabinetLekarstvoService _doctorCabinetLekarstvoService;
     private readonly IDoctorCabinetLekarstvoRepository _doctorCabinetLekarstvoRepository;
-
+    
     public ConclusionService(
         IConclusionRepository repository,
         ILekarstvoRepository lekarstvoRepository,
@@ -34,55 +34,56 @@ public class ConclusionService : IConclusionService
         var conclusion = MappingToConclusion(conclusionForCreatreDto);
         decimal totalPriceSum = 0;
 
+        QuestionnaireHistory questionnaireHistory = null;
+        if (conclusion.QuestionnaireHistoryId.HasValue)
+        {
+            questionnaireHistory = await _questionnaireHistoryRepositoty
+                .GetQuestionnaireHistoryByQuestionnaireIdAsync(conclusion.QuestionnaireHistoryId.Value);
+
+            if (questionnaireHistory == null)
+            {
+                throw new Exception($"QuestionnaireHistory with ID {conclusion.QuestionnaireHistoryId.Value} not found.");
+            }
+        }
+
         foreach (var lekarstvoUsageEntry in conclusionForCreatreDto.LekarstvaUsage)
         {
             int lekarstvoId = lekarstvoUsageEntry.Id;
             decimal quantityUsed = lekarstvoUsageEntry.Amount;
 
-            if (lekarstvoId == 0)
-            {
-                continue;
-            }
+            if (lekarstvoId == 0) continue;
 
             await _doctorCabinetLekarstvoService.UseLekarstvoAsync(lekarstvoId, quantityUsed);
 
-            var lekarstvo = await _lekarstvoRepository.FindByIdAsync(lekarstvoId);
-            if (lekarstvo == null)
+            var lekarstvo = await _doctorCabinetLekarstvoRepository.FindByIdDoctorCabinetLekarstvoAsync(lekarstvoId);
+            if (lekarstvo?.Partiya == null)
             {
                 throw new Exception($"Lekarstvo with ID {lekarstvoId} not found.");
             }
 
-            //var lekarstvo = _doctorCabinetLekarstvoRepository.FindByIdDoctorCabinetLekarstvoAsync(lekarstvoId);
-            //if (lekarstvo == null)
-            //{
-            //    throw new Exception($"Lekarstvo with ID {lekarstvoId} not found.");
-            //}
-
-            //var totalPrice = lekarstvo.SalePrice.GetValueOrDefault() * quantityUsed;
-            var totalPrice = 0;
-            totalPriceSum += totalPrice * -1; // Суммируем каждую стоимость
+            var totalPrice = lekarstvo.Partiya.SalePrice.GetValueOrDefault() * quantityUsed;
+            totalPriceSum -= totalPrice;  // Accumulate total cost
 
             var lekarstvoUsageEntity = new LekarstvoUsage
             {
                 Conclusion = conclusion,
-                DoctorCabinetLekarstvo = null,
+                DoctorCabinetLekarstvoId = lekarstvoId,
                 QuantityUsed = quantityUsed,
                 TotalPrice = totalPrice,
-                Amount = totalPrice * -1
+                Amount = -totalPrice,
+                QuestionnaireHistoryId = questionnaireHistory?.Id
             };
 
             conclusion.LekarstvoUsages.Add(lekarstvoUsageEntity);
         }
 
-        if (conclusion.QuestionnaireHistoryId.HasValue)
+        if (questionnaireHistory != null)
         {
-            var questionnaireHistory = await _questionnaireHistoryRepositoty.FindByIdAsync(conclusion.QuestionnaireHistoryId.Value);
-            if (questionnaireHistory != null)
-            {
-                questionnaireHistory.Balance = (questionnaireHistory.Balance ?? 0) + totalPriceSum;
-                await _questionnaireHistoryRepositoty.UpdateAsync(questionnaireHistory);
-            }
+            questionnaireHistory.Balance = (questionnaireHistory.Balance ?? 0) + totalPriceSum;
+            await _questionnaireHistoryRepositoty.UpdateAsync(questionnaireHistory);
         }
+
+        conclusion.QuestionnaireHistoryId = questionnaireHistory?.Id;
 
         await _repository.CreateAsync(conclusion);
 

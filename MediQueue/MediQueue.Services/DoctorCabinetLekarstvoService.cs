@@ -66,7 +66,8 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
         {
             Quantity = (decimal)doctorCabinetLekarstvoForCreateDto.Quantity,
             DoctorCabinetId = doctorCabinetLekarstvoForCreateDto.DoctorCabinetId,
-            PartiyaId = doctorCabinetLekarstvoForCreateDto.PartiyaId
+            PartiyaId = doctorCabinetLekarstvoForCreateDto.PartiyaId,
+            CreateDate = DateTime.Now,
         };
 
         await _repository.CreateAsync(cabinetLekarstvo);
@@ -86,7 +87,7 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
 
     public async Task UseLekarstvoAsync(int id, decimal amount)
     {
-        var lekarstvo = await _repository.FindByIdAsync(id);
+        var lekarstvo = await _repository.FindByIdDoctorCabinetLekarstvoAsync(id);
         if (lekarstvo == null)
         {
             throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
@@ -95,7 +96,7 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
         if (amount <= 0)
             throw new ArgumentException("Quantity must be included.");
 
-        if (amount > lekarstvo.Quantity - lekarstvo.Partiya.PriceQuantity)
+        if (amount > lekarstvo.Quantity)
             throw new InvalidOperationException("Not enough medicine to use.");
 
         lekarstvo.Quantity -= amount;
@@ -124,6 +125,7 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
         return new DoctorCabinetLekarstvoDto(
             d.Id,
             d.Quantity,
+            d.CreateDate ?? DateTime.MinValue,
             d.DoctorCabinetId,
             $"{d.DoctorCabinet?.Account?.LastName} {d.DoctorCabinet?.Account?.FirstName} {d.DoctorCabinet?.Account?.SurName}" ?? "",
             d.PartiyaId,

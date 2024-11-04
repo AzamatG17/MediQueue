@@ -16,7 +16,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Set<Account>()
                 .Include(x => x.RolePermissions)
                 .Include(x => x.Role)
-                .AsNoTracking()
+                .Include(x => x.DoctorCabinet)
                 .ToListAsync();
         }
 
@@ -25,6 +25,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Set<Account>()
                 .Include(x => x.RolePermissions)
                 .Include(x => x.Role)
+                .Include(x => x.DoctorCabinet)
                 .FirstOrDefaultAsync(x => x.Id == Id);
         }
     }

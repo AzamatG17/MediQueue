@@ -104,6 +104,7 @@ public class DoctorCabinetService : IDoctorCabinetService
         return new DoctorCabinetLekarstvoDto(
             d.Id,
             d.Quantity,
+            d.CreateDate ?? DateTime.MinValue,
             d.DoctorCabinetId,
             $"{d.DoctorCabinet?.Account?.LastName} {d.DoctorCabinet?.Account?.FirstName} {d.DoctorCabinet?.Account?.SurName}" ?? "",
             d.PartiyaId,

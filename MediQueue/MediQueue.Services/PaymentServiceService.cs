@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MediQueue.Domain.DTOs.PaymentLekarstvo;
 using MediQueue.Domain.DTOs.PaymentService;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Enums;
@@ -24,7 +25,7 @@ public class PaymentServiceService : IPaymentServiceService
     {
         var payments = await _repository.GetAllPaymentServicesAsync();
 
-        return _mapper.Map<IEnumerable<PaymentServiceDto>>(payments);
+        return payments.Select(MapToPaymentServiceDto).ToList();
     }
 
     public async Task<PaymentServiceDto> GetPaymentByIdAsync(int id)
@@ -35,7 +36,7 @@ public class PaymentServiceService : IPaymentServiceService
             throw new KeyNotFoundException(nameof(payment));
         }
 
-        return _mapper.Map<PaymentServiceDto>(payment);
+        return MapToPaymentServiceDto(payment);
     }
 
     public async Task<IEnumerable<PaymentServiceDto>> CreatePaymentAsync(PaymentServiceHelperDto paymentServiceHelperDto)
@@ -91,8 +92,8 @@ public class PaymentServiceService : IPaymentServiceService
             $"{p.Account?.LastName} {p.Account?.FirstName} {p.Account?.SurName}" ?? "",
             p.ServiceId,
             p.Service?.Name ?? "",
-            p.LekarstvoId,
-            p.Lekarstvo?.Name ?? "",
+            p.DoctorCabinetLekarstvoId,
+            p.DoctorCabinetLekarstvo?.Partiya?.Lekarstvo?.Name ?? "",
             p.QuestionnaireHistoryId)).ToList();
     }
 
@@ -148,7 +149,7 @@ public class PaymentServiceService : IPaymentServiceService
     {
         var lekarstvoUsage = questionnaireHistory.Conclusions
                                         .SelectMany(c => c.LekarstvoUsages)
-                                        .FirstOrDefault(l => l.DoctorCabinetLekarstvoId == payment.LekarstvoId && l.Amount < 0);
+                                        .FirstOrDefault(l => l.Id == payment.LekarstvoId && l.Amount < 0);
 
         if (lekarstvoUsage == null)
         {
@@ -156,7 +157,7 @@ public class PaymentServiceService : IPaymentServiceService
         }
 
         var existingPayments = questionnaireHistory.PaymentServices
-                                    .Where(p => p.LekarstvoId == lekarstvoUsage.DoctorCabinetLekarstvoId);
+                                    .Where(p => p.DoctorCabinetLekarstvoId == lekarstvoUsage.DoctorCabinetLekarstvoId);
         var totalPaidAmount = existingPayments.Sum(p => p.PaidAmount ?? 0);
         var remainingAmount = lekarstvoUsage.Amount ?? lekarstvoUsage.TotalPrice - totalPaidAmount;
 
@@ -174,7 +175,7 @@ public class PaymentServiceService : IPaymentServiceService
             PaymentType = payment.PaymentType ?? PaymentType.Cash,
             QuestionnaireHistoryId = lekarstvoUsage.QuestionnaireHistoryId,
             AccountId = payment.AccountId,
-            LekarstvoId = lekarstvoUsage.DoctorCabinetLekarstvoId,
+            DoctorCabinetLekarstvoId = lekarstvoUsage.DoctorCabinetLekarstvoId,
             MedicationType = payment.MedicationType,
             PaymentStatus = DeterminePaymentStatus(payment.PaidAmount, remainingAmount)
         };
@@ -221,5 +222,26 @@ public class PaymentServiceService : IPaymentServiceService
             return PaymentStatus.Partial;
 
         return PaymentStatus.Paid;
+    }
+
+    private PaymentServiceDto MapToPaymentServiceDto(PaymentService p)
+    {
+        return new PaymentServiceDto(
+            p.Id,
+            p.TotalAmount,
+            p.PaidAmount,
+            p.OutstandingAmount,
+            p.PaymentDate,
+            p.PaymentType,
+            p.PaymentStatus,
+            p.MedicationType,
+            p.AccountId,
+            $"{p.Account?.LastName ?? ""} {p.Account?.FirstName ?? ""} {p.Account?.SurName ?? ""}".Trim(),
+            p.ServiceId,
+            p.Service?.Name ?? "",
+            p.DoctorCabinetLekarstvoId,
+            p.DoctorCabinetLekarstvo?.Partiya?.Lekarstvo?.Name ?? "",
+            p.QuestionnaireHistoryId
+            );
     }
 }
