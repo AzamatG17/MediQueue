@@ -16,13 +16,15 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Set<T>()
                 .AsNoTracking()
+                .Where(x => x.IsActive)
                 .ToListAsync(); 
         }
 
         public async Task<T> FindByIdAsync(int id)
         {
             return await _context.Set<T>()
-                .FindAsync(id);
+                .Where(x => x.Id == id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<T> CreateAsync(T entity)
@@ -44,9 +46,13 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             var entity = await FindByIdAsync(id);
 
-            _context.Set<T>().Remove(entity);
+            if (entity != null)
+            {
+                entity.IsActive = false;
+                _context.Set<T>().Update(entity);
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<bool> IsExistByIdAsync(int id)

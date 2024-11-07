@@ -43,7 +43,7 @@ public class AnalysisResultService : IAnalysisResultService
 
         return _mapper.Map<AnalysisResultDto>(analysisResult);
     }
-    
+
     public Task<AnalysisResultDto> UpdateAnalysisResultAsync(AnalysisResultForUpdateDto analysisResultForUpdateDto)
     {
         throw new NotImplementedException();

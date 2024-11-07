@@ -16,6 +16,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Groups
                                  .Where(g => groupIds.Contains(g.Id))
+                                 .Where(x => x.IsActive)
                                  .ToListAsync();
         }
 
@@ -24,7 +25,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Groups
                                  .Include(c => c.Categories)
                                  .ThenInclude(c => c.Services)
-                                 .AsSplitQuery()
+                                 .Where(x => x.IsActive)
                                  .ToListAsync();
         }
 
@@ -33,21 +34,21 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Groups
                     .Include(c => c.Categories)
                     .ThenInclude(c => c.Services)
-                    .AsSplitQuery()
-                    .SingleOrDefaultAsync(c => c.Id == id);
+                    .Where(x => x.Id == id && x.IsActive)
+                    .SingleOrDefaultAsync();
         }
 
         public async Task DeleteGroupAsync(int id)
         {
             var entity = await FindByIdAsync(id);
 
-            if (entity == null)
+            if (entity != null)
             {
-                throw new KeyNotFoundException($"Entity with ID {id} was not found.");
-            }
+                entity.IsActive = false;
+                _context.Groups.Update(entity);
 
-            _context.Set<Group>().Remove(entity);
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

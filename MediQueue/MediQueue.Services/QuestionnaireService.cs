@@ -140,7 +140,7 @@ public class QuestionnaireService : IQuestionnaireService
 
         await _questionnaireHistoryService.CreateQuestionnaireHistoryAsync(questonnaireForCreate);
     }
-    
+
     private QuestionnaireDto MapToQuestionnaireDto(Questionnaire questionnaire)
     {
         return new QuestionnaireDto(

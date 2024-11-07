@@ -21,6 +21,7 @@ public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionn
                         .ThenInclude(qh => qh.ServiceUsages)
                             .ThenInclude(s => s.Service)
                         .AsNoTracking()
+                        .Where(x => x.IsActive)
                         .AsQueryable();
 
         if (questionnaireResourceParameters.Id.HasValue)
@@ -75,41 +76,42 @@ public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionn
             .ThenInclude(q => q.Account)
             .Include(a => a.QuestionnaireHistories)
             .ThenInclude(q => q.ServiceUsages)
-            .SingleOrDefaultAsync(c => c.Id == Id);  
+            .Where(x => x.Id == Id && x.IsActive)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<Questionnaire> FindByQuestionnaireIdAsync(string passportSeria)
     {
         return await _context.Set<Questionnaire>()
+            .Where(x => x.IsActive)
             .FirstOrDefaultAsync(x => x.PassportPinfl == passportSeria);
     }
 
     public async Task<Questionnaire> GetByQuestionnaireIdAsync(int? questionnaireId)
     {
         return await _context.Set<Questionnaire>()
+            .Where(x => x.IsActive)
             .FirstOrDefaultAsync(x => x.QuestionnaireId == questionnaireId);
     }
 
     public async Task<bool> ExistsByIdAsync(int newId)
     {
         return await _context.Set<Questionnaire>()
+            .Where(x => x.IsActive)
             .AnyAsync(q => q.QuestionnaireId == newId);
     }
 
     public async Task DeleteWithOutQuestionnaryHistory(int id)
     {
         var questionnary = await _context.Set<Questionnaire>()
-            .Include(c => c.QuestionnaireHistories)
             .FirstOrDefaultAsync(c => c.Id == id);
 
-        ArgumentNullException.ThrowIfNull(questionnary);
-
-        foreach (var history in questionnary.QuestionnaireHistories)
+        if (questionnary != null)
         {
-            history.QuestionnaireId = null;
-        }
+            questionnary.IsActive = false;
+            _context.Questionnaires.Update(questionnary);
 
-        _context.Questionnaires.Remove(questionnary);
-        await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
+        }
     }
 }

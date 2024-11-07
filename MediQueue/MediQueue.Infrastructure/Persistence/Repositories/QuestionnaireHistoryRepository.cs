@@ -11,11 +11,10 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             : base(mediQueueDbContext)
         {
         }
-        
+
         public async Task<IEnumerable<QuestionnaireHistory>> GetAllQuestionnaireHistoriesAsync(QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs)
         {
             var query = _context.QuestionnaireHistories
-                .AsNoTracking()
                 .Include(q => q.Account)
                 .Include(q => q.Questionnaire)
                 .Include(q => q.ServiceUsages)
@@ -37,7 +36,9 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(c => c.ServiceUsage)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.Account)
+                .AsNoTracking()
                 .AsSplitQuery()
+                .Where(x => x.IsActive)
                 .AsQueryable();
 
             if (questionnaireHistoryResourceParametrs.QuestionnaireId.HasValue)
@@ -87,7 +88,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(c => c.ServiceUsage)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.Account)
-                .SingleOrDefaultAsync(qh => qh.Id == id);
+                .Where(x => x.Id == id && x.IsActive)
+                .FirstOrDefaultAsync(); ;
         }
 
         public async Task<QuestionnaireHistory> GetQuestionnaireHistoryByQuestionnaireIdAsync(int? id)
@@ -115,7 +117,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.Account)
                 .AsSplitQuery()
-                .SingleOrDefaultAsync(qh => qh.Historyid == id);
+                .Where(x => x.Historyid == id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<QuestionnaireHistory> GetQuestionnaireHistoryByHistoryIdAsync(int? id)
@@ -143,7 +146,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.Account)
                 .AsSplitQuery()
-                .SingleOrDefaultAsync(qh => qh.QuestionnaireId == id);
+                .Where(x => x.QuestionnaireId == id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<bool> ExistsByIdAsync(int newId)
@@ -177,22 +181,22 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .ThenInclude(l => l.LekarstvoUsages)
                 .ThenInclude(ll => ll.DoctorCabinetLekarstvo)
                 .AsSplitQuery()
-                .FirstOrDefaultAsync(q => q.Historyid == id);
+                .Where(x => x.Historyid == id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
 
         public async Task DeleteWithOutService(int id)
         {
             var questionnaireHistory = await _context.Set<QuestionnaireHistory>()
-                .Include(a => a.ServiceUsages)
-                .Include(s => s.PaymentServices)
-                .Include(c => c.Conclusions)
-                .ThenInclude(l => l.LekarstvoUsages)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            ArgumentNullException.ThrowIfNull(questionnaireHistory);
+            if (questionnaireHistory != null)
+            {
+                questionnaireHistory.IsActive = false;
+                _context.QuestionnaireHistories.Update(questionnaireHistory);
 
-            _context.QuestionnaireHistories.Remove(questionnaireHistory);
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<int> SaveChangeAsync()

@@ -78,7 +78,7 @@ public class AuthorizationService : IAuthorizationService
     }
 
     public async Task<LoginResponse> RefreshToken(string refreshToken)
-    {    
+    {
         var session = await _context.AccountSessions
             .FirstOrDefaultAsync(s => s.AccessToken == refreshToken && !s.IsLoggedOut);
 

@@ -16,6 +16,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Branches
                 .Include(x => x.Sclads)
                 .ThenInclude(sc => sc.Partiyas)
+                .Where(x => x.IsActive)
                 .ToListAsync();
         }
 
@@ -24,7 +25,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Branches
                 .Include(x => x.Sclads)
                 .ThenInclude(sc => sc.Partiyas)
-                .FirstOrDefaultAsync(x => x.Id == Id);
+                .Where(x => x.Id == Id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<bool> ExistsAsync(int branchId)

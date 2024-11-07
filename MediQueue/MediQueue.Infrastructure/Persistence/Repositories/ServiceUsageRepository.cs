@@ -14,6 +14,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.ServiceUsages
                 .Include(s => s.Service)
                 .Where(g => serviceIds.Contains(g.Id))
+                .Where(x => x.IsActive)
                 .ToListAsync();
         }
     }

@@ -50,10 +50,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
 
     public async Task<QuestionnaireHistoryDto> CreateQuestionnaireHistoryAsync(QuestionnaireHistoryForCreateDto questionnaireHistoryForCreateDto)
     {
-        if (questionnaireHistoryForCreateDto == null)
-        {
-            throw new ArgumentNullException(nameof(questionnaireHistoryForCreateDto));
-        }
+        ArgumentNullException.ThrowIfNull(questionnaireHistoryForCreateDto);
 
         var questionnaire = await MapToQuestionnaryHistory(questionnaireHistoryForCreateDto);
 
@@ -81,7 +78,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         }
         else
         {
-            questionn.Balance =  0m;
+            questionn.Balance = 0m;
         }
 
         questionn.HistoryDiscription = questionnaireHistoryForUpdateDto.HistoryDiscription;

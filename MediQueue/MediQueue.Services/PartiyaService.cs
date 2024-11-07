@@ -15,7 +15,7 @@ public class PartiyaService : IPartiyaService
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _lekarstvoRepository = lekarstvoRepository ?? throw new ArgumentNullException(nameof(lekarstvoRepository));
-        _cladRepository = cladRepository ?? throw new ArgumentNullException(nameof(cladRepository));    
+        _cladRepository = cladRepository ?? throw new ArgumentNullException(nameof(cladRepository));
     }
 
     public async Task<IEnumerable<PartiyaDto>> GetAllPartiyastvosAsync()
