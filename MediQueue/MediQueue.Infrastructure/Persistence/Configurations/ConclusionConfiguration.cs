@@ -14,8 +14,7 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(x => x.IsActive)
                 .HasDefaultValue(true);
 
-            builder.Property(c => c.Discription)
-                .HasMaxLength(2000);
+            builder.Property(c => c.Discription);
 
             builder.HasOne(c => c.ServiceUsage)
                .WithMany()
@@ -23,7 +22,8 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.HasOne(c => c.Account)
                .WithMany()
-               .HasForeignKey(c => c.AccountId);
+               .HasForeignKey(c => c.AccountId)
+               .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(c => c.QuestionnaireHistory)
                .WithMany(qh => qh.Conclusions)

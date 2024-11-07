@@ -30,6 +30,7 @@ namespace MediQueue.Infrastructure.Persistence
         public virtual DbSet<DoctorCabinet> DoctorCabinets { get; set; }
         public virtual DbSet<DoctorCabinetLekarstvo> DoctorCabinetLekarstvos { get; set; }
         public virtual DbSet<Partiya> Partiyas { get; set; }
+        public virtual DbSet<Sample> Samples { get; set; }
 
         public MediQueueDbContext(DbContextOptions<MediQueueDbContext> options)
             :base(options)

@@ -4,5 +4,4 @@ public record LekarstvoForUpdateDto(
     int Id, 
     string? Name,
     string? PhotoBase64, 
-    int? CategoryLekarstvoId,
-    int? ScladId);
+    int? CategoryLekarstvoId);

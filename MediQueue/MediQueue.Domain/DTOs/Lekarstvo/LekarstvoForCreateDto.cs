@@ -3,5 +3,4 @@
 public record LekarstvoForCreateDto(
     string? Name,
     string? PhotoBase64,
-    int? CategoryLekarstvoId,
-    int? ScladId);
+    int? CategoryLekarstvoId);

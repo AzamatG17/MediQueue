@@ -27,9 +27,6 @@ public class PartiyaController : BaseController
         {
             var accounts = await _service.GetAllPartiyastvosAsync();
 
-            if (accounts == null || !accounts.Any())
-                return NotFound(CreateErrorResponse($"Partiya does not exist."));
-
             return Ok(accounts);
         }
         catch (Exception ex)

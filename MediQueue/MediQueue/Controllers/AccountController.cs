@@ -29,9 +29,6 @@ public class AccountController : BaseController
         {
             var accounts = await _accountService.GetAllAccountsAsync();
 
-            if (accounts == null || !accounts.Any())
-                return NotFound(CreateErrorResponse($"Account does not exist."));
-
             return Ok(accounts);
         }
         catch (Exception ex)

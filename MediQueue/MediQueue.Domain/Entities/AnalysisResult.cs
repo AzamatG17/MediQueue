@@ -10,7 +10,7 @@ public class AnalysisResult : EntityBase
     public string? PhotoBase64 { get; set; }
     public TestStatus Status { get; set; } = TestStatus.Pending;
     public DateTime? ResultDate { get; set; }
-
+    
     public int? AccountId { get; set; }
     public Account? Account { get; set; }
     public int ServiceUsageId { get; set; }

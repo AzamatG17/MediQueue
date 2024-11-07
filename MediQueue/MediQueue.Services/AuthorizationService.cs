@@ -114,18 +114,14 @@ public class AuthorizationService : IAuthorizationService
         }
     }
 
-    private async Task<Account> GetByEmailAsync(string login, string password)
+    public async Task<IEnumerable<AccountSession>> FindAllAccountSession()
     {
-        var userEntity = await _context.Accounts
+        var accountSession = await _context.AccountSessions
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Login == login && u.Password == password);
+            .Where(session => session.RefreshTokenExpiry > DateTime.UtcNow)
+            .ToListAsync();
 
-        if (userEntity == null)
-        {
-            return null;
-        }
-
-        return _mapper.Map<Account>(userEntity);
+        return accountSession;
     }
 
     public async Task<AccountSession> GetSessionById(string sessionId)
@@ -139,5 +135,19 @@ public class AuthorizationService : IAuthorizationService
         session.LastActivitytime = DateTime.UtcNow;
         session.RefreshTokenExpiry = DateTime.UtcNow.AddHours(1);
         await _context.SaveChangesAsync();
+    }
+
+    private async Task<Account> GetByEmailAsync(string login, string password)
+    {
+        var userEntity = await _context.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Login == login && u.Password == password);
+
+        if (userEntity == null)
+        {
+            return null;
+        }
+
+        return _mapper.Map<Account>(userEntity);
     }
 }

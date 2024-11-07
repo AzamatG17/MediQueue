@@ -5,6 +5,4 @@ public record LekarstvoDto(
     string? Name,
     string? PhotoBase64,    
     int? CategoryLekarstvoId, 
-    string? CategoryLekarstvoName,
-    int? ScladId, 
-    string? ScladName);
+    string? CategoryLekarstvoName);

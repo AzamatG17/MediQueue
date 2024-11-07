@@ -28,9 +28,6 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.Navigation(x => x.CategoryLekarstvo)
                 .AutoInclude();
-
-            builder.Navigation(x => x.Sclad)
-                .AutoInclude();
         }
     }
 }

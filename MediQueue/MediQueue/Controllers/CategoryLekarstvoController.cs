@@ -28,9 +28,6 @@ public class CategoryLekarstvoController : BaseController
         {
             var accounts = await _categoryLekarstvoService.GetAllCategoryLekarstvosAsync();
 
-            if (accounts == null || !accounts.Any())
-                return NotFound(CreateErrorResponse($"Category Lekarstvo does not exist."));
-
             return Ok(accounts);
         }
         catch (Exception ex)

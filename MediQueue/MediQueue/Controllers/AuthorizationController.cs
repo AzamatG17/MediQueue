@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Account;
 using MediQueue.Domain.Entities.Responses;
+using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,7 +15,7 @@ public class AuthorizationController : BaseController
     {
         _authorizationService = authorizationService;
     }
-    
+
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login(AccountForLoginDto accountForLogin)
     {
@@ -27,7 +28,7 @@ public class AuthorizationController : BaseController
                 return Ok(CreateErrorResponse("Invalid login or password"));
             }
 
-            HttpContext.Response.Cookies.Append("mediks-cookies", token.Token);
+            HttpContext.Response.Cookies.Append("Authorization", token.Token);
 
             return Ok(token);
         }
@@ -88,5 +89,40 @@ public class AuthorizationController : BaseController
         await _authorizationService.Logout(sessionId);
 
         return Ok(CreateSuccessResponse("Logged out successfully."));
+    }
+
+    [PermissionAuthorize(22, 1)]
+    [HttpGet]
+    public async Task<ActionResult> GetAsync()
+    {
+        try
+        {
+            var accounts = await _authorizationService.FindAllAccountSession();
+
+            return Ok(accounts);
+        }
+        catch (Exception ex)
+        {
+            return HandleError(ex);
+        }
+    }
+
+    [PermissionAuthorize(22, 5)]
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<ReturnResponse>> DeleteAsync(string id)
+    {
+        try
+        {
+            await _authorizationService.Logout(id);
+            return Ok(CreateSuccessResponse("Account Session successfully deleted."));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(CreateErrorResponse(ex.Message + ", Account Session not found."));
+        }
+        catch (Exception ex)
+        {
+            return HandleError(ex);
+        }
     }
 }

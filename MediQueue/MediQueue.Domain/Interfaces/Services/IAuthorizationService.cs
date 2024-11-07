@@ -6,6 +6,7 @@ namespace MediQueue.Domain.Interfaces.Services
 {
     public interface IAuthorizationService
     {
+        Task<IEnumerable<AccountSession>> FindAllAccountSession();
         Task<LoginResponse> Login(AccountForLoginDto accountForLoginDto);
         Task<LoginResponse> RefreshToken(string refreshToken);
         Task Logout(string sessionId);

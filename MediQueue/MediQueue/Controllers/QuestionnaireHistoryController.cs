@@ -28,9 +28,6 @@ public class QuestionnaireHistoryController : BaseController
         {
             var accounts = await _questionnaireHistoryService.GetAllQuestionnaireHistoriessAsync(questionnaireHistoryResourceParametrs);
 
-            if (accounts == null || !accounts.Any())
-                return NotFound(CreateErrorResponse($"Questionnairy History does not exist."));
-
             return Ok(accounts);
         }
         catch (Exception ex)
