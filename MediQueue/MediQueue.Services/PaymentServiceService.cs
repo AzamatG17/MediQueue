@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using MediQueue.Domain.DTOs.PaymentLekarstvo;
 using MediQueue.Domain.DTOs.PaymentService;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Enums;
@@ -41,10 +40,7 @@ public class PaymentServiceService : IPaymentServiceService
 
     public async Task<IEnumerable<PaymentServiceDto>> CreatePaymentAsync(PaymentServiceHelperDto paymentServiceHelperDto)
     {
-        if (paymentServiceHelperDto == null)
-        {
-            throw new ArgumentNullException(nameof(paymentServiceHelperDto));
-        }
+        ArgumentNullException.ThrowIfNull(nameof(paymentServiceHelperDto));
 
         var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(paymentServiceHelperDto.QuestionnaireHistoryId);
         if (questionnaireHistory == null)

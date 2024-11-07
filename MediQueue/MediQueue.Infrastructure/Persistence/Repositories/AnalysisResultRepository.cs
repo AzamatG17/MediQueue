@@ -17,6 +17,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(a => a.Account)
                 .Include(s => s.ServiceUsage)
                 .ThenInclude(ss => ss.Service)
+                .Where(x => x.IsActive)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -27,7 +28,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(a => a.Account)
                 .Include(s => s.ServiceUsage)
                 .ThenInclude(ss => ss.Service)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .Where(x => x.Id == id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
     }
 }

@@ -15,6 +15,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Sclads
                 .Include(x => x.Partiyas)
+                .Where(x => x.IsActive)
                 .ToListAsync();
         }
 
@@ -22,7 +23,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Sclads
                 .Include(x => x.Partiyas)
-                .FirstOrDefaultAsync(s => s.Id == id);
+                .Where(x => x.Id == id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
     }
 }

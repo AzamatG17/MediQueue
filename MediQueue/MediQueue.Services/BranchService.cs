@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Branch;
-using MediQueue.Domain.DTOs.Lekarstvo;
 using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.DTOs.Sclad;
-using MediQueue.Domain.DTOs.ScladLekarstvo;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;

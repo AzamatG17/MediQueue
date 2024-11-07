@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.PaymentLekarstvo;
-using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Enums;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;

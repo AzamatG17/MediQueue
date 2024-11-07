@@ -61,6 +61,7 @@ public class PermissonService : IPermissionService
     {
         return await _dbContext.Controllers
             .AsNoTracking()
+            .Where(x => x.IsActive)
             .ToListAsync();
     }
 }

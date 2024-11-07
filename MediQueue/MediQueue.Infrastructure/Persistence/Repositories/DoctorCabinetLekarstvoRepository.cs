@@ -18,6 +18,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(da => da.Account)
                 .Include(p => p.Partiya)
                     .ThenInclude(pl => pl.Lekarstvo)
+                .Where(x => x.IsActive)
                 .ToListAsync();
         }
 
@@ -28,7 +29,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(da => da.Account)
                 .Include(p => p.Partiya)
                     .ThenInclude(pl => pl.Lekarstvo)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .Where(x => x.Id == id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
     }
 }

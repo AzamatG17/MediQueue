@@ -15,6 +15,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.CategoryLekarstvos
                 .Include(x => x.Lekarstvos)
+                .Where(x => x.IsActive)
                 .ToListAsync();
         }
 
@@ -22,7 +23,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.CategoryLekarstvos
                 .Include(x => x.Lekarstvos)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .Where(x => x.Id == id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
     }
 }

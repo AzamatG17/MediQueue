@@ -14,7 +14,7 @@ public class ConclusionService : IConclusionService
     private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
     private readonly IDoctorCabinetLekarstvoService _doctorCabinetLekarstvoService;
     private readonly IDoctorCabinetLekarstvoRepository _doctorCabinetLekarstvoRepository;
-    
+
     public ConclusionService(
         IConclusionRepository repository,
         ILekarstvoRepository lekarstvoRepository,

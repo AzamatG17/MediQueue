@@ -17,6 +17,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(x => x.RolePermissions)
                 .Include(x => x.Role)
                 .Include(x => x.DoctorCabinet)
+                .Where(x => x.IsActive)
                 .ToListAsync();
         }
 
@@ -26,7 +27,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(x => x.RolePermissions)
                 .Include(x => x.Role)
                 .Include(x => x.DoctorCabinet)
-                .FirstOrDefaultAsync(x => x.Id == Id);
+                .Where(x => x.Id == Id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
     }
 }
