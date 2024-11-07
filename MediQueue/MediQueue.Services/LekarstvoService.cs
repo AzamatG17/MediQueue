@@ -72,8 +72,7 @@ public class LekarstvoService : ILekarstvoService
             Id = lekarstvo.Id,
             Name = lekarstvo.Name,
             PhotoBase64 = lekarstvo.PhotoBase64,
-            CategoryLekarstvoId = lekarstvo.CategoryLekarstvoId,
-            ScladId = lekarstvo.ScladId
+            CategoryLekarstvoId = lekarstvo.CategoryLekarstvoId
         };
     }
 
@@ -83,8 +82,7 @@ public class LekarstvoService : ILekarstvoService
         {
             Name = lekarstvo.Name,
             PhotoBase64 = lekarstvo.PhotoBase64,
-            CategoryLekarstvoId = lekarstvo.CategoryLekarstvoId,
-            ScladId = lekarstvo.ScladId
+            CategoryLekarstvoId = lekarstvo.CategoryLekarstvoId
         };
     }
 
@@ -95,9 +93,7 @@ public class LekarstvoService : ILekarstvoService
             lekarstvo.Name,
             lekarstvo.PhotoBase64,
             lekarstvo.CategoryLekarstvoId,
-            lekarstvo.CategoryLekarstvo?.Name ?? "",
-            lekarstvo.ScladId,
-            lekarstvo.Sclad?.Name ?? ""
+            lekarstvo.CategoryLekarstvo?.Name ?? ""
             );
     }
 }

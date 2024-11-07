@@ -25,9 +25,6 @@ public class PermissionController : BaseController
         {
             var accounts = await _permissionService.GetAllPermissionsAsync();
 
-            if (accounts.Item1 == null || !accounts.Item1.Any() || accounts.Item2 == null || !accounts.Item2.Any())
-                return NotFound(CreateErrorResponse($"Branch does not exist."));
-
             return Ok(new { Controllers = accounts.Item1, Permissions = accounts.Item2 });
         }
         catch (Exception ex)

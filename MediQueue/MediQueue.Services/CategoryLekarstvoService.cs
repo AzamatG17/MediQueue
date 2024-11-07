@@ -87,9 +87,7 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
             lekarstvo.Name,
             lekarstvo.PhotoBase64,
             lekarstvo.CategoryLekarstvoId,
-            lekarstvo.CategoryLekarstvo.Name ?? null,
-            lekarstvo.ScladId,
-            lekarstvo.Sclad.Name ?? null
+            lekarstvo.CategoryLekarstvo.Name ?? null
             );
     }
 }

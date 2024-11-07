@@ -27,9 +27,6 @@ public class CategoryController : BaseController
         {
             var accounts = await _categoryService.GetAllCategoriesAsync();
 
-            if (accounts == null || !accounts.Any())
-                return NotFound(CreateErrorResponse($"Category does not exist."));
-
             return Ok(accounts);
         }
         catch (Exception ex)

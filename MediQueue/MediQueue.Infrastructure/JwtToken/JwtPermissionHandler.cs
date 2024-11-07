@@ -96,6 +96,8 @@ namespace MediQueue.Infrastructure.JwtToken
                 "DoctorCabinet" => 19,
                 "DoctorCabinetLekarstvo" => 20,
                 "Partiya" => 21,
+                "Authorization" => 22,
+                "Sample" => 23,
                 _ => 0
             };
         }

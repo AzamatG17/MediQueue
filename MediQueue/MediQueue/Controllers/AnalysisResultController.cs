@@ -28,9 +28,6 @@ public class AnalysisResultController : BaseController
         {
             var analysisResults = await _analysisResultService.GetAllAnalysisResultsAsync();
 
-            if (analysisResults == null || !analysisResults.Any())
-                return NotFound(CreateErrorResponse($"Analysis Result does not exist."));
-
             return Ok(analysisResults);
         }
         catch (Exception ex)

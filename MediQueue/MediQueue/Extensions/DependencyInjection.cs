@@ -78,6 +78,7 @@ public static class DependencyInjection
         services.AddScoped<IDoctorCabinetService, DoctorCabinetService>();
         services.AddScoped<IDoctorCabinetLekarstvoService, DoctorCabinetLekarstvoService>();
         services.AddScoped<IPartiyaService, PartiyaService>();
+        services.AddScoped<ISampleService, SampleService>();
 
         services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
         services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
@@ -106,6 +107,7 @@ public static class DependencyInjection
         services.AddScoped<IDoctorCabinetRepository, DoctorCabinetRepository>();
         services.AddScoped<IDoctorCabinetLekarstvoRepository, DoctorCabinetLekarstvoRepository>();
         services.AddScoped<IPartiyaRepository, PartiyaRepository>();
+        services.AddScoped<ISampleRepository, SampleRepository>();
     }
 
     private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
@@ -138,7 +140,7 @@ public static class DependencyInjection
                 {
                     OnMessageReceived = context =>
                     {
-                        context.Token = context.Request.Cookies["mediks-cookies"];
+                        context.Token = context.Request.Cookies["Authorization"];
 
                         return Task.CompletedTask;
                     }

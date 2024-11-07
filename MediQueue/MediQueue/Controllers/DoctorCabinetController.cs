@@ -27,9 +27,6 @@ public class DoctorCabinetController : BaseController
         {
             var accounts = await _service.GetAllDoctorCabinetsAsync();
 
-            if (accounts == null || !accounts.Any())
-                return NotFound(CreateErrorResponse($"Doctor Cabinet does not exist."));
-
             return Ok(accounts);
         }
         catch (Exception ex)

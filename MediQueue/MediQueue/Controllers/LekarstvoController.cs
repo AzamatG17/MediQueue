@@ -27,9 +27,6 @@ public class LekarstvoController : BaseController
         {
             var accounts = await _lekarstvoService.GetAllLekarstvosAsync();
 
-            if (accounts == null || !accounts.Any())
-                return NotFound(CreateErrorResponse($"Lekarstvo does not exist."));
-
             return Ok(accounts);
         }
         catch (Exception ex)

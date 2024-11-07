@@ -27,9 +27,6 @@ public class GroupController : BaseController
         {
             var accounts = await _groupService.GetAllGroupsAsync();
 
-            if (accounts == null || !accounts.Any())
-                return NotFound(CreateErrorResponse($"Group does not exist."));
-
             return Ok(accounts);
         }
         catch (Exception ex)

@@ -26,9 +26,6 @@ public class BranchController : BaseController
         {
             var accounts = await _branchService.GetAllBranchsAsync();
 
-            if (accounts == null || !accounts.Any())
-                return NotFound(CreateErrorResponse($"Branch does not exist."));
-
             return Ok(accounts);
         }
         catch (Exception ex)
