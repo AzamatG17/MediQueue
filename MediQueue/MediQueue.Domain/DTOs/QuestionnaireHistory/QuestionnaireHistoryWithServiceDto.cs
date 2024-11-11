@@ -1,5 +1,4 @@
 ﻿using MediQueue.Domain.DTOs.ServiceUsage;
-using MediQueue.Domain.Entities.Responses;
 
 namespace MediQueue.Domain.DTOs.QuestionnaireHistory
 {

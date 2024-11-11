@@ -9,11 +9,15 @@ public class QuestionnaireHistory : EntityBase
     public DateTime? DateCreated { get; set; }
     public decimal? Balance { get; set; }
     public bool? IsPayed { get; set; } = false;
+    public decimal? InitialDiscountPercentage { get; set; }
+    public decimal? InitialBenefitPercentage { get; set; }
 
     public int? AccountId { get; set; }
     public Account? Account { get; set; }
     public int? QuestionnaireId { get; set; }
     public Questionnaire? Questionnaire { get; set; }
+    public virtual ICollection<Discount>? Discounts { get; set; }
+    public virtual ICollection<Benefit>? Benefits { get; set; }
     public virtual ICollection<ServiceUsage>? ServiceUsages { get; set; }
     public virtual ICollection<PaymentService>? PaymentServices { get; set; }
     public virtual ICollection<Conclusion>? Conclusions { get; set; }

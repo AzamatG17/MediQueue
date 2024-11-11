@@ -98,6 +98,8 @@ namespace MediQueue.Infrastructure.JwtToken
                 "Partiya" => 21,
                 "Authorization" => 22,
                 "Sample" => 23,
+                "Discount" => 24,
+                "Benefit" => 25,
                 _ => 0
             };
         }
