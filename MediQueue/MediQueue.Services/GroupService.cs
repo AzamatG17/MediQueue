@@ -151,7 +151,7 @@ public class GroupService : IGroupService
             service.Id,
             service.Name,
             service.Amount,
-            service.CategoryId,
+            service.CategoryId ?? 0,
             service.Category?.CategoryName
         );
     }

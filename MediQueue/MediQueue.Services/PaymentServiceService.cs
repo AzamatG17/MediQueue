@@ -11,13 +11,19 @@ public class PaymentServiceService : IPaymentServiceService
 {
     private readonly IPaymentServiceRepository _repository;
     private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
+    private readonly IQuestionnaireRepository _questionnaireRepository;
     private readonly IMapper _mapper;
 
-    public PaymentServiceService(IPaymentServiceRepository repository, IMapper mapper, IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty)
+    public PaymentServiceService(
+        IPaymentServiceRepository repository,
+        IMapper mapper,
+        IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty,
+        IQuestionnaireRepository questionnaireRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
+        _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
     }
 
     public async Task<IEnumerable<PaymentServiceDto>> GetAllPaymentsAsync()
@@ -42,11 +48,8 @@ public class PaymentServiceService : IPaymentServiceService
     {
         ArgumentNullException.ThrowIfNull(nameof(paymentServiceHelperDto));
 
-        var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(paymentServiceHelperDto.QuestionnaireHistoryId);
-        if (questionnaireHistory == null)
-        {
-            throw new KeyNotFoundException($"QuestionnaireHistory with ID {paymentServiceHelperDto.QuestionnaireHistoryId} not found");
-        }
+        var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(paymentServiceHelperDto.QuestionnaireHistoryId)
+            ?? throw new KeyNotFoundException($"QuestionnaireHistory with ID {paymentServiceHelperDto.QuestionnaireHistoryId} not found");
 
         var createdPayments = new List<PaymentService>();
 
@@ -99,9 +102,7 @@ public class PaymentServiceService : IPaymentServiceService
                        .FirstOrDefault(s => s.Id == payment.ServiceId && s.Amount < 0);
 
         if (serviceUsage == null)
-        {
             throw new KeyNotFoundException($"Service with ID {payment.ServiceId} not found in QuestionnaireHistory.");
-        }
 
         var existingPayments = serviceUsage.QuestionnaireHistory.PaymentServices
                                     .Where(p => p.ServiceId == serviceUsage.Id);
@@ -137,6 +138,14 @@ public class PaymentServiceService : IPaymentServiceService
         serviceUsage.IsPayed = serviceUsage.Amount == 0;
 
         await _questionnaireHistoryRepositoty.SaveChangeAsync();
+
+        var questionaire = await _questionnaireRepository.GetByIdQuestionnaireHistory(questionnaireHistory.QuestionnaireId);
+
+        if (questionaire != null)
+        {
+            questionaire.Balance += payment.PaidAmount;
+            await _questionnaireRepository.UpdateAsync(questionaire);
+        }
 
         return paymentService;
     }
@@ -187,15 +196,20 @@ public class PaymentServiceService : IPaymentServiceService
 
         await _questionnaireHistoryRepositoty.SaveChangeAsync();
 
+        var questionaire = await _questionnaireRepository.GetByIdQuestionnaireHistory(questionnaireHistory.QuestionnaireId);
+
+        if (questionaire != null)
+        {
+            questionaire.Balance += payment.PaidAmount;
+            await _questionnaireRepository.UpdateAsync(questionaire);
+        }
+
         return paymentService;
     }
 
     public async Task<PaymentServiceDto> UpdatePaymentAsync(PaymentServiceForUpdateDto roleForUpdateDto)
     {
-        if (roleForUpdateDto == null)
-        {
-            throw new ArgumentNullException(nameof(roleForUpdateDto));
-        }
+        ArgumentNullException.ThrowIfNull(roleForUpdateDto);
 
         var payment = _mapper.Map<PaymentService>(roleForUpdateDto);
 

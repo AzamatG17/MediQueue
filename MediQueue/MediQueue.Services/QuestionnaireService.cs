@@ -134,7 +134,7 @@ public class QuestionnaireService : IQuestionnaireService
         var questonnaireForCreate = new QuestionnaireHistoryForCreateDto(
             HistoryDiscription,
             AccountId,
-            QuestionnaireId,
+            QuestionnaireId ?? 0,
             ServiceIds,
             DiscountIds,
             BenefitIds

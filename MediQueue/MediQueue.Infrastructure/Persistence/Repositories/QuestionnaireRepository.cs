@@ -80,6 +80,17 @@ public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionn
             .FirstOrDefaultAsync();
     }
 
+    public async Task<Questionnaire> GetByIdQuestionnaireHistory(int? Id)
+    {
+        return await _context.Questionnaires
+            .Include(q => q.QuestionnaireHistories)
+            .ThenInclude(q => q.Account)
+            .Include(a => a.QuestionnaireHistories)
+            .ThenInclude(q => q.ServiceUsages)
+            .Where(x => x.Id == Id && x.IsActive)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<Questionnaire> FindByQuestionnaireIdAsync(string passportSeria)
     {
         return await _context.Set<Questionnaire>()

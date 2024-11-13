@@ -3,7 +3,7 @@
 public record QuestionnaireHistoryForCreateDto(
     string? HistoryDiscription,
     int? AccountId, 
-    int? QuestionnaireId,
+    int QuestionnaireId,
     List<int>? ServiceIds,
     List<int>? DiscountIds,
     List<int>? BenefitIds

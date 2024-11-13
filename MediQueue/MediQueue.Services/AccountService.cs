@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Account;
 using MediQueue.Domain.DTOs.Role;
+using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
@@ -28,33 +29,25 @@ public class AccountService : IAccountService
     {
         var accounts = await _accountRepository.FindAllWithRoleIdAsync();
 
+        if (accounts == null) return null;
+
         return accounts.Select(MapToAccountDto).ToList();
     }
 
     public async Task<AccountDto> GetAccountByIdAsync(int id)
     {
-        var account = await _accountRepository.FindByIdWithRoleAsync(id);
-
-        if (account == null)
-        {
-            throw new KeyNotFoundException($"Account with id {id} not found.");
-        }
+        var account = await _accountRepository.FindByIdWithRoleAsync(id)
+            ?? throw new KeyNotFoundException($"Account with id {id} not found.");
 
         return MapToAccountDto(account);
     }
 
     public async Task<AccountDto> CreateAccountAsync(AccountForCreateDto accountForCreateDto)
     {
-        if (accountForCreateDto == null)
-        {
-            throw new ArgumentNullException(nameof(accountForCreateDto));
-        }
+        ArgumentNullException.ThrowIfNull(accountForCreateDto);
 
-        var role = await _roleRepository.FindByIdAsync(accountForCreateDto.RoleId);
-        if (role == null)
-        {
-            throw new ArgumentException("Role not found.");
-        }
+        var role = await _roleRepository.FindByIdAsync(accountForCreateDto.RoleId)
+            ?? throw new ArgumentException("Role not found.");
 
         var accountEntity = new Account
         {
@@ -102,6 +95,8 @@ public class AccountService : IAccountService
 
         await _dbContext.SaveChangesAsync();
 
+        await AddServicesToAccountAsync(updatedAccount, accountForCreateDto.ServiceIds);
+
         return MapToAccountDto(updatedAccount);
     }
 
@@ -109,17 +104,11 @@ public class AccountService : IAccountService
     {
         ArgumentNullException.ThrowIfNull(nameof(accountForUpdateDto));
 
-        var role = await _roleRepository.FindByIdAsync(accountForUpdateDto.RoleId);
-        if (role == null)
-        {
-            throw new ArgumentException("Role not found.");
-        }
+        var role = await _roleRepository.FindByIdAsync(accountForUpdateDto.RoleId)
+            ?? throw new ArgumentException("Role not found.");
 
-        var account = await _accountRepository.FindByIdWithRoleAsync(accountForUpdateDto.Id);
-        if (account == null)
-        {
-            throw new ArgumentException("Account not found.");
-        }
+        var account = await _accountRepository.FindByIdWithRoleAsync(accountForUpdateDto.Id)
+            ?? throw new ArgumentException("Account not found.");
 
         if (account.RolePermissions != null && account.RolePermissions.Any())
         {
@@ -142,8 +131,11 @@ public class AccountService : IAccountService
 
         await _accountRepository.UpdateAsync(account);
 
+        await AddServicesToAccountAsync(account, accountForUpdateDto.ServiceIds);
+
         return MapToAccountDto(account);
     }
+
 
     public async Task DeleteAccountAsync(int id)
     {
@@ -164,10 +156,22 @@ public class AccountService : IAccountService
             account.PhotoBase64 ?? "",
             account.Bithdate,
             account.RoleId,
-            account.Role.Name,
+            account.Role.Name ?? "",
             account.DoctorCabinetId,
             account.DoctorCabinet?.RoomNumber,
-            account.RolePermissions.Select(MapToRolePermissionDto).ToList()
+            account.RolePermissions.Select(MapToRolePermissionDto).ToList() ?? new List<RolePermissionDto>(),
+            account.Services.Select(MapToServiceDto).ToList() ?? new List<ServiceDtos>()
+            );
+    }
+
+    private ServiceDtos MapToServiceDto(Service service)
+    {
+        return new ServiceDtos(
+            service.Id,
+            service.Name,
+            service.Amount,
+            service.CategoryId ?? 0,
+            service.Category?.CategoryName ?? ""
             );
     }
 
@@ -187,5 +191,22 @@ public class AccountService : IAccountService
             Permissions = (List<int>)rolePermissionDto.Permissions,
             AccountId = accountId
         };
+    }
+
+    private async Task AddServicesToAccountAsync(Account account, List<int>? serviceIds)
+    {
+        if (serviceIds == null || !serviceIds.Any())
+            return;
+
+        var services = await _dbContext.Services
+            .Where(s => serviceIds.Contains(s.Id))
+            .ToListAsync();
+
+        if (serviceIds.Any())
+        {
+            account.Services = services;
+
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }
