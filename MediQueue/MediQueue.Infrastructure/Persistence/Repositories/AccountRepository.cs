@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 
 namespace MediQueue.Infrastructure.Persistence.Repositories
 {
@@ -17,6 +18,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(x => x.RolePermissions)
                 .Include(x => x.Role)
                 .Include(x => x.DoctorCabinet)
+                .Include(x => x.Services)
+                .ThenInclude(xc => xc.Category)
                 .Where(x => x.IsActive)
                 .ToListAsync();
         }
@@ -27,6 +30,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(x => x.RolePermissions)
                 .Include(x => x.Role)
                 .Include(x => x.DoctorCabinet)
+                .Include(x => x.Services)
+                .ThenInclude(xc => xc.Category)
                 .Where(x => x.Id == Id && x.IsActive)
                 .FirstOrDefaultAsync();
         }

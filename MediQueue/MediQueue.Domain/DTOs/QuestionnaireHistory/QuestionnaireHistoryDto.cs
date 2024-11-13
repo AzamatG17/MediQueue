@@ -1,4 +1,6 @@
-﻿using MediQueue.Domain.DTOs.Conclusion;
+﻿using MediQueue.Domain.DTOs.Benefit;
+using MediQueue.Domain.DTOs.Conclusion;
+using MediQueue.Domain.DTOs.Discount;
 using MediQueue.Domain.DTOs.PaymentService;
 using MediQueue.Domain.DTOs.ServiceUsage;
 
@@ -11,6 +13,8 @@ public record QuestionnaireHistoryDto(
     DateTime? DateCreated,
     decimal? Balance,
     bool? IsPayed,
+    decimal? InitialDiscountPercentage,
+    decimal? InitialBenefitPercentage,
     int? AccountId,
     string? AccountName,
     int? QuestionnaireId,
@@ -21,6 +25,8 @@ public record QuestionnaireHistoryDto(
     string? QuestionnaireName, 
     DateTime? Bithdate, 
     string? PhotoBase64,
+    List<BenefitDto>? BenefitDtos,
+    List<DiscountDto>? DiscountDtos,
     List<ServiceUsageDto>? ServiceUsages,
     List<PaymentServiceDto>? PaymentServices,
     List<ConclusionDto>? ConclusionDtos

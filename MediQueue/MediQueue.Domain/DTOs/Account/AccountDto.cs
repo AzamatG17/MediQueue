@@ -1,4 +1,5 @@
 ﻿using MediQueue.Domain.DTOs.Role;
+using MediQueue.Domain.DTOs.Service;
 
 namespace MediQueue.Domain.DTOs.Account
 {
@@ -17,5 +18,6 @@ namespace MediQueue.Domain.DTOs.Account
         string RoleName,
         int? CabinetId,
         string? CabinetNumber,
-        List<RolePermissionDto>? RolePermissions);
+        List<RolePermissionDto>? RolePermissions,
+        List<ServiceDtos>? ServiceDtos);
 }

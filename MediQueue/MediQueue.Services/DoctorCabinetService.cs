@@ -16,10 +16,10 @@ public class DoctorCabinetService : IDoctorCabinetService
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _accountRepository = accountRepository ?? throw new ArgumentNullException(nameof(accountRepository));
     }
-
+    
     public async Task<IEnumerable<DoctorCabinetDto>> GetAllDoctorCabinetsAsync()
     {
-        var doctorCabinets = await _repository.FindAllAsync();
+        var doctorCabinets = await _repository.FindAllDoctorCabinetsAsync();
 
         if (doctorCabinets == null) return null;
 
@@ -28,7 +28,7 @@ public class DoctorCabinetService : IDoctorCabinetService
 
     public async Task<DoctorCabinetDto> GetDoctorCabinetByIdAsync(int id)
     {
-        var doctorCabinet = await _repository.FindByIdAsync(id);
+        var doctorCabinet = await _repository.FindByIdDoctorCabinetAsync(id);
 
         if (doctorCabinet == null) return null;
 
@@ -92,7 +92,7 @@ public class DoctorCabinetService : IDoctorCabinetService
             d.Id,
             d.RoomNumber,
             d.AccountId,
-            $"{d.Account?.LastName} {d.Account?.FirstName} {d.Account?.SurName}" ?? "",
+            $"{d.Account?.LastName ?? ""} {d.Account?.FirstName ?? ""} {d.Account?.SurName ?? ""}".Trim(),
             d.DoctorCabinetLekarstvos != null
                 ? d.DoctorCabinetLekarstvos.Select(MapToDoctorCabinetLekarstvoDto).ToList()
                 : new List<DoctorCabinetLekarstvoDto>()
@@ -106,7 +106,7 @@ public class DoctorCabinetService : IDoctorCabinetService
             d.Quantity,
             d.CreateDate ?? DateTime.MinValue,
             d.DoctorCabinetId,
-            $"{d.DoctorCabinet?.Account?.LastName} {d.DoctorCabinet?.Account?.FirstName} {d.DoctorCabinet?.Account?.SurName}" ?? "",
+            $"{d.DoctorCabinet?.Account?.LastName ?? ""} {d.DoctorCabinet?.Account?.FirstName ?? ""} {d.DoctorCabinet?.Account?.SurName ?? ""}".Trim(),
             d.PartiyaId,
             d.Partiya?.Lekarstvo?.Name ?? ""
             );

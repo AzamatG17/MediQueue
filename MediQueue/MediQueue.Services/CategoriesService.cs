@@ -117,7 +117,7 @@ public class CategoriesService : ICategoryService
             s.Id,
             s.Name,
             s.Amount,
-            s.CategoryId,
+            s.CategoryId ?? 0,
             s.Category.CategoryName
             )).ToList();
 

@@ -62,6 +62,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .WithOne(d => d.Account)
                 .HasForeignKey<Account>(a => a.DoctorCabinetId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasMany(a => a.Services)
+                .WithMany(s => s.Accounts);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using MediQueue.Domain.DTOs.Account;
-using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.JwtToken;

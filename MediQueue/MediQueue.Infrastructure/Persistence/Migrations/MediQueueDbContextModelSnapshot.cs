@@ -22,6 +22,21 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("AccountService", b =>
+                {
+                    b.Property<int>("AccountsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServicesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AccountsId", "ServicesId");
+
+                    b.HasIndex("ServicesId");
+
+                    b.ToTable("AccountService");
+                });
+
             modelBuilder.Entity("CategoryGroup", b =>
                 {
                     b.Property<int>("CategoriesId")
@@ -194,6 +209,37 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.ToTable("AnalysisResult", (string)null);
                 });
 
+            modelBuilder.Entity("MediQueue.Domain.Entities.Benefit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<decimal>("Percent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("QuestionnaireHistoryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionnaireHistoryId");
+
+                    b.ToTable("Benefit", (string)null);
+                });
+
             modelBuilder.Entity("MediQueue.Domain.Entities.Branch", b =>
                 {
                     b.Property<int>("Id")
@@ -331,6 +377,37 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Controllers", (string)null);
+                });
+
+            modelBuilder.Entity("MediQueue.Domain.Entities.Discount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<decimal>("Percent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("QuestionnaireHistoryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionnaireHistoryId");
+
+                    b.ToTable("Discount", (string)null);
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.DoctorCabinet", b =>
@@ -793,6 +870,12 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int>("Historyid")
                         .HasColumnType("int");
 
+                    b.Property<decimal?>("InitialBenefitPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("InitialDiscountPercentage")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -931,7 +1014,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -959,6 +1042,9 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("int");
+
                     b.Property<decimal?>("Amount")
                         .HasColumnType("decimal(18,2)");
 
@@ -984,11 +1070,28 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccountId");
+
                     b.HasIndex("QuestionnaireHistoryId");
 
                     b.HasIndex("ServiceId");
 
                     b.ToTable("ServiceUsage", (string)null);
+                });
+
+            modelBuilder.Entity("AccountService", b =>
+                {
+                    b.HasOne("MediQueue.Domain.Entities.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MediQueue.Domain.Entities.Service", null)
+                        .WithMany()
+                        .HasForeignKey("ServicesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CategoryGroup", b =>
@@ -1042,6 +1145,16 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Navigation("ServiceUsage");
                 });
 
+            modelBuilder.Entity("MediQueue.Domain.Entities.Benefit", b =>
+                {
+                    b.HasOne("MediQueue.Domain.Entities.QuestionnaireHistory", "QuestionnaireHistory")
+                        .WithMany("Benefits")
+                        .HasForeignKey("QuestionnaireHistoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("QuestionnaireHistory");
+                });
+
             modelBuilder.Entity("MediQueue.Domain.Entities.Conclusion", b =>
                 {
                     b.HasOne("MediQueue.Domain.Entities.Account", "Account")
@@ -1063,6 +1176,16 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Navigation("QuestionnaireHistory");
 
                     b.Navigation("ServiceUsage");
+                });
+
+            modelBuilder.Entity("MediQueue.Domain.Entities.Discount", b =>
+                {
+                    b.HasOne("MediQueue.Domain.Entities.QuestionnaireHistory", "QuestionnaireHistory")
+                        .WithMany("Discounts")
+                        .HasForeignKey("QuestionnaireHistoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("QuestionnaireHistory");
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.DoctorCabinet", b =>
@@ -1242,14 +1365,18 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.HasOne("MediQueue.Domain.Entities.Category", "Category")
                         .WithMany("Services")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Category");
                 });
 
             modelBuilder.Entity("MediQueue.Domain.Entities.ServiceUsage", b =>
                 {
+                    b.HasOne("MediQueue.Domain.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("MediQueue.Domain.Entities.QuestionnaireHistory", "QuestionnaireHistory")
                         .WithMany("ServiceUsages")
                         .HasForeignKey("QuestionnaireHistoryId")
@@ -1259,6 +1386,8 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .WithMany("ServiceUsages")
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Account");
 
                     b.Navigation("QuestionnaireHistory");
 
@@ -1323,7 +1452,11 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 {
                     b.Navigation("AnalysisResults");
 
+                    b.Navigation("Benefits");
+
                     b.Navigation("Conclusions");
+
+                    b.Navigation("Discounts");
 
                     b.Navigation("PaymentServices");
 

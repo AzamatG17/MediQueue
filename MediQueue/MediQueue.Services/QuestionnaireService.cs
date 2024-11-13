@@ -70,7 +70,7 @@ public class QuestionnaireService : IQuestionnaireService
         await _questionnaireRepository.CreateAsync(quest);
 
         await CreateQuestionnaireHistory
-            (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.AccountId, uniqueQuestionnaireId, questionnaireForCreateDto.ServiceIds);
+            (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.AccountId, uniqueQuestionnaireId, questionnaireForCreateDto.ServiceIds, questionnaireForCreateDto.DiscountIds, questionnaireForCreateDto.BenefitIds);
 
         return MapToQuestionnaireDto(quest);
     }
@@ -87,7 +87,7 @@ public class QuestionnaireService : IQuestionnaireService
         }
 
         await CreateQuestionnaireHistory
-            (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.AccountId, question.QuestionnaireId, questionnaireForCreateDto.ServiceIds);
+            (questionnaireForCreateDto.HistoryDiscription, questionnaireForCreateDto.AccountId, question.QuestionnaireId, questionnaireForCreateDto.ServiceIds, questionnaireForCreateDto.DiscountIds, questionnaireForCreateDto.BenefitIds);
 
         return MapToQuestionnaireDto(question);
     }
@@ -129,13 +129,15 @@ public class QuestionnaireService : IQuestionnaireService
         return random.Next(1000000, 999999999);
     }
 
-    private async Task CreateQuestionnaireHistory(string? HistoryDiscription, int? AccountId, int? QuestionnaireId, List<int>? ServiceIds)
+    private async Task CreateQuestionnaireHistory(string? HistoryDiscription, int? AccountId, int? QuestionnaireId, List<int>? ServiceIds, List<int>? DiscountIds, List<int>? BenefitIds)
     {
         var questonnaireForCreate = new QuestionnaireHistoryForCreateDto(
             HistoryDiscription,
             AccountId,
-            QuestionnaireId,
-            ServiceIds
+            QuestionnaireId ?? 0,
+            ServiceIds,
+            DiscountIds,
+            BenefitIds
             );
 
         await _questionnaireHistoryService.CreateQuestionnaireHistoryAsync(questonnaireForCreate);

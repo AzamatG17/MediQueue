@@ -12,6 +12,7 @@ public class ConclusionService : IConclusionService
     private readonly IConclusionRepository _repository;
     private readonly ILekarstvoRepository _lekarstvoRepository;
     private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
+    private readonly IQuestionnaireRepository _questionnaireRepository;
     private readonly IDoctorCabinetLekarstvoService _doctorCabinetLekarstvoService;
     private readonly IDoctorCabinetLekarstvoRepository _doctorCabinetLekarstvoRepository;
 
@@ -19,12 +20,14 @@ public class ConclusionService : IConclusionService
         IConclusionRepository repository,
         ILekarstvoRepository lekarstvoRepository,
         IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty,
+        IQuestionnaireRepository questionnaireRepository,
         IDoctorCabinetLekarstvoService doctorCabinetLekarstvoService,
         IDoctorCabinetLekarstvoRepository doctorCabinetLekarstvoRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _lekarstvoRepository = lekarstvoRepository ?? throw new ArgumentNullException(nameof(lekarstvoRepository));
         _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
+        _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
         _doctorCabinetLekarstvoRepository = doctorCabinetLekarstvoRepository ?? throw new ArgumentNullException(nameof(doctorCabinetLekarstvoRepository));
         _doctorCabinetLekarstvoService = doctorCabinetLekarstvoService ?? throw new ArgumentNullException(nameof(doctorCabinetLekarstvoService));
     }
@@ -62,7 +65,7 @@ public class ConclusionService : IConclusionService
             }
 
             var totalPrice = lekarstvo.Partiya.SalePrice.GetValueOrDefault() * quantityUsed;
-            totalPriceSum -= totalPrice;  // Accumulate total cost
+            totalPriceSum -= totalPrice;
 
             var lekarstvoUsageEntity = new LekarstvoUsage
             {
@@ -81,6 +84,14 @@ public class ConclusionService : IConclusionService
         {
             questionnaireHistory.Balance = (questionnaireHistory.Balance ?? 0) + totalPriceSum;
             await _questionnaireHistoryRepositoty.UpdateAsync(questionnaireHistory);
+        }
+
+        var questionaire = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistory.QuestionnaireId);
+
+        if (questionaire != null)
+        {
+            questionaire.Balance = (questionaire.Balance ?? 0) + totalPriceSum;
+            await _questionnaireRepository.UpdateAsync(questionaire);
         }
 
         conclusion.QuestionnaireHistoryId = questionnaireHistory?.Id;

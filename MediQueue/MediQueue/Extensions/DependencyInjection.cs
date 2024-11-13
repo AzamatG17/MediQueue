@@ -79,6 +79,8 @@ public static class DependencyInjection
         services.AddScoped<IDoctorCabinetLekarstvoService, DoctorCabinetLekarstvoService>();
         services.AddScoped<IPartiyaService, PartiyaService>();
         services.AddScoped<ISampleService, SampleService>();
+        services.AddScoped<IDiscountService, DiscountService>();
+        services.AddScoped<IBenefitService, BenefitService>();
 
         services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
         services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
@@ -108,6 +110,8 @@ public static class DependencyInjection
         services.AddScoped<IDoctorCabinetLekarstvoRepository, DoctorCabinetLekarstvoRepository>();
         services.AddScoped<IPartiyaRepository, PartiyaRepository>();
         services.AddScoped<ISampleRepository, SampleRepository>();
+        services.AddScoped<IDiscountRepository, DiscountRepository>();
+        services.AddScoped<IBenefitRepository, BenefitRepository>();
     }
 
     private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)

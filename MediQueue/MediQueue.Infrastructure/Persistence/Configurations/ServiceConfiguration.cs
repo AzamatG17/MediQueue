@@ -23,12 +23,16 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.HasOne(x => x.Category)
                 .WithMany(c => c.Services)
-                .HasForeignKey(x => x.CategoryId);
+                .HasForeignKey(x => x.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasMany(s => s.ServiceUsages)
                 .WithOne(qh => qh.Service)
                 .HasForeignKey(qh => qh.ServiceId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasMany(s => s.Accounts)
+                .WithMany(c => c.Services);
         }
     }
 }

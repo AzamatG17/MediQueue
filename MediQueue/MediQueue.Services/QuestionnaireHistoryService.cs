@@ -1,4 +1,6 @@
-﻿using MediQueue.Domain.DTOs.Conclusion;
+﻿using MediQueue.Domain.DTOs.Benefit;
+using MediQueue.Domain.DTOs.Conclusion;
+using MediQueue.Domain.DTOs.Discount;
 using MediQueue.Domain.DTOs.LekarstvaUsage;
 using MediQueue.Domain.DTOs.PaymentService;
 using MediQueue.Domain.DTOs.QuestionnaireHistory;
@@ -16,12 +18,23 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     private readonly IQuestionnaireRepository _questionnaireRepository;
     private readonly IServiceRepository _serviceRepository;
     private readonly IServiceUsageRepository _serviceUsageRepository;
-    public QuestionnaireHistoryService(IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty, IServiceRepository serviceRepository, IQuestionnaireRepository questionnaireRepository, IServiceUsageRepository serviceUsageRepository)
+    private readonly IDiscountRepository _discountRepository;
+    private readonly IBenefitRepository _benefitRepository;
+
+    public QuestionnaireHistoryService(
+        IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty,
+        IServiceRepository serviceRepository,
+        IQuestionnaireRepository questionnaireRepository,
+        IServiceUsageRepository serviceUsageRepository,
+        IDiscountRepository discountRepository,
+        IBenefitRepository bankRepository)
     {
         _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
         _serviceRepository = serviceRepository ?? throw new ArgumentNullException(nameof(serviceRepository));
         _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
         _serviceUsageRepository = serviceUsageRepository ?? throw new ArgumentNullException(nameof(serviceUsageRepository));
+        _discountRepository = discountRepository ?? throw new ArgumentNullException(nameof(discountRepository));
+        _benefitRepository = bankRepository ?? throw new ArgumentNullException(nameof(bankRepository));
     }
 
     public async Task<IEnumerable<QuestionnaireHistoryDto>> GetAllQuestionnaireHistoriessAsync(QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs)
@@ -52,11 +65,20 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     {
         ArgumentNullException.ThrowIfNull(questionnaireHistoryForCreateDto);
 
-        var questionnaire = await MapToQuestionnaryHistory(questionnaireHistoryForCreateDto);
+        var questionnaire = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForCreateDto.QuestionnaireId);
 
-        await _questionnaireHistoryRepositoty.CreateAsync(questionnaire);
+        if (questionnaire == null)
+            throw new KeyNotFoundException($"Questionnairy Id: {questionnaireHistoryForCreateDto.QuestionnaireId} does not exist!");
 
-        return await MapToQuestionnaireHistoryDto(questionnaire);
+        var questionnaireHistory = await MapToQuestionnaryHistory(questionnaireHistoryForCreateDto);
+
+        await _questionnaireHistoryRepositoty.CreateAsync(questionnaireHistory);
+
+        questionnaire.Balance += questionnaireHistory.Balance;
+
+        await _questionnaireRepository.UpdateAsync(questionnaire);
+
+        return await MapToQuestionnaireHistoryDto(questionnaireHistory);
     }
 
     public async Task<QuestionnaireHistoryDto> UpdateQuestionnaireHistoryAsync(QuestionnaireHistoryForUpdateDto questionnaireHistoryForUpdateDto)
@@ -150,7 +172,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             p.DoctorCabinetLekarstvoId,
             p.DoctorCabinetLekarstvo?.Partiya?.Lekarstvo?.Name ?? "",
             p.QuestionnaireHistoryId
-        )).ToList();
+        )).ToList() ?? new List<PaymentServiceDto>();
 
         //Маппинг Conclusions на DTO
         var conclusionDtos = questionnaireHistory.Conclusions?.Select(conclusion => new ConclusionDto(
@@ -178,6 +200,18 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             )).ToList()
         )).ToList();
 
+        var benefiDtos = questionnaireHistory.Benefits?.Select(b => new BenefitDto(
+            b.Id,
+            b.Name ?? "",
+            b.Percent
+            )).ToList();
+
+        var discountDtos = questionnaireHistory.Benefits?.Select(b => new DiscountDto(
+            b.Id,
+            b.Name ?? "",
+            b.Percent
+            )).ToList();
+
         return new QuestionnaireHistoryDto(
             questionnaireHistory.Id,
             questionnaireHistory.Historyid,
@@ -185,6 +219,8 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             questionnaireHistory.DateCreated,
             questionnaireHistory.Balance,
             questionnaireHistory.IsPayed,
+            questionnaireHistory.InitialDiscountPercentage,
+            questionnaireHistory.InitialBenefitPercentage,
             questionnaireHistory.AccountId,
             $"{questionnaireHistory.Account?.LastName ?? ""} {questionnaireHistory.Account?.FirstName ?? ""} {questionnaireHistory.Account?.SurName ?? ""}".Trim(),
             questionnaireHistory.QuestionnaireId,
@@ -192,9 +228,11 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             questionnaireHistory.Questionnaire?.PassportPinfl ?? "",
             questionnaireHistory.Questionnaire?.PassportSeria ?? "",
             questionnaireHistory.Questionnaire?.PhoneNumber ?? "",
-            $"{questionnaireHistory.Questionnaire?.LastName} {questionnaireHistory.Questionnaire?.FirstName} {questionnaireHistory.Questionnaire?.SurName}",
+            $"{questionnaireHistory.Questionnaire?.LastName ?? ""} {questionnaireHistory.Questionnaire?.FirstName ?? ""} {questionnaireHistory.Questionnaire?.SurName ?? ""}".Trim(),
             questionnaireHistory.Questionnaire?.Bithdate,
             questionnaireHistory.Questionnaire?.PhotoBase64 ?? "",
+            benefiDtos,
+            discountDtos,
             serviceUsage,
             paymentDtos,
             conclusionDtos
@@ -208,33 +246,95 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             throw new KeyNotFoundException($"QuestionnaireId with {questionnaireHistoryForCreateDto.QuestionnaireId} not found");
         }
 
+        bool hasDiscount = questionnaireHistoryForCreateDto.DiscountIds?.Count > 0 && questionnaireHistoryForCreateDto.DiscountIds?.Any(id => id != 0) == true;
+        bool hasBenefit = questionnaireHistoryForCreateDto.BenefitIds?.Count > 0 && questionnaireHistoryForCreateDto.BenefitIds?.Any(id => id != 0) == true;
+
+        if ((hasDiscount && hasBenefit))
+        {
+            throw new InvalidOperationException("You can only choose one of the options: either Discount or Benefit, but not both.");
+        }
+
         var services = await _serviceRepository.FindByServiceIdsAsync(questionnaireHistoryForCreateDto.ServiceIds ?? new List<int>());
         int historyid = await GenerateUniqueQuestionnaireIdAsync();
 
         var questionnaryId = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForCreateDto.QuestionnaireId);
 
-        var serviceUsages = services.Select(service => new ServiceUsage
-        {
-            ServiceId = service.Id,
-            Service = service,
-            Amount = -1 * service.Amount,
-            TotalPrice = service.Amount,
-            IsPayed = false
-        }).ToList();
+        var applicableDiscounts = await GetApplicableDiscounts(questionnaireHistoryForCreateDto.DiscountIds);
+        var applicableBenefits = await GetApplicableBenefits(questionnaireHistoryForCreateDto.BenefitIds);
 
-        decimal balanceAmount = await GenerateBalanse(questionnaireHistoryForCreateDto.ServiceIds);
+        var serviceUsages = GenerateServiceUsages(services, applicableDiscounts, applicableBenefits);
+
+        var sumOfServiceUsage = serviceUsages.Sum(a => a.Amount);
 
         return new QuestionnaireHistory
         {
             Historyid = historyid,
             HistoryDiscription = questionnaireHistoryForCreateDto.HistoryDiscription,
             DateCreated = DateTime.Now,
-            Balance = balanceAmount,
+            Balance = sumOfServiceUsage,
             IsPayed = false,
+            InitialDiscountPercentage = applicableDiscounts.Any() ? applicableDiscounts.First().Percent : (decimal?)null,
+            InitialBenefitPercentage = applicableBenefits.Any() ? applicableBenefits.First().Percent : (decimal?)null,
             AccountId = questionnaireHistoryForCreateDto?.AccountId,
             QuestionnaireId = questionnaryId.Id,
-            ServiceUsages = serviceUsages
+            ServiceUsages = serviceUsages,
+            Discounts = applicableDiscounts,
+            Benefits = applicableBenefits
         };
+    }
+
+    private List<ServiceUsage> GenerateServiceUsages(IEnumerable<Service> services, List<Discount> applicableDiscounts, List<Benefit> applicableBenefits)
+    {
+        if (applicableDiscounts.Any() && applicableBenefits.Any())
+        {
+            throw new InvalidOperationException("You can only choose one option: Discount or Benefit.");
+        }
+
+        var applicablePercent = GetApplicablePercent(applicableDiscounts, applicableBenefits);
+
+        return services.Select(service => new ServiceUsage
+        {
+            ServiceId = service.Id,
+            Service = service,
+            Amount = -1 * service.Amount * (1 - applicablePercent / 100),
+            TotalPrice = service.Amount,
+            IsPayed = -1 * service.Amount * (1 - applicablePercent / 100) < 0 ? false : true
+        }).ToList();
+    }
+
+    private decimal GetApplicablePercent(List<Discount> discounts, List<Benefit> benefits)
+    {
+        decimal totalPercent = 0;
+
+        if (discounts.Any())
+        {
+            totalPercent += discounts.Sum(d => d.Percent);
+        }
+
+        if (benefits.Any())
+        {
+            totalPercent += benefits.Sum(b => b.Percent);
+        }
+
+        return totalPercent > 100 ? 100 : totalPercent;
+    }
+
+    private async Task<List<Discount>> GetApplicableDiscounts(List<int>? discountIds)
+    {
+        if (discountIds?.Any() == true)
+        {
+            return (List<Discount>)await _discountRepository.FindByIdsAsync(discountIds);
+        }
+        return new List<Discount>();
+    }
+
+    private async Task<List<Benefit>> GetApplicableBenefits(List<int>? benefitIds)
+    {
+        if (benefitIds?.Any() == true)
+        {
+            return (List<Benefit>)await _benefitRepository.FindByIdsAsync(benefitIds);
+        }
+        return new List<Benefit>();
     }
 
     private async Task<decimal> GenerateBalanse(List<int> serviceIds)
@@ -245,6 +345,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
 
         return totalBalance;
     }
+
     private async Task<int> GenerateUniqueQuestionnaireIdAsync()
     {
         int newId;

@@ -23,7 +23,7 @@ public class ServicesService : IServicesService
             s.Id,
             s.Name,
             s.Amount,
-            s.CategoryId,
+            s.CategoryId ?? 0,
             s.Category.CategoryName
         )).ToList();
     }
@@ -40,7 +40,7 @@ public class ServicesService : IServicesService
             service.Id,
             service.Name,
             service.Amount,
-            service.CategoryId,
+            service.CategoryId ?? 0,
             service.Category.CategoryName
             );
     }
@@ -66,7 +66,7 @@ public class ServicesService : IServicesService
                 result.Id,
                 result.Name,
                 result.Amount,
-                result.CategoryId,
+                result.CategoryId ?? 0,
                 category.CategoryName
                 );
         return serviceDto;
@@ -92,7 +92,7 @@ public class ServicesService : IServicesService
             existingService.Id,
             existingService.Name,
             existingService.Amount,
-            existingService.CategoryId,
+            existingService.CategoryId ?? 0,
             existingService.Category?.CategoryName ?? ""
         );
     }
