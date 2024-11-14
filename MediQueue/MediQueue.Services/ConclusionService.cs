@@ -15,6 +15,7 @@ public class ConclusionService : IConclusionService
     private readonly IQuestionnaireRepository _questionnaireRepository;
     private readonly IDoctorCabinetLekarstvoService _doctorCabinetLekarstvoService;
     private readonly IDoctorCabinetLekarstvoRepository _doctorCabinetLekarstvoRepository;
+    private readonly IServiceUsageRepository _serviceUsageRepository;
 
     public ConclusionService(
         IConclusionRepository repository,
@@ -22,7 +23,8 @@ public class ConclusionService : IConclusionService
         IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty,
         IQuestionnaireRepository questionnaireRepository,
         IDoctorCabinetLekarstvoService doctorCabinetLekarstvoService,
-        IDoctorCabinetLekarstvoRepository doctorCabinetLekarstvoRepository)
+        IDoctorCabinetLekarstvoRepository doctorCabinetLekarstvoRepository,
+        IServiceUsageRepository serviceUsageRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _lekarstvoRepository = lekarstvoRepository ?? throw new ArgumentNullException(nameof(lekarstvoRepository));
@@ -30,23 +32,31 @@ public class ConclusionService : IConclusionService
         _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
         _doctorCabinetLekarstvoRepository = doctorCabinetLekarstvoRepository ?? throw new ArgumentNullException(nameof(doctorCabinetLekarstvoRepository));
         _doctorCabinetLekarstvoService = doctorCabinetLekarstvoService ?? throw new ArgumentNullException(nameof(doctorCabinetLekarstvoService));
+        _serviceUsageRepository = serviceUsageRepository ?? throw new ArgumentNullException(nameof(serviceUsageRepository));
     }
 
     public async Task<ConclusionDto> CreateConclusionAsync(ConclusionForCreatreDto conclusionForCreatreDto)
     {
+        ArgumentNullException.ThrowIfNull(conclusionForCreatreDto);
+
         var conclusion = MappingToConclusion(conclusionForCreatreDto);
         decimal totalPriceSum = 0;
 
         QuestionnaireHistory questionnaireHistory = null;
-        if (conclusion.QuestionnaireHistoryId.HasValue)
-        {
-            questionnaireHistory = await _questionnaireHistoryRepositoty
+        questionnaireHistory = await _questionnaireHistoryRepositoty
                 .GetQuestionnaireHistoryByQuestionnaireIdAsync(conclusion.QuestionnaireHistoryId.Value);
 
-            if (questionnaireHistory == null)
-            {
-                throw new Exception($"QuestionnaireHistory with ID {conclusion.QuestionnaireHistoryId.Value} not found.");
-            }
+        if (questionnaireHistory == null)
+            throw new Exception($"QuestionnaireHistory with ID {conclusion.QuestionnaireHistoryId.Value} not found.");
+
+        var serviceUsage = await _serviceUsageRepository.FindByIdAsync(conclusionForCreatreDto.ServiceId);
+
+        if (serviceUsage == null)
+            throw new Exception($"Service Usage with ID {conclusionForCreatreDto.ServiceId} not found.");
+
+        if (serviceUsage.AccountId != conclusionForCreatreDto.AccountId)
+        {
+            throw new InvalidOperationException($"You do not have permission to write this Conclusion to ServiceUsage with Account ID {serviceUsage.AccountId}.");
         }
 
         foreach (var lekarstvoUsageEntry in conclusionForCreatreDto.LekarstvaUsage)

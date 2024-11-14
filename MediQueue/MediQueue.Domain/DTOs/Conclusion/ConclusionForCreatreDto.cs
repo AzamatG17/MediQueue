@@ -7,7 +7,7 @@ public record ConclusionForCreatreDto(
     string? Discription,
     HealthStatus? HealthStatus,
     bool? IsFullyRecovered,
-    int? ServiceId,
+    int ServiceId,
     int? AccountId,
     int? QuestionnaireHistoryId,
     List<LekarstvoUsageDto>? LekarstvaUsage

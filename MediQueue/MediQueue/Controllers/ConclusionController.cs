@@ -3,6 +3,7 @@ using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MediQueue.Controllers;
 
@@ -23,6 +24,13 @@ public class ConclusionController : BaseController
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] ConclusionForCreatreDto conclusionForCreatreDto)
     {
+        var accountIdFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
+
+        if (accountIdFromToken != conclusionForCreatreDto.AccountId.ToString())
+        {
+            return BadRequest(CreateErrorResponse("You can only write a conclusion in your own name."));
+        }
+
         if (conclusionForCreatreDto == null)
         {
             return BadRequest(CreateErrorResponse("Conclusion data is null."));
