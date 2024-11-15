@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MediQueue.Domain.DTOs.Account;
 
 namespace MediQueue.Domain.DTOs.Service
 {
-    public record ServiceDtos(int id, string Name, decimal Amount, int CategoryId, string CategoryName);
+    public record ServiceDtos(
+        int id,
+        string Name, 
+        decimal Amount,
+        int CategoryId,
+        string CategoryName,
+        List<AccountHelperDto> Accounts
+        );
 }

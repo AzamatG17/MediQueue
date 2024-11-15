@@ -6,5 +6,6 @@ namespace MediQueue.Domain.Interfaces.Repositories
     {
         Task<IEnumerable<Account>> FindAllWithRoleIdAsync();
         Task<Account> FindByIdWithRoleAsync(int Id);
+        Task<List<Account>> FindByIdsAccount(List<int> ids);
     }
 }

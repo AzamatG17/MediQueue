@@ -154,19 +154,20 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         var services = questionnaireHistory.ServiceUsages.ToList();
         var payments = questionnaireHistory.PaymentServices ?? Enumerable.Empty<PaymentService>();
 
-        // Обновляем сервисы с рассчитанным остатком
         var serviceUsage = questionnaireHistory.ServiceUsages?.Select(su => new ServiceUsageDto(
             su.Id,
             su.ServiceId,
             su.Service?.Name ?? "",
+            su.AccountId,
+            $"{su.Account?.LastName ?? ""} {su.Account?.FirstName ?? ""} {su.Account?.SurName ?? ""}".Trim(),
             su.QuantityUsed,
             su.TotalPrice,
             su.Amount,
             su.IsPayed,
-            su.QuestionnaireHistoryId
+            su.QuestionnaireHistoryId,
+            su.QuestionnaireHistory?.Id ?? 0
         )).ToList();
 
-        // Маппинг PaymentServices на DTO
         var paymentDtos = questionnaireHistory.PaymentServices?.Select(p => new PaymentServiceDto(
             p.Id,
             p.TotalAmount,
@@ -185,7 +186,6 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             p.QuestionnaireHistoryId
         )).ToList() ?? new List<PaymentServiceDto>();
 
-        //Маппинг Conclusions на DTO
         var conclusionDtos = questionnaireHistory.Conclusions?.Select(conclusion => new ConclusionDto(
             conclusion.Id,
             conclusion.Discription,
@@ -267,16 +267,11 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         {
             foreach (var item in questionnaireHistoryForCreateDto.ServiceAndAccountIds)
             {
-                var account = await _accountRepository.FindByIdWithRoleAsync(item.AccountId);
-                if (account == null)
-                {
-                    throw new InvalidOperationException($"Account with ID {item.AccountId} does not exist.");
-                }
+                var account = await _accountRepository.FindByIdWithRoleAsync(item.AccountId) 
+                    ?? throw new InvalidOperationException($"Account with ID {item.AccountId} does not exist.");
 
                 if (!account.Services.Any(service => service.Id == item.ServiceId))
-                {
                     throw new InvalidOperationException($"Service with ID {item.ServiceId} is not associated with Account {item.AccountId}.");
-                }
             }
         }
 
@@ -311,9 +306,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     private async Task<List<ServiceUsage>> GenerateServiceUsages(List<ServiceAndAccountResponse> serviceAndAccountIds, List<Discount> applicableDiscounts, List<Benefit> applicableBenefits)
     {
         if (applicableDiscounts.Any() && applicableBenefits.Any())
-        {
             throw new InvalidOperationException("You can only choose one option: Discount or Benefit.");
-        }
 
         var applicablePercent = GetApplicablePercent(applicableDiscounts, applicableBenefits);
 
@@ -332,9 +325,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     {
         var service = await _serviceRepository.FindByIdAsync(serviceId);
         if (service == null)
-        {
             throw new InvalidOperationException($"Service with ID {serviceId} not found.");
-        }
 
         return new ServiceUsage
         {

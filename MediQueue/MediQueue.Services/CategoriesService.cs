@@ -113,12 +113,12 @@ public class CategoriesService : ICategoryService
             g.GroupName
             )).ToList();
 
-        var serviceDtos = category.Services?.Select(s => new ServiceDtos(
+        var serviceDtos = category.Services?.Select(s => new ServiceHelperDto(
             s.Id,
             s.Name,
             s.Amount,
             s.CategoryId ?? 0,
-            s.Category.CategoryName
+            s.Category?.CategoryName ?? ""
             )).ToList();
 
         return new CategoryDto(

@@ -56,10 +56,7 @@ public class GroupService : IGroupService
 
     public async Task<GroupDto> UpdateGroupAsync(GroupForUpdateDto groupForUpdateDto)
     {
-        if (groupForUpdateDto == null)
-        {
-            throw new ArgumentNullException(nameof(groupForUpdateDto));
-        }
+        ArgumentNullException.ThrowIfNull(groupForUpdateDto);
 
         var group = await _groupRepository.FindByIdWithGroupAsync(groupForUpdateDto.Id);
         if (group == null)
@@ -69,32 +66,25 @@ public class GroupService : IGroupService
 
         group.GroupName = groupForUpdateDto.GroupName;
 
-        // Получаем существующие категории
         var existingCategoryIds = group.Categories.Select(c => c.Id).ToList();
 
-        // Находим новые категории на основе переданных Id
         var updatedCategories = await _categoryRepository.FindByGroupIdsAsync(groupForUpdateDto.CategoryIds);
         var updatedCategoryIds = updatedCategories.Select(c => c.Id).ToList();
 
-        // Найти категории, которые нужно добавить (новые отношения)
         var categoriesToAdd = updatedCategories.Where(c => !existingCategoryIds.Contains(c.Id)).ToList();
 
-        // Найти категории, которые нужно удалить (старые отношения, отсутствующие в обновленном списке)
         var categoriesToRemove = group.Categories.Where(c => !updatedCategoryIds.Contains(c.Id)).ToList();
 
-        // Удаляем старые категории, которые больше не принадлежат группе
         foreach (var categoryToRemove in categoriesToRemove)
         {
             group.Categories.Remove(categoryToRemove);
         }
 
-        // Добавляем новые категории, которые пришли с обновлением
         foreach (var categoryToAdd in categoriesToAdd)
         {
             group.Categories.Add(categoryToAdd);
         }
 
-        // Сохраняем изменения
         await _groupRepository.UpdateAsync(group);
 
         return MapToCategoryDto(group);
@@ -145,14 +135,14 @@ public class GroupService : IGroupService
         );
     }
 
-    private ServiceDtos MapToServiceDto(Service service)
+    private ServiceHelperDto MapToServiceDto(Service service)
     {
-        return new ServiceDtos(
+        return new ServiceHelperDto(
             service.Id,
             service.Name,
             service.Amount,
             service.CategoryId ?? 0,
-            service.Category?.CategoryName
+            service.Category?.CategoryName ?? ""
         );
     }
 }
