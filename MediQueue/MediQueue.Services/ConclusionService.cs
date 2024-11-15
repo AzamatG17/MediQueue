@@ -55,9 +55,7 @@ public class ConclusionService : IConclusionService
             throw new Exception($"Service Usage with ID {conclusionForCreatreDto.ServiceId} not found.");
 
         if (serviceUsage.AccountId != conclusionForCreatreDto.AccountId)
-        {
             throw new InvalidOperationException($"You do not have permission to write this Conclusion to ServiceUsage with Account ID {serviceUsage.AccountId}.");
-        }
 
         foreach (var lekarstvoUsageEntry in conclusionForCreatreDto.LekarstvaUsage)
         {
@@ -158,7 +156,7 @@ public class ConclusionService : IConclusionService
             conclusion.ServiceUsage?.ServiceId,
             conclusion.ServiceUsage?.Service?.Name ?? "",
             conclusion.AccountId,
-            $"{conclusion.Account?.LastName ?? ""} {conclusion.Account?.FirstName ?? ""} {conclusion.Account?.SurName ?? ""}",
+            $"{conclusion.Account?.LastName ?? ""} {conclusion.Account?.FirstName ?? ""} {conclusion.Account?.SurName ?? ""}".Trim(),
             conclusion.QuestionnaireHistoryId,
             conclusion.LekarstvoUsages?.Select(u => new LekarstvoUsageForHelpDto(
                 u.Id,

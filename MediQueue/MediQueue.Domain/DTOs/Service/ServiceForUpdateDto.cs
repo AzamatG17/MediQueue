@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MediQueue.Domain.DTOs.Service
+﻿namespace MediQueue.Domain.DTOs.Service
 {
-    public record ServiceForUpdateDto(int id, string Name, decimal Amount, int CategoryId);
+    public record ServiceForUpdateDto(
+        int id, 
+        string Name, 
+        decimal Amount,
+        int CategoryId,
+        List<int>? AccountIds);
 }

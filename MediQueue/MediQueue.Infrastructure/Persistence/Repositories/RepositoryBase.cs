@@ -61,5 +61,10 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .AnyAsync(x => x.Id == id);
         }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

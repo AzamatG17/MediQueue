@@ -23,6 +23,10 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Services
                 .Include(c => c.Category)
+                .Include(a => a.Accounts)
+                .ThenInclude(ar => ar.Role)
+                .Include(a => a.Accounts)
+                .ThenInclude(ac => ac.DoctorCabinet)
                 .Where(x => x.IsActive)
                 .ToListAsync();
         }
@@ -31,6 +35,10 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Services
                 .Include(c => c.Category)
+                .Include(a => a.Accounts)
+                .ThenInclude(ar => ar.Role)
+                .Include(a => a.Accounts)
+                .ThenInclude(ac => ac.DoctorCabinet)
                 .Where(x => x.Id == id && x.IsActive)
                 .FirstOrDefaultAsync();
         }

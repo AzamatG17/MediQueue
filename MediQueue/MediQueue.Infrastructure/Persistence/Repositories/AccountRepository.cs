@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 using System.Xml.Linq;
 
 namespace MediQueue.Infrastructure.Persistence.Repositories
@@ -35,5 +36,12 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Where(x => x.Id == Id && x.IsActive)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<List<Account>> FindByIdsAccount(List<int> ids)
+        {
+            return await _context.Accounts
+                .Where(a => ids.Contains(a.Id) && a.IsActive)
+                .ToListAsync();
+        }   
     }
 }

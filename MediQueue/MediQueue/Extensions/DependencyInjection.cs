@@ -81,6 +81,7 @@ public static class DependencyInjection
         services.AddScoped<ISampleService, SampleService>();
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IBenefitService, BenefitService>();
+        services.AddScoped<IServiceUsageService, ServiceUsageService>();
 
         services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
         services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
@@ -112,6 +113,7 @@ public static class DependencyInjection
         services.AddScoped<ISampleRepository, SampleRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IBenefitRepository, BenefitRepository>();
+        services.AddScoped<IServiceUsageRepository, ServiceUsageRepository>();
     }
 
     private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)

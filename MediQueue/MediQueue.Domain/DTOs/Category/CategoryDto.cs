@@ -3,5 +3,5 @@ using MediQueue.Domain.Entities.Responses;
 
 namespace MediQueue.Domain.DTOs.Category
 {
-    public record CategoryDto(int Id, string CategoryName, List<GroupInfoResponse> GroupIds, ICollection<ServiceDtos> ServiceDtos);
+    public record CategoryDto(int Id, string CategoryName, List<GroupInfoResponse> GroupIds, ICollection<ServiceHelperDto> ServiceDtos);
 }

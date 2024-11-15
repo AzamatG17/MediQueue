@@ -160,13 +160,13 @@ public class AccountService : IAccountService
             account.DoctorCabinetId,
             account.DoctorCabinet?.RoomNumber,
             account.RolePermissions.Select(MapToRolePermissionDto).ToList() ?? new List<RolePermissionDto>(),
-            account.Services.Select(MapToServiceDto).ToList() ?? new List<ServiceDtos>()
+            account.Services.Select(MapToServiceDto).ToList() ?? new List<ServiceHelperDto>()
             );
     }
 
-    private ServiceDtos MapToServiceDto(Service service)
+    private ServiceHelperDto MapToServiceDto(Service service)
     {
-        return new ServiceDtos(
+        return new ServiceHelperDto(
             service.Id,
             service.Name,
             service.Amount,
@@ -199,10 +199,10 @@ public class AccountService : IAccountService
             return;
 
         var services = await _dbContext.Services
-            .Where(s => serviceIds.Contains(s.Id))
+            .Where(s => serviceIds.Contains(s.Id) && s.IsActive)
             .ToListAsync();
 
-        if (serviceIds.Any())
+        if (services.Any())
         {
             account.Services = services;
 

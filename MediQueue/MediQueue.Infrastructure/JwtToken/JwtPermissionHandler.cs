@@ -39,7 +39,6 @@ namespace MediQueue.Infrastructure.JwtToken
             }
 
             var httpContext = _httpContextAccessor.HttpContext;
-
             if (httpContext == null)
             {
                 context.Fail();
@@ -100,6 +99,7 @@ namespace MediQueue.Infrastructure.JwtToken
                 "Sample" => 23,
                 "Discount" => 24,
                 "Benefit" => 25,
+                "ServiceUsage" => 26,
                 _ => 0
             };
         }

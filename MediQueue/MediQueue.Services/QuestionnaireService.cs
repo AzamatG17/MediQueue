@@ -197,11 +197,14 @@ public class QuestionnaireService : IQuestionnaireService
             serviceUsage.Id,
             serviceUsage.ServiceId,
             serviceUsage.Service?.Name ?? "",
+            serviceUsage.AccountId,
+            $"{serviceUsage.Account?.LastName ?? ""} {serviceUsage.Account?.FirstName ?? ""} {serviceUsage.Account?.SurName ?? ""}".Trim(),
             serviceUsage.QuantityUsed,
             serviceUsage.TotalPrice,
             serviceUsage.Amount,
             serviceUsage.IsPayed,
-            serviceUsage.QuestionnaireHistoryId
+            serviceUsage.QuestionnaireHistoryId,
+            serviceUsage.QuestionnaireHistory?.Id ?? 0
             );
     }
 }

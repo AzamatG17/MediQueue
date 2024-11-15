@@ -10,5 +10,6 @@ namespace MediQueue.Domain.Interfaces.Repositories
         Task UpdateAsync(T entity);
         Task DeleteAsync(int id);
         Task<bool> IsExistByIdAsync(int id);
+        Task SaveChangesAsync();
     }
 }
