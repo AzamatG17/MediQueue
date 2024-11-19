@@ -67,29 +67,22 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
 
     public async Task<QuestionnaireHistoryDto> CreateQuestionnaireHistoryAsync(QuestionnaireHistoryForCreateDto questionnaireHistoryForCreateDto)
     {
-        try
-        {
-            ArgumentNullException.ThrowIfNull(questionnaireHistoryForCreateDto);
+        ArgumentNullException.ThrowIfNull(questionnaireHistoryForCreateDto);
 
-            var questionnaire = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForCreateDto.QuestionnaireId);
+        var questionnaire = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForCreateDto.QuestionnaireId);
 
-            if (questionnaire == null)
-                throw new KeyNotFoundException($"Questionnairy Id: {questionnaireHistoryForCreateDto.QuestionnaireId} does not exist!");
+        if (questionnaire == null)
+            throw new KeyNotFoundException($"Questionnairy Id: {questionnaireHistoryForCreateDto.QuestionnaireId} does not exist!");
 
-            var questionnaireHistory = await MapToQuestionnaryHistory(questionnaireHistoryForCreateDto);
+        var questionnaireHistory = await MapToQuestionnaryHistory(questionnaireHistoryForCreateDto);
 
-            await _questionnaireHistoryRepositoty.CreateAsync(questionnaireHistory);
+        await _questionnaireHistoryRepositoty.CreateAsync(questionnaireHistory);
 
-            questionnaire.Balance += questionnaireHistory.Balance;
+        questionnaire.Balance += questionnaireHistory.Balance;
 
-            await _questionnaireRepository.UpdateAsync(questionnaire);
+        await _questionnaireRepository.UpdateAsync(questionnaire);
 
-            return await MapToQuestionnaireHistoryDto(questionnaireHistory);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("", ex);
-        }
+        return await MapToQuestionnaireHistoryDto(questionnaireHistory);
     }
 
     public async Task<QuestionnaireHistoryDto> UpdateQuestionnaireHistoryAsync(QuestionnaireHistoryForUpdateDto questionnaireHistoryForUpdateDto)
@@ -256,9 +249,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         bool hasBenefit = questionnaireHistoryForCreateDto.BenefitIds?.Any(id => id != 0) == true;
 
         if (hasDiscount && hasBenefit)
-        {
             throw new InvalidOperationException("You can only choose one of the options: either Discount or Benefit, but not both.");
-        }
 
         var serviceIds = questionnaireHistoryForCreateDto.ServiceAndAccountIds?.Select(item => item.ServiceId) ?? Enumerable.Empty<int>();
         var services = await _serviceRepository.FindByServiceIdsAsync(serviceIds.ToList());
@@ -267,8 +258,13 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         {
             foreach (var item in questionnaireHistoryForCreateDto.ServiceAndAccountIds)
             {
-                var account = await _accountRepository.FindByIdWithRoleAsync(item.AccountId) 
-                    ?? throw new InvalidOperationException($"Account with ID {item.AccountId} does not exist.");
+                if (item.AccountId == 0)
+                {
+                    continue;
+                }
+
+                var account = await _accountRepository.FindByIdWithRoleAsync(item.AccountId)
+                ?? throw new InvalidOperationException($"Account with ID {item.AccountId} does not exist.");
 
                 if (!account.Services.Any(service => service.Id == item.ServiceId))
                     throw new InvalidOperationException($"Service with ID {item.ServiceId} is not associated with Account {item.AccountId}.");
@@ -321,20 +317,22 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         return serviceUsages;
     }
 
-    private async Task<ServiceUsage> GenerateServiceUsage(int serviceId, int accountId, decimal applicablePercent)
+    private async Task<ServiceUsage> GenerateServiceUsage(int serviceId, int? accountId, decimal applicablePercent)
     {
         var service = await _serviceRepository.FindByIdAsync(serviceId);
         if (service == null)
             throw new InvalidOperationException($"Service with ID {serviceId} not found.");
 
+        var calculatedAmount = service.Amount * (1 - applicablePercent / 100);
+
         return new ServiceUsage
         {
             ServiceId = serviceId,
-            AccountId = accountId,
+            AccountId = accountId == 0 ? (int?)null : accountId,
             Service = service,
-            Amount = -1 * service.Amount * (1 - applicablePercent / 100),
+            Amount = -calculatedAmount,
             TotalPrice = service.Amount,
-            IsPayed = -1 * service.Amount * (1 - applicablePercent / 100) >= 0
+            IsPayed = -calculatedAmount >= 0
         };
     }
 

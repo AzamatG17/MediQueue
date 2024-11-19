@@ -136,7 +136,6 @@ public class AccountService : IAccountService
         return MapToAccountDto(account);
     }
 
-
     public async Task DeleteAccountAsync(int id)
     {
         await _accountRepository.DeleteAsync(id);
@@ -158,9 +157,9 @@ public class AccountService : IAccountService
             account.RoleId,
             account.Role.Name ?? "",
             account.DoctorCabinetId,
-            account.DoctorCabinet?.RoomNumber,
+            account.DoctorCabinet?.RoomNumber ?? "",
             account.RolePermissions.Select(MapToRolePermissionDto).ToList() ?? new List<RolePermissionDto>(),
-            account.Services.Select(MapToServiceDto).ToList() ?? new List<ServiceHelperDto>()
+            account.Services?.Select(MapToServiceDto)?.ToList() ?? new List<ServiceHelperDto>()
             );
     }
 

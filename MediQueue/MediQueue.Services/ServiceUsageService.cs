@@ -51,7 +51,7 @@ public class ServiceUsageService : IServiceUsageService
     {
         ArgumentNullException.ThrowIfNull(nameof(serviceUsageForCreate));
 
-        if (!await _accountRepository.IsExistByIdAsync(serviceUsageForCreate.AccountId))
+        if (serviceUsageForCreate.AccountId != 0 && !await _accountRepository.IsExistByIdAsync(serviceUsageForCreate.AccountId))
         {
             throw new ArgumentException($"Account with Id: {serviceUsageForCreate.AccountId} does not exist.");
         }
@@ -71,8 +71,8 @@ public class ServiceUsageService : IServiceUsageService
         var serviceUsage = new ServiceUsage
         {
             ServiceId = serviceUsageForCreate.ServiceId,
-            AccountId = serviceUsageForCreate.AccountId,
-            QuestionnaireHistoryId = serviceUsageForCreate.QuestionnaireHistoryId,
+            AccountId = serviceUsageForCreate.AccountId == 0 ? (int?)null : serviceUsageForCreate.AccountId,
+            QuestionnaireHistoryId = questionareHistory.Id,
             Amount = -1 * service.Amount * (1 - questionareHistory.InitialBenefitPercentage / 100),
             TotalPrice = service.Amount,
             IsPayed = -1 * service.Amount * (1 - questionareHistory.InitialBenefitPercentage / 100) >= 0
