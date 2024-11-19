@@ -12,13 +12,13 @@ public class Program
         var configuration = builder.Configuration;
         // Add services to the container.
         builder.Services.AddCors(options =>
-         {
-             options.AddPolicy("AllowSpecificOrigins", policy =>
-             {
-                 policy.WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                       .WithHeaders("X-Requested-With", "Content-Type", "Origin", "Accept");
-             });
-         });
+        {
+            options.AddPolicy("AllowSpecificOrigins", policy =>
+            {
+                policy.WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                      .WithHeaders("X-Requested-With", "Content-Type", "Origin", "Accept");
+            });
+        });
 
         //Log.Logger = new LoggerConfiguration()
         //    .MinimumLevel.Verbose()

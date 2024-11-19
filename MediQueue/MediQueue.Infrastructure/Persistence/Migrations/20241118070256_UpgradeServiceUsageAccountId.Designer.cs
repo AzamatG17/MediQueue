@@ -4,6 +4,7 @@ using MediQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediQueue.Infrastructure.persistence.Migrations
 {
     [DbContext(typeof(MediQueueDbContext))]
-    partial class MediQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241118070256_UpgradeServiceUsageAccountId")]
+    partial class UpgradeServiceUsageAccountId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1374,7 +1377,8 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                 {
                     b.HasOne("MediQueue.Domain.Entities.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("MediQueue.Domain.Entities.QuestionnaireHistory", "QuestionnaireHistory")
                         .WithMany("ServiceUsages")
