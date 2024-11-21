@@ -1,7 +1,8 @@
 ﻿namespace MediQueue.Domain.Entities.Enums;
 
-public enum PaymentType
+public enum Gender
 {
-    Cash,
-    Card
+    Male,
+    Female,
+    Other
 }

@@ -1,4 +1,5 @@
 ﻿using MediQueue.Domain.Common;
+using MediQueue.Domain.Entities.Enums;
 
 namespace MediQueue.Domain.Entities;
 

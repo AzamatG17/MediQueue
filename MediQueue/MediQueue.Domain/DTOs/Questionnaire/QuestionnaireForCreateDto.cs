@@ -1,4 +1,4 @@
-﻿using MediQueue.Domain.Entities;
+﻿using MediQueue.Domain.Entities.Enums;
 using MediQueue.Domain.Entities.Responses;
 
 namespace MediQueue.Domain.DTOs.Questionnaire
