@@ -65,6 +65,9 @@ public class BenefitService : IBenefitService
         if (benefit == null)
             throw new KeyNotFoundException($"Benefit with id: {benefitForUpdateDto.Id} does not exist!");
 
+        benefit.Name = benefitForUpdateDto.Name;
+        benefit.Percent = benefitForUpdateDto.Percent;
+
         await _repository.UpdateAsync(benefit);
 
         return MapToBenefitDto(benefit);

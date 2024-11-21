@@ -1,5 +1,5 @@
 ﻿using MediQueue.Domain.DTOs.QuestionnaireHistory;
-using MediQueue.Domain.Entities;
+using MediQueue.Domain.Entities.Enums;
 
 namespace MediQueue.Domain.DTOs.Questionnaire
 {

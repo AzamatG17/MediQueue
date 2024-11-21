@@ -82,7 +82,8 @@ public class ConclusionService : IConclusionService
                 throw new Exception($"Lekarstvo with ID {lekarstvoId} not found.");
             }
 
-            var totalPrice = lekarstvo.Partiya.SalePrice.GetValueOrDefault() * quantityUsed;
+            var unitPrice = lekarstvo.Partiya.SalePrice.GetValueOrDefault() / lekarstvo.Partiya.PriceQuantity.GetValueOrDefault(1);
+            var totalPrice = unitPrice * quantityUsed;
             totalPriceSum -= totalPrice;
 
             var lekarstvoUsageEntity = new LekarstvoUsage

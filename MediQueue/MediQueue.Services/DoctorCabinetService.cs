@@ -59,7 +59,7 @@ public class DoctorCabinetService : IDoctorCabinetService
     {
         ArgumentNullException.ThrowIfNull(doctorCabinetForUpdate);
 
-        if (!await _accountRepository.IsExistByIdAsync(doctorCabinetForUpdate.Id))
+        if (!await _repository.IsExistByIdAsync(doctorCabinetForUpdate.Id))
         {
             throw new KeyNotFoundException($"DoctorCabinet with id: {doctorCabinetForUpdate.Id} does not exist");
         }

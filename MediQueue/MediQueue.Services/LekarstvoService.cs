@@ -1,4 +1,5 @@
 ﻿using MediQueue.Domain.DTOs.Lekarstvo;
+using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
@@ -16,7 +17,7 @@ public class LekarstvoService : ILekarstvoService
 
     public async Task<IEnumerable<LekarstvoDto>> GetAllLekarstvosAsync()
     {
-        var lekarstvo = await _repository.FindAllAsync();
+        var lekarstvo = await _repository.FindAllLekarstvoAsync();
 
         if (lekarstvo == null) return null;
 
@@ -25,7 +26,7 @@ public class LekarstvoService : ILekarstvoService
 
     public async Task<LekarstvoDto> GetLekarstvoByIdAsync(int id)
     {
-        var lekarstvo = await _repository.FindByIdAsync(id);
+        var lekarstvo = await _repository.FindByIdLekarstvoAsync(id);
 
         if (lekarstvo == null) return null;
 
@@ -34,10 +35,7 @@ public class LekarstvoService : ILekarstvoService
 
     public async Task<LekarstvoDto> CreateLekarstvoAsync(LekarstvoForCreateDto lekarstvoForCreateDto)
     {
-        if (lekarstvoForCreateDto == null)
-        {
-            throw new ArgumentNullException(nameof(lekarstvoForCreateDto));
-        }
+        ArgumentNullException.ThrowIfNull(nameof(lekarstvoForCreateDto));
 
         var lekarstvo = await MapToLekarstvo(lekarstvoForCreateDto);
 
@@ -48,10 +46,7 @@ public class LekarstvoService : ILekarstvoService
 
     public async Task<LekarstvoDto> UpdateLekarstvoAsync(LekarstvoForUpdateDto lekarstvoForUpdateDto)
     {
-        if (lekarstvoForUpdateDto == null)
-        {
-            throw new ArgumentNullException(nameof(lekarstvoForUpdateDto));
-        }
+        ArgumentNullException.ThrowIfNull(nameof(lekarstvoForUpdateDto));
 
         var lekarstvo = await MapToLekarstvoUpdate(lekarstvoForUpdateDto);
 
@@ -93,7 +88,22 @@ public class LekarstvoService : ILekarstvoService
             lekarstvo.Name,
             lekarstvo.PhotoBase64,
             lekarstvo.CategoryLekarstvoId,
-            lekarstvo.CategoryLekarstvo?.Name ?? ""
+            lekarstvo.CategoryLekarstvo?.Name ?? "",
+            lekarstvo.Partiyas.Select(p => new PartiyaDto(
+                p.Id,
+                p.PurchasePrice,
+                p.SalePrice,
+                p.ExpirationDate,
+                p.BeforeDate,
+                p.TotalQuantity,
+                p.PriceQuantity,
+                p.PhotoBase64,
+                p.MeasurementUnit,
+                p.LekarstvoId,
+                p.Lekarstvo?.Name ?? "",
+                p.ScladId,
+                p.Sclad?.Name ?? ""
+                )).ToList()
             );
     }
 }
