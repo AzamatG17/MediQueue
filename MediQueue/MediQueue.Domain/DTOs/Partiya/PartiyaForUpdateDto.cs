@@ -11,7 +11,6 @@ public record PartiyaForUpdateDto(
     decimal? TotalQuantity,
     decimal? PriceQuantity,
     string? PhotoBase64,
-    MeasurementUnit MeasurementUnit,
     int LekarstvoId,
     int ScladId
     );

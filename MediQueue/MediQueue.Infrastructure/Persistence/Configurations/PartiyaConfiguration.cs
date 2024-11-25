@@ -35,9 +35,6 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(x => x.PhotoBase64)
                 .HasColumnType("nvarchar(max)");
 
-            builder.Property(x => x.MeasurementUnit)
-                .HasConversion<string>();
-
             builder.HasOne(x => x.Lekarstvo)
                 .WithMany(l => l.Partiyas)
                 .HasForeignKey(x => x.LekarstvoId)

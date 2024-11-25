@@ -138,7 +138,6 @@ public class ScladService : IScladService
             p.TotalQuantity,
             p.PriceQuantity,
             p.PhotoBase64,
-            p.MeasurementUnit,
             p.LekarstvoId,
             p.Lekarstvo?.Name ?? "",
             p.ScladId,

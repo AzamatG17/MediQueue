@@ -7,6 +7,7 @@ public class Lekarstvo : EntityBase
 {
     public string? Name { get; set; }
     public string? PhotoBase64 { get; set; }
+    public MeasurementUnit? MeasurementUnit { get; set; }
 
     public int? CategoryLekarstvoId { get; set; }
     public CategoryLekarstvo? CategoryLekarstvo { get; set; }

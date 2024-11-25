@@ -6,7 +6,7 @@ namespace MediQueue.Infrastructure.Persistence
 {
     public class MediQueueDbContext : DbContext
     {
-        public virtual  DbSet<Role> Roles { get; set; }
+        public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Group> Groups { get; set; }

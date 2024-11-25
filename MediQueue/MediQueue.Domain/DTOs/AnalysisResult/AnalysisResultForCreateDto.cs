@@ -6,8 +6,7 @@ public record AnalysisResultForCreateDto(
     string? MeasuredValue,
     AnalysisMeasurementUnit? Unit,
     string? PhotoBase64,
-    TestStatus? Status,
-    int? AccountId,
-    int? ServiceUsageId,
-    int? QuestionnaireHistoryId
+    int AccountId,
+    int ServiceUsageId,
+    int QuestionnaireHistoryId
     );

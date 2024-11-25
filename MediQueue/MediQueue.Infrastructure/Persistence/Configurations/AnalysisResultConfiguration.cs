@@ -35,10 +35,15 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .HasForeignKey(ar => ar.ServiceUsageId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(ar => ar.Account)
+            builder.HasOne(ar => ar.FirstDoctor)
                 .WithMany()
-                .HasForeignKey(ar => ar.AccountId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(ar => ar.FirstDoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(ar => ar.SecondDoctor)
+                .WithMany()
+                .HasForeignKey(ar => ar.SecondDoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(ar => ar.QuestionnaireHistory)
                 .WithMany(qh => qh.AnalysisResults)

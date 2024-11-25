@@ -1,6 +1,9 @@
-﻿namespace MediQueue.Domain.DTOs.Lekarstvo;
+﻿using MediQueue.Domain.Entities.Enums;
+
+namespace MediQueue.Domain.DTOs.Lekarstvo;
 
 public record LekarstvoForCreateDto(
     string? Name,
     string? PhotoBase64,
-    int? CategoryLekarstvoId);
+    MeasurementUnit? MeasurementUnit,
+    int CategoryLekarstvoId);
