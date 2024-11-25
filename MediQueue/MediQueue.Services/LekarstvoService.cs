@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.DTOs.Lekarstvo;
 using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Entities.Enums;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -9,10 +10,12 @@ namespace MediQueue.Services;
 public class LekarstvoService : ILekarstvoService
 {
     private readonly ILekarstvoRepository _repository;
+    private readonly ICategoryLekarstvoRepository _categoryLekarstvoRepository;
 
-    public LekarstvoService(ILekarstvoRepository repository)
+    public LekarstvoService(ILekarstvoRepository repository, ICategoryLekarstvoRepository categoryLekarstvoRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _categoryLekarstvoRepository = categoryLekarstvoRepository ?? throw new ArgumentNullException(nameof(categoryLekarstvoRepository));
     }
 
     public async Task<IEnumerable<LekarstvoDto>> GetAllLekarstvosAsync()
@@ -37,6 +40,9 @@ public class LekarstvoService : ILekarstvoService
     {
         ArgumentNullException.ThrowIfNull(nameof(lekarstvoForCreateDto));
 
+        if (! await _categoryLekarstvoRepository.IsExistByIdAsync(lekarstvoForCreateDto.CategoryLekarstvoId))
+            throw new ArgumentException($"CategoryLekarstvo with id: {lekarstvoForCreateDto.CategoryLekarstvoId} does not exist");
+
         var lekarstvo = await MapToLekarstvo(lekarstvoForCreateDto);
 
         await _repository.CreateAsync(lekarstvo);
@@ -47,6 +53,9 @@ public class LekarstvoService : ILekarstvoService
     public async Task<LekarstvoDto> UpdateLekarstvoAsync(LekarstvoForUpdateDto lekarstvoForUpdateDto)
     {
         ArgumentNullException.ThrowIfNull(nameof(lekarstvoForUpdateDto));
+
+        if (!await _categoryLekarstvoRepository.IsExistByIdAsync(lekarstvoForUpdateDto.CategoryLekarstvoId))
+            throw new ArgumentException($"CategoryLekarstvo with id: {lekarstvoForUpdateDto.CategoryLekarstvoId} does not exist");
 
         var lekarstvo = await MapToLekarstvoUpdate(lekarstvoForUpdateDto);
 
@@ -67,6 +76,7 @@ public class LekarstvoService : ILekarstvoService
             Id = lekarstvo.Id,
             Name = lekarstvo.Name,
             PhotoBase64 = lekarstvo.PhotoBase64,
+            MeasurementUnit = lekarstvo.MeasurementUnit,
             CategoryLekarstvoId = lekarstvo.CategoryLekarstvoId
         };
     }
@@ -77,19 +87,28 @@ public class LekarstvoService : ILekarstvoService
         {
             Name = lekarstvo.Name,
             PhotoBase64 = lekarstvo.PhotoBase64,
+            MeasurementUnit = lekarstvo.MeasurementUnit,
             CategoryLekarstvoId = lekarstvo.CategoryLekarstvoId
         };
     }
 
     private LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
     {
+        decimal totalQuantityLEkarstvo = lekarstvo.Partiyas?.Sum(x => x.TotalQuantity ?? 0) ?? 0;
+
+        var measurementUnit = lekarstvo.MeasurementUnit.HasValue
+        ? Enum.GetName(typeof(MeasurementUnit), lekarstvo.MeasurementUnit) ?? ""
+        : "";
+
         return new LekarstvoDto(
             lekarstvo.Id,
             lekarstvo.Name,
             lekarstvo.PhotoBase64,
+            measurementUnit,
             lekarstvo.CategoryLekarstvoId,
             lekarstvo.CategoryLekarstvo?.Name ?? "",
-            lekarstvo.Partiyas.Select(p => new PartiyaDto(
+            totalQuantityLEkarstvo,
+            lekarstvo.Partiyas?.Select(p => new PartiyaDto(
                 p.Id,
                 p.PurchasePrice,
                 p.SalePrice,
@@ -98,12 +117,11 @@ public class LekarstvoService : ILekarstvoService
                 p.TotalQuantity,
                 p.PriceQuantity,
                 p.PhotoBase64,
-                p.MeasurementUnit,
                 p.LekarstvoId,
                 p.Lekarstvo?.Name ?? "",
                 p.ScladId,
                 p.Sclad?.Name ?? ""
-                )).ToList()
-            );
+            )).ToList() ?? new List<PartiyaDto>()
+        );
     }
 }

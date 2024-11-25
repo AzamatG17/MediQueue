@@ -2,6 +2,7 @@
 using MediQueue.Domain.DTOs.Lekarstvo;
 using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Entities.Enums;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -83,12 +84,20 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
 
     private LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
     {
+        decimal totalQuantityLEkarstvo = lekarstvo.Partiyas.Sum(x => x.TotalQuantity ?? 0);
+
+        var measurementUnit = lekarstvo.MeasurementUnit.HasValue
+        ? Enum.GetName(typeof(MeasurementUnit), lekarstvo.MeasurementUnit) ?? ""
+        : "";
+
         return new LekarstvoDto(
             lekarstvo.Id,
             lekarstvo.Name,
             lekarstvo.PhotoBase64,
+            measurementUnit,
             lekarstvo.CategoryLekarstvoId,
             lekarstvo.CategoryLekarstvo?.Name ?? "",
+            totalQuantityLEkarstvo,
             lekarstvo.Partiyas.Select(p => new PartiyaDto(
                 p.Id,
                 p.PurchasePrice,
@@ -98,7 +107,6 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
                 p.TotalQuantity,
                 p.PriceQuantity,
                 p.PhotoBase64,
-                p.MeasurementUnit,
                 p.LekarstvoId,
                 p.Lekarstvo?.Name ?? "",
                 p.ScladId,

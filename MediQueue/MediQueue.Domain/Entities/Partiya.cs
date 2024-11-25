@@ -1,5 +1,4 @@
 ﻿using MediQueue.Domain.Common;
-using MediQueue.Domain.Entities.Enums;
 
 namespace MediQueue.Domain.Entities;
 
@@ -12,7 +11,6 @@ public class Partiya : EntityBase
     public decimal? TotalQuantity { get; set; }
     public decimal? PriceQuantity { get; set; } = 1;
     public string? PhotoBase64 { get; set; }
-    public MeasurementUnit? MeasurementUnit { get; set; }
 
     public int? LekarstvoId { get; set; }
     public Lekarstvo? Lekarstvo { get; set; }

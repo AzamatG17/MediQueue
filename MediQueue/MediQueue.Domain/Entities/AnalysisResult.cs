@@ -10,9 +10,11 @@ public class AnalysisResult : EntityBase
     public string? PhotoBase64 { get; set; }
     public TestStatus Status { get; set; } = TestStatus.Pending;
     public DateTime? ResultDate { get; set; }
-    
-    public int? AccountId { get; set; }
-    public Account? Account { get; set; }
+
+    public int? FirstDoctorId { get; set; }
+    public Account? FirstDoctor { get; set; }
+    public int? SecondDoctorId { get; set; }
+    public Account? SecondDoctor { get; set; }
     public int ServiceUsageId { get; set; }
     public ServiceUsage ServiceUsage { get; set; }
     public int? QuestionnaireHistoryId { get; set; }

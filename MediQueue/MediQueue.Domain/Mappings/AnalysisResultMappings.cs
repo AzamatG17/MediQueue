@@ -20,9 +20,11 @@ namespace MediQueue.Domain.Mappings
                 .ForCtorParam(nameof(AnalysisResultDto.ServiceUsageId), opt => opt.MapFrom(src => src.ServiceUsageId))
                 .ForCtorParam(nameof(AnalysisResultDto.ServiceId), opt => opt.MapFrom(src => src.ServiceUsage != null ? src.ServiceUsage.ServiceId : (int?)null))
                 .ForCtorParam(nameof(AnalysisResultDto.ServiceName), opt => opt.MapFrom(src => src.ServiceUsage != null ? src.ServiceUsage.Service.Name : null))
-                .ForCtorParam(nameof(AnalysisResultDto.QuestionnaireHistoryId), opt => opt.MapFrom(src => src.QuestionnaireHistoryId))
-                .ForCtorParam(nameof(AnalysisResultDto.AccountId), opt => opt.MapFrom(src => src.AccountId))
-                .ForCtorParam(nameof(AnalysisResultDto.AccountName), opt => opt.MapFrom(src => src.Account != null ? $"{src.Account.LastName ?? ""} {src.Account.FirstName ?? ""} {src.Account.SurName ?? ""}" : null));
+                .ForCtorParam(nameof(AnalysisResultDto.QuestionnaireHistoryId), opt => opt.MapFrom(src => src.QuestionnaireHistory != null ? src.QuestionnaireHistory.Historyid : 0))
+                .ForCtorParam(nameof(AnalysisResultDto.FirstAccountId), opt => opt.MapFrom(src => src.FirstDoctorId))
+                .ForCtorParam(nameof(AnalysisResultDto.FirstAccountName), opt => opt.MapFrom(src => src.FirstDoctor != null ? $"{src.FirstDoctor.LastName ?? ""} {src.FirstDoctor.FirstName ?? ""} {src.FirstDoctor.SurName ?? ""}" : null))
+                .ForCtorParam(nameof(AnalysisResultDto.SecondAccountId), opt => opt.MapFrom(src => src.SecondDoctorId))
+                .ForCtorParam(nameof(AnalysisResultDto.SecondAccountName), opt => opt.MapFrom(src => src.SecondDoctor != null ? $"{src.SecondDoctor.LastName ?? ""} {src.SecondDoctor.FirstName ?? ""} {src.SecondDoctor.SurName ?? ""}" : null));
 
             CreateMap<AnalysisResultForCreateDto, AnalysisResult>();
             CreateMap<AnalysisResultForUpdateDto, AnalysisResult>();

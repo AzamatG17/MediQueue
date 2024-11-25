@@ -4,6 +4,7 @@ using MediQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediQueue.Infrastructure.persistence.Migrations
 {
     [DbContext(typeof(MediQueueDbContext))]
-    partial class MediQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241122063837_Upgrade-Partiy-Lekarstvo")]
+    partial class UpgradePartiyLekarstvo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,7 +169,7 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("FirstDoctorId")
+                    b.Property<int?>("AccountId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -187,9 +190,6 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<DateTime?>("ResultDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("SecondDoctorId")
-                        .HasColumnType("int");
-
                     b.Property<int>("ServiceUsageId")
                         .HasColumnType("int");
 
@@ -203,11 +203,9 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FirstDoctorId");
+                    b.HasIndex("AccountId");
 
                     b.HasIndex("QuestionnaireHistoryId");
-
-                    b.HasIndex("SecondDoctorId");
 
                     b.HasIndex("ServiceUsageId");
 
@@ -1127,20 +1125,15 @@ namespace MediQueue.Infrastructure.persistence.Migrations
 
             modelBuilder.Entity("MediQueue.Domain.Entities.AnalysisResult", b =>
                 {
-                    b.HasOne("MediQueue.Domain.Entities.Account", "FirstDoctor")
+                    b.HasOne("MediQueue.Domain.Entities.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("FirstDoctorId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("MediQueue.Domain.Entities.QuestionnaireHistory", "QuestionnaireHistory")
                         .WithMany("AnalysisResults")
                         .HasForeignKey("QuestionnaireHistoryId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("MediQueue.Domain.Entities.Account", "SecondDoctor")
-                        .WithMany()
-                        .HasForeignKey("SecondDoctorId")
-                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("MediQueue.Domain.Entities.ServiceUsage", "ServiceUsage")
                         .WithMany()
@@ -1148,11 +1141,9 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("FirstDoctor");
+                    b.Navigation("Account");
 
                     b.Navigation("QuestionnaireHistory");
-
-                    b.Navigation("SecondDoctor");
 
                     b.Navigation("ServiceUsage");
                 });

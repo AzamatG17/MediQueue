@@ -59,7 +59,6 @@ public class PartiyaService : IPartiyaService
             TotalQuantity = partiyaForCreateDto.TotalQuantity,
             PriceQuantity = partiyaForCreateDto.PriceQuantity,
             PhotoBase64 = partiyaForCreateDto?.PhotoBase64,
-            MeasurementUnit = partiyaForCreateDto?.MeasurementUnit,
             LekarstvoId = partiyaForCreateDto?.LekarstvoId,
             ScladId = partiyaForCreateDto?.ScladId
         };
@@ -94,7 +93,6 @@ public class PartiyaService : IPartiyaService
         partiya.TotalQuantity = partiyaForUpdateDto.TotalQuantity;
         partiya.PriceQuantity = partiyaForUpdateDto.PriceQuantity;
         partiya.PhotoBase64 = partiyaForUpdateDto?.PhotoBase64 ?? "";
-        partiya.MeasurementUnit = partiyaForUpdateDto?.MeasurementUnit;
         partiya.LekarstvoId = partiyaForUpdateDto?.LekarstvoId;
         partiya.ScladId = partiyaForUpdateDto?.ScladId;
 
@@ -119,7 +117,6 @@ public class PartiyaService : IPartiyaService
             p.TotalQuantity,
             p.PriceQuantity,
             p.PhotoBase64,
-            p.MeasurementUnit,
             p.LekarstvoId,
             p.Lekarstvo?.Name ?? "",
             p.ScladId,
