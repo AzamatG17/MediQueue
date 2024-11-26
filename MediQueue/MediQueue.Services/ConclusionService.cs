@@ -45,27 +45,21 @@ public class ConclusionService : IConclusionService
         var conclusion = MappingToConclusion(conclusionForCreatreDto);
         decimal totalPriceSum = 0;
 
-         var questionnaireHistory = await _questionnaireHistoryRepositoty
-                .GetQuestionnaireHistoryByQuestionnaireIdAsync(conclusion.QuestionnaireHistoryId.Value);
+        var questionnaireHistory = await _questionnaireHistoryRepositoty
+            .GetQuestionnaireHistoryByQuestionnaireIdAsync(conclusion.QuestionnaireHistoryId.Value) 
+            ?? throw new Exception($"QuestionnaireHistory with ID {conclusion.QuestionnaireHistoryId.Value} not found.");
 
-        if (questionnaireHistory == null)
-            throw new Exception($"QuestionnaireHistory with ID {conclusion.QuestionnaireHistoryId.Value} not found.");
+        var account = await _accountRepository.FindByIdWithRoleAsync(conclusionForCreatreDto.AccountId)
+            ?? throw new Exception($"Account with ID {conclusionForCreatreDto.AccountId} not found.");
 
-        var account = await _accountRepository.FindByIdWithRoleAsync(conclusionForCreatreDto.AccountId);
-        if (account == null)
-            throw new Exception($"Account with ID {conclusionForCreatreDto.ServiceId} not found.");
-
-        var serviceUsage = await _serviceUsageRepository.FindByIdAsync(conclusionForCreatreDto.ServiceId);
-        if (serviceUsage == null)
-            throw new Exception($"Service Usage with ID {conclusionForCreatreDto.ServiceId} not found.");
+        var serviceUsage = await _serviceUsageRepository.FindByIdAsync(conclusionForCreatreDto.ServiceId)
+            ?? throw new Exception($"Service Usage with ID {conclusionForCreatreDto.ServiceId} not found.");
 
         if (serviceUsage.AccountId != null && serviceUsage.AccountId != conclusionForCreatreDto.AccountId)
             throw new InvalidOperationException($"You do not have permission to write this Conclusion to ServiceUsage with Account ID {serviceUsage.AccountId}.");
 
         if (!account.Services.Any(s => s.Id == serviceUsage.ServiceId))
-        {
             throw new InvalidOperationException($"You do not have permission to add a conclusion to ServiceUsage with Service ID {serviceUsage.ServiceId} because you lack access to the associated Service.");
-        }
 
         foreach (var lekarstvoUsageEntry in conclusionForCreatreDto.LekarstvaUsage)
         {
@@ -76,11 +70,8 @@ public class ConclusionService : IConclusionService
 
             await _doctorCabinetLekarstvoService.UseLekarstvoAsync(lekarstvoId, quantityUsed);
 
-            var lekarstvo = await _doctorCabinetLekarstvoRepository.FindByIdDoctorCabinetLekarstvoAsync(lekarstvoId);
-            if (lekarstvo?.Partiya == null)
-            {
-                throw new Exception($"Lekarstvo with ID {lekarstvoId} not found.");
-            }
+            var lekarstvo = await _doctorCabinetLekarstvoRepository.FindByIdDoctorCabinetLekarstvoAsync(lekarstvoId)
+                ?? throw new Exception($"Lekarstvo with ID {lekarstvoId} not found.");
 
             var unitPrice = lekarstvo.Partiya.SalePrice.GetValueOrDefault() / lekarstvo.Partiya.PriceQuantity.GetValueOrDefault(1);
             var totalPrice = unitPrice * quantityUsed;

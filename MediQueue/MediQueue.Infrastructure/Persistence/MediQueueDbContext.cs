@@ -1,4 +1,5 @@
 ﻿using MediQueue.Domain.Entities;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -33,6 +34,11 @@ namespace MediQueue.Infrastructure.Persistence
         public virtual DbSet<Sample> Samples { get; set; }
         public virtual DbSet<Discount> Discounts { get; set; }
         public virtual DbSet<Benefit> Benefits { get; set; }
+        public virtual DbSet<Nutrition> Nutritions { get; set; }
+        public virtual DbSet<StationaryStay> StationaryStays { get; set; }  
+        public virtual DbSet<Tariff> Tariffs { get; set; }
+        public virtual DbSet<Ward> Wards { get; set; }
+        public virtual DbSet<WardPlace> WardsPlace { get; set; }
 
         public MediQueueDbContext(DbContextOptions<MediQueueDbContext> options)
             :base(options)
