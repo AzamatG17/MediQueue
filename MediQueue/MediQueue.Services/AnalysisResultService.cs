@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.AnalysisResult;
+using MediQueue.Domain.DTOs.Conclusion;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Infrastructure.Persistence.Repositories;
 
 namespace MediQueue.Services;
 
@@ -11,14 +13,21 @@ public class AnalysisResultService : IAnalysisResultService
     private readonly IAnalysisResultRepository _analysisResultRepository;
     private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
     private readonly IAccountRepository _accountRepository;
+    private readonly IServiceUsageRepository _serviceUsageRepository;
     private readonly IMapper _mapper;
 
-    public AnalysisResultService(IAnalysisResultRepository analysisResultRepository, IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty, IMapper mapper, IAccountRepository account)
+    public AnalysisResultService(
+        IAnalysisResultRepository analysisResultRepository, 
+        IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty, 
+        IMapper mapper,
+        IAccountRepository account,
+        IServiceUsageRepository serviceUsageRepository)
     {
         _analysisResultRepository = analysisResultRepository ?? throw new ArgumentNullException(nameof(analysisResultRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
         _accountRepository = account ?? throw new ArgumentNullException(nameof(account));
+        _serviceUsageRepository = serviceUsageRepository ?? throw new ArgumentNullException(nameof(serviceUsageRepository));
     }
 
     public async Task<IEnumerable<AnalysisResultDto>> GetAllAnalysisResultsAsync()
@@ -42,10 +51,17 @@ public class AnalysisResultService : IAnalysisResultService
         var questionairyHistory = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(analysisResultForCreateDto.QuestionnaireHistoryId)
             ?? throw new ArgumentException($"QuestionairyHistory with id: {analysisResultForCreateDto.QuestionnaireHistoryId} does not exist.");
 
-        if (!await _accountRepository.IsExistByIdAsync(analysisResultForCreateDto.AccountId))
-        {
-            throw new ArgumentException($"Account with id: {analysisResultForCreateDto.AccountId} does not exist.");
-        }
+        var account = await _accountRepository.FindByIdWithRoleAsync(analysisResultForCreateDto.AccountId)
+            ?? throw new Exception($"Account with ID {analysisResultForCreateDto.AccountId} not found.");
+
+        var serviceUsage = await _serviceUsageRepository.FindByIdAsync(analysisResultForCreateDto.ServiceUsageId)
+            ?? throw new Exception($"Service Usage with ID {analysisResultForCreateDto.ServiceUsageId} not found.");
+
+        if (serviceUsage.AccountId != null && serviceUsage.AccountId != analysisResultForCreateDto.AccountId)
+            throw new InvalidOperationException($"You do not have permission to write this Conclusion to ServiceUsage with Account ID {serviceUsage.AccountId}.");
+
+        if (!account.Services.Any(s => s.Id == serviceUsage.ServiceId))
+            throw new InvalidOperationException($"You do not have permission to add a conclusion to ServiceUsage with Service ID {serviceUsage.ServiceId} because you lack access to the associated Service.");
 
         var analysisResult = new AnalysisResult
         {

@@ -70,16 +70,10 @@ public class CategoriesService : ICategoryService
 
         category.CategoryName = categoryForUpdateDto.CategoryName;
 
-        // Update Groups
         await UpdateGroupsAsync(category, categoryForUpdateDto.GroupIds);
 
-        // Update Services
-        //await UpdateServicesAsync(category, categoryForUpdateDto.ServiceIds);
-
-        // Persist the changes to the repository
         await _categoryRepository.UpdateAsync(category);
 
-        // Map and return the updated category DTO
         return MapToCategoryDto(category);
     }
 

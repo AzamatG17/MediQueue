@@ -22,4 +22,5 @@ public class QuestionnaireHistory : EntityBase
     public virtual ICollection<PaymentService>? PaymentServices { get; set; }
     public virtual ICollection<Conclusion>? Conclusions { get; set; }
     public virtual ICollection<AnalysisResult>? AnalysisResults { get; set; }
+    public virtual ICollection<StationaryStay>? StationaryStays { get; set; }
 } 

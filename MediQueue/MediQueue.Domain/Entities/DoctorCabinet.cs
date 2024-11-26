@@ -8,5 +8,5 @@ public class DoctorCabinet : EntityBase
     public int? AccountId { get; set; }
     public Account? Account { get; set; }
 
-    public virtual ICollection<DoctorCabinetLekarstvo> DoctorCabinetLekarstvos { get; set; }
+    public virtual ICollection<DoctorCabinetLekarstvo>? DoctorCabinetLekarstvos { get; set; }
 }

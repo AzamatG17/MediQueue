@@ -6,6 +6,6 @@ namespace MediQueue.Domain.Entities
     {
         public string GroupName { get; set; }
 
-        public ICollection<Category> Categories { get; set; }
+        public virtual ICollection<Category>? Categories { get; set; }
     }
 }
