@@ -19,7 +19,7 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.Property(qh => qh.Balance)
                 .HasColumnType("decimal(18, 2)");
-
+             
             builder.HasOne(qh => qh.Questionnaire)
                 .WithMany(q => q.QuestionnaireHistories)
                 .HasForeignKey(qh => qh.QuestionnaireId)
@@ -53,6 +53,11 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasMany(qh => qh.Benefits)
                 .WithOne(b => b.QuestionnaireHistory)
                 .HasForeignKey(b => b.QuestionnaireHistoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasMany(qh => qh.ServiceUsages)
+                .WithOne(e => e.QuestionnaireHistory)
+                .HasForeignKey(e => e.QuestionnaireHistoryId)
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }
