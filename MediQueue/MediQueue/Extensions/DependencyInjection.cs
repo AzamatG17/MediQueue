@@ -82,6 +82,11 @@ public static class DependencyInjection
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IBenefitService, BenefitService>();
         services.AddScoped<IServiceUsageService, ServiceUsageService>();
+        services.AddScoped<INutritionService, NutritionService>();
+        services.AddScoped<IStationaryStayService, StationaryStayService>();
+        services.AddScoped<ITariffService, TariffService>();
+        services.AddScoped<IWardPlaceService, WardPlaceService>();
+        services.AddScoped<IWardService, WardService>();
 
         services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
         services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
@@ -114,6 +119,11 @@ public static class DependencyInjection
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IBenefitRepository, BenefitRepository>();
         services.AddScoped<IServiceUsageRepository, ServiceUsageRepository>();
+        services.AddScoped<INutritionRepository, NutritionRepository>();
+        services.AddScoped<IStationaryStayRepository, StationaryStayRepository>();
+        services.AddScoped<ITariffRepository, TariffRepository>();
+        services.AddScoped<IWardPlaceRepository, WardPlaceRepository>();
+        services.AddScoped<IWardRepository, WardRepository>();
     }
 
     private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)

@@ -5,6 +5,6 @@ public record WardPlaceDto(
     string? WardPlaceName,
     int? WardId,
     string? WardName,
-    bool IsOccupied,
+    bool? IsOccupied,
     int? StationaryStayId
     );

@@ -3,6 +3,5 @@
 public record WardPlaceForCreateDto(
     string? WardPlaceName,
     int? WardId,
-    bool IsOccupied,
-    int? StationaryStayId
+    bool IsOccupied
     );
