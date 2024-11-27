@@ -1,6 +1,8 @@
-﻿namespace MediQueue.Domain.DTOs.Ward;
+﻿using MediQueue.Domain.DTOs.WardPlace;
+
+namespace MediQueue.Domain.DTOs.Ward;
 
 public record WardForCreateDto(
     string? WardName,
-    List<WardForCreateDto> WardPlaces
+    List<WardPlaceForCreateDto> WardPlaces
     );
