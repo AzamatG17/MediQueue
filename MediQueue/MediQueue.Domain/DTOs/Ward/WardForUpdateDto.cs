@@ -2,7 +2,7 @@
 
 namespace MediQueue.Domain.DTOs.Ward;
 
-public record WardPlaceForUpdateDto(
+public record WardForUpdateDto(
     int id,
     string? WardName,
     List<WardPlaceDto> WardPlaces
