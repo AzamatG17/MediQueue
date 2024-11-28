@@ -8,8 +8,9 @@ public record StationaryStayDto(
     int Id,
     DateTime? StartTime,
     int? NumberOfDays,
+    decimal? TotalCost,
     int? QuestionnaireHistoryId,
-    TariffDto? TariffDto,
+    TariffHelperDto? TariffDto,
     WardPlaceDto? WardPlaceDto,
     NutritionDto? NutritionDto
     );
