@@ -14,8 +14,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<Service>> FindByServiceIdsAsync(List<int> serviceIds)
         {
             return await _context.Services
-                                 .Where(g => serviceIds.Contains(g.Id))
-                                 .Where(x => x.IsActive)
+                                 .Where(g => serviceIds.Contains(g.Id) && g.IsActive)
                                  .ToListAsync();
         }
 
