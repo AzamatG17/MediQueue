@@ -1,4 +1,5 @@
-﻿using MediQueue.Domain.DTOs.Ward;
+﻿using MediQueue.Domain.DTOs.Tariff;
+using MediQueue.Domain.DTOs.Ward;
 using MediQueue.Domain.DTOs.WardPlace;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
@@ -9,15 +10,17 @@ namespace MediQueue.Services;
 public class WardService : IWardService
 {
     private readonly IWardRepository _repository;
+    private readonly ITariffRepository _tariffRepository;
 
-    public WardService(IWardRepository repository)
+    public WardService(IWardRepository repository, ITariffRepository tariffRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _tariffRepository = tariffRepository ?? throw new ArgumentNullException(nameof(tariffRepository));
     }
 
     public async Task<IEnumerable<WardDto>> GetAllWardsAsync()
     {
-        var wards = await _repository.FindAllAsync();
+        var wards = await _repository.FindAllWardsAsync();
 
         if (wards == null) return null;
 
@@ -26,7 +29,7 @@ public class WardService : IWardService
 
     public async Task<WardDto> GetWardByIdAsync(int id)
     {
-        var ward = await _repository.FindByIdAsync(id);
+        var ward = await _repository.FindByIdWardAsync(id);
 
         if (ward == null) return null;
 
@@ -37,7 +40,11 @@ public class WardService : IWardService
     {
         ArgumentNullException.ThrowIfNull(nameof(wardForCreateDto));
 
-        var ward = MapWardForCreateDtoToWard(wardForCreateDto);
+        var tariffs = await _tariffRepository.FindByIdsAsync(wardForCreateDto.TariffIds);
+        if (tariffs == null || !tariffs.Any())
+            throw new KeyNotFoundException($"Tariff does not exist.");
+
+        var ward = MapWardForCreateDtoToWard(wardForCreateDto, tariffs.ToList());
 
         await _repository.CreateAsync(ward);
 
@@ -48,9 +55,11 @@ public class WardService : IWardService
     {
         ArgumentNullException.ThrowIfNull(nameof(wardForUpdateDto));
 
-        var existingWard = await _repository.FindByIdAsync(wardForUpdateDto.id)
+        var existingWard = await _repository.FindByIdWardAsync(wardForUpdateDto.id)
             ?? throw new KeyNotFoundException($"Ward with ID {wardForUpdateDto.id} not found.");
         
+        existingWard.WardPlaces.Clear();
+
         existingWard.WardName = wardForUpdateDto.WardName;
         existingWard.WardPlaces = wardForUpdateDto.WardPlaces.Select(MapWardPlaceDtoToWardPlace).ToList();
 
@@ -61,7 +70,7 @@ public class WardService : IWardService
 
     public async Task DeleteWardAsync(int id)
     {
-        await _repository.DeleteAsync(id);
+        await _repository.DeleteWardPlace(id);
     }
 
     private static WardDto MapWardToWardDto(Ward ward)
@@ -75,11 +84,15 @@ public class WardService : IWardService
                 wp.WardId,
                 wp.Ward?.WardName ?? "",
                 wp.IsOccupied,
-                wp.StationaryStayId)).ToList() ?? new List<WardPlaceDto>()
+                wp.StationaryStayId)).ToList() ?? new List<WardPlaceDto>(),
+            ward.Tariffs?.Select(t => new TariffHelperDto(
+                t.Id,
+                t.Name,
+                t.PricePerDay)).ToList() ?? new List<TariffHelperDto>()
         );
     }
 
-    private static Ward MapWardForCreateDtoToWard(WardForCreateDto wardForCreateDto)
+    private static Ward MapWardForCreateDtoToWard(WardForCreateDto wardForCreateDto, List<Tariff> tariffs)
     {
         return new Ward
         {
@@ -88,19 +101,19 @@ public class WardService : IWardService
             {
                 WardPlaceName = wp.WardPlaceName,
                 IsOccupied = wp.IsOccupied,
-                StationaryStayId = 0
-            }).ToList()
+                StationaryStayId = null
+            }).ToList(),
+            Tariffs = tariffs
         };
     }
 
-    private static WardPlace MapWardPlaceDtoToWardPlace(WardPlaceDto wardPlaceDto)
+    private static WardPlace MapWardPlaceDtoToWardPlace(WardPlaceHelperDto wardPlaceHelperDto)
     {
         return new WardPlace
         {
-            Id = wardPlaceDto.Id,
-            WardPlaceName = wardPlaceDto.WardPlaceName,
-            IsOccupied = wardPlaceDto.IsOccupied,
-            StationaryStayId = wardPlaceDto.StationaryStayId
+            WardPlaceName = wardPlaceHelperDto.WardPlaceName,
+            IsOccupied = wardPlaceHelperDto.IsOccupied,
+            StationaryStayId = null
         };
     }
 }

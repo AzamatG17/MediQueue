@@ -3,8 +3,8 @@
 public record StationaryStayForCreateDto(
     DateTime? StartTime,
     int? NumberOfDays,
-    int? QuestionnaireHistoryId,
-    int? TariffId,
-    int? WardPlaceId,
-    int? NutritionId
+    int QuestionnaireHistoryId,
+    int TariffId,
+    int WardPlaceId,
+    int NutritionId
     );

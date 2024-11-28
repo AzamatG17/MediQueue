@@ -1,8 +1,6 @@
 ﻿namespace MediQueue.Domain.DTOs.WardPlace;
 
-public record WardPlaceForUpdateDto(
-    int Id,
+public record WardPlaceHelperDto(
     string? WardPlaceName,
-    int? WardId,
     bool IsOccupied
     );

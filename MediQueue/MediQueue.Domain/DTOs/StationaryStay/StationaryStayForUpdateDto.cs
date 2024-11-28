@@ -5,7 +5,7 @@ public record StationaryStayForUpdateDto(
     DateTime? StartTime,
     int? NumberOfDays,
     int? QuestionnaireHistoryId,
-    int? TariffId,
-    int? WardPlaceId,
-    int? NutritionId
+    int TariffId,
+    int WardPlaceId,
+    int NutritionId
     );

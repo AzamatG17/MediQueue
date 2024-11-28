@@ -6,4 +6,6 @@ public class Tariff : EntityBase
 {
     public string? Name { get; set; }
     public decimal? PricePerDay { get; set; }
+
+    public virtual ICollection<Ward>? Wards { get; set; }
 }

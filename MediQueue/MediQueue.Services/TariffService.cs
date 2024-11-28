@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Tariff;
+using MediQueue.Domain.DTOs.Ward;
+using MediQueue.Domain.DTOs.WardPlace;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
@@ -19,20 +21,20 @@ public class TariffService : ITariffService
 
     public async Task<IEnumerable<TariffDto>> GetAllTariffsAsync()
     {
-        var tariffs = await _repository.FindAllAsync();
+        var tariffs = await _repository.FindAllTariffAsync();
 
         if (tariffs == null) return null;
 
-        return _mapper.Map<IEnumerable<TariffDto>>(tariffs);
+        return tariffs.Select(MapTariffToTariffDto).ToList();
     }
 
     public async Task<TariffDto> GetTariffByIdAsync(int id)
     {
-        var tariff = await _repository.FindByIdAsync(id);
+        var tariff = await _repository.FindByIdTariffAsync(id);
 
         if (tariff == null) return null;
 
-        return _mapper.Map<TariffDto>(tariff);
+        return MapTariffToTariffDto(tariff);
     }
 
     public async Task<TariffDto> CreateTariffAsync(TariffForCreateDto tariffForCreateDto)
@@ -43,7 +45,7 @@ public class TariffService : ITariffService
 
         await _repository.CreateAsync(tariff);
 
-        return _mapper.Map<TariffDto>(tariff);
+        return MapTariffToTariffDto(tariff);
     }
 
     public async Task<TariffDto> UpdateTariffAsync(TariffForUpdateDto tariffForUpdateDto)
@@ -58,11 +60,43 @@ public class TariffService : ITariffService
 
         await _repository.UpdateAsync(tariff);
 
-        return _mapper.Map<TariffDto>(tariff);
+        return MapTariffToTariffDto(tariff);
     }
 
     public async Task DeleteTariffAsync(int id)
     {
         await _repository.DeleteAsync(id);
+    }
+
+    private static TariffDto MapTariffToTariffDto(Tariff tariff)
+    {
+        return new TariffDto(
+            tariff.Id,
+            tariff.Name,
+            tariff.PricePerDay,
+            tariff.Wards != null
+                ? tariff.Wards.Select(w => new WardHelperDto(
+                    w.Id,
+                    w.WardName ?? "",
+                    w.WardPlaces?.Select(wp => new WardPlaceDto(
+                        wp.Id,
+                        wp.WardPlaceName ?? "",
+                        wp.WardId,
+                        wp.Ward.WardName ?? "",
+                        wp.IsOccupied,
+                        wp.StationaryStayId
+                    )).ToList()
+                )).ToList()
+                : new List<WardHelperDto>()
+        );
+    }
+
+    private static Tariff MapTariffForCreateDtoToTariff(TariffForCreateDto tariffForCreateDto)
+    {
+        return new Tariff
+        {
+            Name = tariffForCreateDto.Name,
+            PricePerDay = tariffForCreateDto.PricePerDay
+        };
     }
 }

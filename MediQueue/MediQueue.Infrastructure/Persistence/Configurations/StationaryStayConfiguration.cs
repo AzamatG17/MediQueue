@@ -17,6 +17,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(e => e.NumberOfDays)
                    .HasDefaultValue(null);
 
+            builder.Property(e => e.TotalCost)
+                .HasColumnType("decimal(18, 2)");
+
             builder.HasOne(e => e.Tariff)
                    .WithMany()
                    .HasForeignKey(e => e.TariffId)
