@@ -16,6 +16,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.Property(e => e.PricePerDay)
                    .HasColumnType("decimal(18,2)");
+
+            builder.HasMany(t => t.Wards)
+                .WithMany(w => w.Tariffs);
         }
     }
 }

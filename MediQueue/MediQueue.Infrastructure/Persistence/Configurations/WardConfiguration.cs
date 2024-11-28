@@ -18,6 +18,9 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                    .WithOne(e => e.Ward)
                    .HasForeignKey(e => e.WardId)
                    .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasMany(w => w.Tariffs)
+                .WithMany(e => e.Wards);
         }
     }
 }
