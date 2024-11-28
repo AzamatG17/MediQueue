@@ -6,6 +6,7 @@ public class StationaryStay : EntityBase
 {
     public DateTime? StartTime { get; set; }
     public int? NumberOfDays { get; set; }
+    public decimal? TotalCost { get; set; }
 
     public int? TariffId { get; set; }
     public virtual Tariff? Tariff { get; set; }
