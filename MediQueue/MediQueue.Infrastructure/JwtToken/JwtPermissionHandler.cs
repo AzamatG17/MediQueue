@@ -100,6 +100,11 @@ namespace MediQueue.Infrastructure.JwtToken
                 "Discount" => 24,
                 "Benefit" => 25,
                 "ServiceUsage" => 26,
+                "Nutrition" => 27,
+                "StationaryStay" => 28,
+                "Tariff" => 29,
+                "WardPlace" => 30,
+                "Ward" => 31,
                 _ => 0
             };
         }
