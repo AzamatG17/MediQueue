@@ -16,7 +16,7 @@ public class WardPlaceService : IWardPlaceService
 
     public async Task<IEnumerable<WardPlaceDto>> GetAllWardPlacesAsync()
     {
-        var wardPlaces = await _repository.FindAllAsync();
+        var wardPlaces = await _repository.FindAllWardPlaceAsync();
 
         if (wardPlaces == null) return null;
 
@@ -25,7 +25,7 @@ public class WardPlaceService : IWardPlaceService
 
     public async Task<WardPlaceDto> GetWardPlaceByIdAsync(int id)
     {
-        var wardPlace = await _repository.FindByIdAsync(id);
+        var wardPlace = await _repository.FindByIdWardPlaceAsync(id);
 
         if (wardPlace == null) return null;
 
@@ -47,13 +47,13 @@ public class WardPlaceService : IWardPlaceService
     {
         ArgumentNullException.ThrowIfNull(nameof(wardPlaceForUpdateDto));
 
-        var existingWardPlace = await _repository.FindByIdAsync(wardPlaceForUpdateDto.Id)
+        var existingWardPlace = await _repository.FindByIdWardPlaceAsync(wardPlaceForUpdateDto.Id)
             ?? throw new KeyNotFoundException($"WardPlace with ID {wardPlaceForUpdateDto.Id} not found.");
 
         existingWardPlace.WardPlaceName = wardPlaceForUpdateDto.WardPlaceName;
         existingWardPlace.WardId = wardPlaceForUpdateDto.WardId;
         existingWardPlace.IsOccupied = wardPlaceForUpdateDto.IsOccupied;
-        existingWardPlace.StationaryStayId = wardPlaceForUpdateDto.StationaryStayId;
+        existingWardPlace.StationaryStayId = null;
 
         await _repository.UpdateAsync(existingWardPlace);
 

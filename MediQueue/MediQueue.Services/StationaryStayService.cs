@@ -11,15 +11,28 @@ namespace MediQueue.Services;
 public class StationaryStayService : IStationaryStayService
 {
     private readonly IStationaryStayRepository _repository;
+    private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
+    private readonly ITariffRepository _tariffRepository;
+    private readonly IWardPlaceRepository _wardPlaceRepository;
+    private readonly INutritionRepository _utritionRepository;
 
-    public StationaryStayService(IStationaryStayRepository repository)
+    public StationaryStayService(
+        IStationaryStayRepository repository,
+        IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty,
+        ITariffRepository tariffRepository,
+        IWardPlaceRepository wardPlaceRepository,
+        INutritionRepository utritionRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
+        _tariffRepository = tariffRepository ?? throw new ArgumentNullException(nameof(tariffRepository));
+        _wardPlaceRepository = wardPlaceRepository ?? throw new ArgumentNullException(nameof(wardPlaceRepository));
+        _utritionRepository = utritionRepository ?? throw new ArgumentNullException(nameof(utritionRepository));
     }
 
     public async Task<IEnumerable<StationaryStayDto>> GetAllStationaryStaysAsync()
     {
-        var stationaryStays = await _repository.FindAllAsync();
+        var stationaryStays = await _repository.FindAllStationaryStayAsync();
 
         if (stationaryStays == null) return null;
 
@@ -28,7 +41,7 @@ public class StationaryStayService : IStationaryStayService
 
     public async Task<StationaryStayDto> GetStationaryStayByIdAsync(int id)
     {
-        var stationaryStay = await _repository.FindByIdAsync(id);
+        var stationaryStay = await _repository.FindByIdStationaryStayAsync(id);
 
         if (stationaryStay == null) return null;
 
@@ -39,7 +52,21 @@ public class StationaryStayService : IStationaryStayService
     {
         ArgumentNullException.ThrowIfNull(nameof(stationaryStayForCreateDto));
 
-        var stationaryStay = MapStationaryStayForCreateDtoToStationaryStay(stationaryStayForCreateDto);
+        var questionairyHistory = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(stationaryStayForCreateDto.QuestionnaireHistoryId);
+        if (questionairyHistory == null)
+            throw new ArgumentException($"Questionairyhistory with id: {stationaryStayForCreateDto.QuestionnaireHistoryId} does not exist.");
+
+        if (!await _tariffRepository.IsExistByIdAsync(stationaryStayForCreateDto.TariffId))
+            throw new KeyNotFoundException($"Tariff with id: {stationaryStayForCreateDto.TariffId} does not exist.");
+
+        var wardPlace = await _wardPlaceRepository.FindByIdWardPlaceAsync(stationaryStayForCreateDto.WardPlaceId);
+        if (wardPlace == null)
+            throw new KeyNotFoundException($"WardPlace with id: {stationaryStayForCreateDto.WardPlaceId} does not exist.");
+
+        if (!await _utritionRepository.IsExistByIdAsync(stationaryStayForCreateDto.NutritionId))
+            throw new KeyNotFoundException($"Nutrition with id: {stationaryStayForCreateDto.NutritionId} does not exist.");
+
+        var stationaryStay = MapStationaryStayForCreateDtoToStationaryStay(stationaryStayForCreateDto, questionairyHistory.Id, wardPlace);
 
         await _repository.CreateAsync(stationaryStay);
 
@@ -50,14 +77,29 @@ public class StationaryStayService : IStationaryStayService
     {
         ArgumentNullException.ThrowIfNull(nameof(stationaryStayForUpdateDto));
 
-        var existingStationaryStay = await _repository.FindByIdAsync(stationaryStayForUpdateDto.Id)
+        var existingStationaryStay = await _repository.FindByIdStationaryStayAsync(stationaryStayForUpdateDto.Id)
             ?? throw new KeyNotFoundException($"StationaryStay with ID {stationaryStayForUpdateDto.Id} not found.");
+
+        var questionairyHistory = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(stationaryStayForUpdateDto.QuestionnaireHistoryId);
+        if (questionairyHistory == null)
+            throw new ArgumentException($"Questionairyhistory with id: {stationaryStayForUpdateDto.QuestionnaireHistoryId} does not exist.");
+
+        if (!await _tariffRepository.IsExistByIdAsync(stationaryStayForUpdateDto.TariffId))
+            throw new KeyNotFoundException($"Tariff with id: {stationaryStayForUpdateDto.TariffId} does not exist.");
+
+        var wardPlace = await _wardPlaceRepository.FindByIdWardPlaceAsync(stationaryStayForUpdateDto.WardPlaceId);
+        if (wardPlace == null)
+            throw new KeyNotFoundException($"WardPlace with id: {stationaryStayForUpdateDto.WardPlaceId} does not exist.");
+
+        if (!await _utritionRepository.IsExistByIdAsync(stationaryStayForUpdateDto.NutritionId))
+            throw new KeyNotFoundException($"Nutrition with id: {stationaryStayForUpdateDto.NutritionId} does not exist.");
 
         existingStationaryStay.StartTime = stationaryStayForUpdateDto.StartTime;
         existingStationaryStay.NumberOfDays = stationaryStayForUpdateDto.NumberOfDays;
-        existingStationaryStay.QuestionnaireHistoryId = stationaryStayForUpdateDto.QuestionnaireHistoryId;
+        existingStationaryStay.QuestionnaireHistoryId = questionairyHistory.Id;
         existingStationaryStay.TariffId = stationaryStayForUpdateDto.TariffId;
         existingStationaryStay.WardPlaceId = stationaryStayForUpdateDto.WardPlaceId;
+        existingStationaryStay.WardPlace = wardPlace;
         existingStationaryStay.NutritionId = stationaryStayForUpdateDto.NutritionId;
 
         await _repository.UpdateAsync(existingStationaryStay);
@@ -76,9 +118,10 @@ public class StationaryStayService : IStationaryStayService
             stationaryStay.Id,
             stationaryStay.StartTime,
             stationaryStay.NumberOfDays,
+            stationaryStay.TotalCost,
             stationaryStay.QuestionnaireHistoryId,
             stationaryStay.Tariff != null
-                ? new TariffDto(stationaryStay.Tariff.Id, stationaryStay.Tariff.Name, stationaryStay.Tariff.PricePerDay)
+                ? new TariffHelperDto(stationaryStay.Tariff.Id, stationaryStay.Tariff.Name, stationaryStay.Tariff.PricePerDay)
                 : null,
             stationaryStay.WardPlace != null
                 ? new WardPlaceDto(
@@ -95,15 +138,16 @@ public class StationaryStayService : IStationaryStayService
         );
     }
 
-    private static StationaryStay MapStationaryStayForCreateDtoToStationaryStay(StationaryStayForCreateDto stationaryStayForCreateDto)
+    private static StationaryStay MapStationaryStayForCreateDtoToStationaryStay(StationaryStayForCreateDto stationaryStayForCreateDto, int questionairyHistoryId, WardPlace wardPlace)
     {
         return new StationaryStay
         {
             StartTime = stationaryStayForCreateDto.StartTime,
             NumberOfDays = stationaryStayForCreateDto.NumberOfDays,
-            QuestionnaireHistoryId = stationaryStayForCreateDto.QuestionnaireHistoryId,
+            QuestionnaireHistoryId = questionairyHistoryId,
             TariffId = stationaryStayForCreateDto.TariffId,
-            WardPlaceId = stationaryStayForCreateDto.WardPlaceId,
+            WardPlaceId = wardPlace.Id,
+            WardPlace = wardPlace,
             NutritionId = stationaryStayForCreateDto.NutritionId
         };
     }
