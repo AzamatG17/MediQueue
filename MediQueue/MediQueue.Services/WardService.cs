@@ -57,11 +57,17 @@ public class WardService : IWardService
 
         var existingWard = await _repository.FindByIdWardAsync(wardForUpdateDto.id)
             ?? throw new KeyNotFoundException($"Ward with ID {wardForUpdateDto.id} not found.");
-        
+
+        var tariffs = await _tariffRepository.FindByIdsAsync(wardForUpdateDto.TariffIds);
+        if (tariffs == null || !tariffs.Any())
+            throw new KeyNotFoundException($"Tariff does not exist.");
+
         existingWard.WardPlaces.Clear();
+        existingWard.Tariffs.Clear();
 
         existingWard.WardName = wardForUpdateDto.WardName;
         existingWard.WardPlaces = wardForUpdateDto.WardPlaces.Select(MapWardPlaceDtoToWardPlace).ToList();
+        existingWard.Tariffs = tariffs.ToList();
 
         await _repository.UpdateAsync(existingWard);
 

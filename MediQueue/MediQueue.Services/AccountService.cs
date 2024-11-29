@@ -107,7 +107,7 @@ public class AccountService : IAccountService
         var role = await _roleRepository.FindByIdAsync(accountForUpdateDto.RoleId)
             ?? throw new ArgumentException("Role not found.");
 
-        var account = await _accountRepository.FindByIdWithRoleAsync(accountForUpdateDto.Id)
+        var account = await _accountRepository.FindByIdAccountAsync(accountForUpdateDto.Id)
             ?? throw new ArgumentException("Account not found.");
 
         if (account.RolePermissions != null && account.RolePermissions.Any())
@@ -129,6 +129,8 @@ public class AccountService : IAccountService
 
         account.Role = role;
 
+        account.Services.Clear();
+
         await _accountRepository.UpdateAsync(account);
 
         await AddServicesToAccountAsync(account, accountForUpdateDto.ServiceIds);
@@ -141,7 +143,7 @@ public class AccountService : IAccountService
         await _accountRepository.DeleteAsync(id);
     }
 
-    private AccountDto MapToAccountDto(Account account)
+    private static AccountDto MapToAccountDto(Account account)
     {
         return new AccountDto(
             account.Id,
@@ -163,7 +165,7 @@ public class AccountService : IAccountService
             );
     }
 
-    private ServiceHelperDto MapToServiceDto(Service service)
+    private static ServiceHelperDto MapToServiceDto(Service service)
     {
         return new ServiceHelperDto(
             service.Id,
@@ -174,7 +176,7 @@ public class AccountService : IAccountService
             );
     }
 
-    private RolePermissionDto MapToRolePermissionDto(RolePermission rolePermission)
+    private static RolePermissionDto MapToRolePermissionDto(RolePermission rolePermission)
     {
         return new RolePermissionDto(
             rolePermission.ControllerId,
@@ -182,7 +184,7 @@ public class AccountService : IAccountService
             );
     }
 
-    private RolePermission MapToRolePermission(RolePermissionDto rolePermissionDto, int accountId)
+    private static RolePermission MapToRolePermission(RolePermissionDto rolePermissionDto, int accountId)
     {
         return new RolePermission
         {

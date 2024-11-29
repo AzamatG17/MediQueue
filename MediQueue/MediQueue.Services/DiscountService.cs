@@ -25,9 +25,8 @@ public class DiscountService : IDiscountService
 
     public async Task<DiscountDto> GetDiscountByIdAsync(int id)
     {
-        var discount = await _repository.FindByIdAsync(id);
-
-        if (discount == null) return null;
+        var discount = await _repository.FindByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Discount with id: {id} does not exist.");
 
         return MapToDiscountDto(discount);
     }

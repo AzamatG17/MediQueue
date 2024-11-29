@@ -21,22 +21,22 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
     {
         var cateforyLekarstvo = await _categoryLekarstvoRepository.FindAllCategoryLekarstvo();
 
+        if (cateforyLekarstvo == null) return null;
+
         return cateforyLekarstvo.Select(MapToCategoryLekarstvoDto).ToList();
     }
 
     public async Task<CategoryLekarstvoDto> GetCategoryLekarstvoByIdAsync(int id)
     {
-        var categoryLekarstvo = await _categoryLekarstvoRepository.FindByIdCategoryLekarstvo(id);
+        var categoryLekarstvo = await _categoryLekarstvoRepository.FindByIdCategoryLekarstvo(id)
+            ?? throw new KeyNotFoundException($"CategoryLekarstvo with id: {id} does not exist.");
 
         return MapToCategoryLekarstvoDto(categoryLekarstvo);
     }
 
     public async Task<CategoryLekarstvoDto> CreateCategoryLekarstvoAsync(CategoryLekarstvoForCreateDto lekarstvoForCreateDto)
     {
-        if (lekarstvoForCreateDto == null)
-        {
-            throw new ArgumentNullException(nameof(lekarstvoForCreateDto));
-        }
+        ArgumentNullException.ThrowIfNull(lekarstvoForCreateDto);
 
         var categoryLekarstvo = new CategoryLekarstvo
         {
@@ -50,10 +50,7 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
 
     public async Task<CategoryLekarstvoDto> UpdateCategoryLekarstvoAsync(CategoryLekarstvoForUpdateDto lekarstvoForUpdateDto)
     {
-        if (lekarstvoForUpdateDto == null)
-        {
-            throw new ArgumentNullException(nameof(lekarstvoForUpdateDto));
-        }
+        ArgumentNullException.ThrowIfNull(lekarstvoForUpdateDto);
 
         var lakarstvo = new CategoryLekarstvo
         {
@@ -71,7 +68,7 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
         await _categoryLekarstvoRepository.DeleteAsync(id);
     }
 
-    private CategoryLekarstvoDto MapToCategoryLekarstvoDto(CategoryLekarstvo lekarstvo)
+    private static CategoryLekarstvoDto MapToCategoryLekarstvoDto(CategoryLekarstvo lekarstvo)
     {
         return new CategoryLekarstvoDto(
             lekarstvo.Id,
@@ -82,7 +79,7 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
             );
     }
 
-    private LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
+    private static LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
     {
         decimal totalQuantityLEkarstvo = lekarstvo.Partiyas.Sum(x => x.TotalQuantity ?? 0);
 

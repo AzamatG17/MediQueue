@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.AnalysisResult;
-using MediQueue.Domain.DTOs.Conclusion;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
-using MediQueue.Infrastructure.Persistence.Repositories;
 
 namespace MediQueue.Services;
 
@@ -34,12 +32,15 @@ public class AnalysisResultService : IAnalysisResultService
     {
         var analysisResults = await _analysisResultRepository.FindAllAnalysisResultsAsync();
 
+        if (analysisResults == null) return null;
+
         return _mapper.Map<IEnumerable<AnalysisResultDto>>(analysisResults);
     }
 
     public async Task<AnalysisResultDto> GetAnalysisResultByIdAsync(int id)
     {
-        var analysisResult = await _analysisResultRepository.FindAnalysisResultByIdAsync(id);
+        var analysisResult = await _analysisResultRepository.FindAnalysisResultByIdAsync(id)
+            ?? throw new KeyNotFoundException($"AnalysisResult with {id} not found");
 
         return _mapper.Map<AnalysisResultDto>(analysisResult);
     }
@@ -84,7 +85,7 @@ public class AnalysisResultService : IAnalysisResultService
     {
         ArgumentNullException.ThrowIfNull(nameof(analysisResultForUpdateDto));
 
-        var analysisResult = await _analysisResultRepository.FindAnalysisResultByIdAsync(analysisResultForUpdateDto.Id)
+        var analysisResult = await _analysisResultRepository.FindByIdAnalysisResultAsync(analysisResultForUpdateDto.Id)
             ?? throw new ArgumentException($"AnalysisResult with id: {analysisResultForUpdateDto.Id} does not exist.");
 
         if (!await _accountRepository.IsExistByIdAsync(analysisResultForUpdateDto.AccountId))

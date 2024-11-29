@@ -27,26 +27,22 @@ public class CategoriesService : ICategoryService
     {
         var categories = await _categoryRepository.GetCategoriesWithGroupsAsync();
 
+        if (categories == null) return null;
+
         return categories.Select(MapToCategoryDto).ToList();
     }
 
     public async Task<CategoryDto> GetCategoryByIdAsync(int id)
     {
-        var category = await _categoryRepository.FindByIdWithGroupAsync(id);
-        if (category == null)
-        {
-            throw new KeyNotFoundException($"Category with {id} not found");
-        }
+        var category = await _categoryRepository.FindByIdWithGroupAsync(id)
+            ?? throw new KeyNotFoundException($"Category with {id} not found");
 
         return MapToCategoryDto(category);
     }
 
     public async Task<CategoryDto> CreateCategoryAsync(CategoryForCreateDto categoryForCreateDto)
     {
-        if (categoryForCreateDto == null)
-        {
-            throw new ArgumentNullException(nameof(categoryForCreateDto));
-        }
+        ArgumentNullException.ThrowIfNull(categoryForCreateDto);
 
         var category = await MapToCategoryAsync(categoryForCreateDto);
 
@@ -57,17 +53,11 @@ public class CategoriesService : ICategoryService
 
     public async Task<CategoryDto> UpdateCategoryAsync(CategoryForUpdateDto categoryForUpdateDto)
     {
-        if (categoryForUpdateDto == null)
-        {
-            throw new ArgumentNullException(nameof(categoryForUpdateDto));
-        }
+        ArgumentNullException.ThrowIfNull(categoryForUpdateDto);
 
-        var category = await _categoryRepository.FindByIdWithGroupAsync(categoryForUpdateDto.Id);
-        if (category == null)
-        {
-            throw new KeyNotFoundException($"Category with {categoryForUpdateDto.Id} not found");
-        }
-
+        var category = await _categoryRepository.FindByIdCategoryAsync(categoryForUpdateDto.Id)
+            ?? throw new KeyNotFoundException($"Category with {categoryForUpdateDto.Id} not found");
+        
         category.CategoryName = categoryForUpdateDto.CategoryName;
 
         await UpdateGroupsAsync(category, categoryForUpdateDto.GroupIds);
@@ -100,7 +90,7 @@ public class CategoriesService : ICategoryService
         };
     }
 
-    private CategoryDto MapToCategoryDto(Category category)
+    private static CategoryDto MapToCategoryDto(Category category)
     {
         var groupInfos = category.Groups.Select(g => new GroupInfoResponse(
             g.Id,

@@ -28,9 +28,8 @@ public class NutritionService : INutritionService
 
     public async Task<NutritionDto> GetNutritionByIdAsync(int id)
     {
-        var nutrition = await _repository.FindByIdAsync(id);
-
-        if (nutrition == null) return null;
+        var nutrition = await _repository.FindByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Nutrition with id: {id} does not exist.");
 
         return _mapper.Map<NutritionDto>(nutrition);
     }
