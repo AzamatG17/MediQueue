@@ -6,5 +6,6 @@ namespace MediQueue.Domain.Interfaces.Repositories
     {
         Task<IEnumerable<PaymentService>> GetAllPaymentServicesAsync();
         Task<PaymentService> GetByIdPaymentServiceAsync(int id);
+        Task<PaymentService> GetPaymentServiceByIdAsync(int id);
     }
 }
