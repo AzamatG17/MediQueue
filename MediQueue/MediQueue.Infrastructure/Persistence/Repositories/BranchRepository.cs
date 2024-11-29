@@ -14,18 +14,20 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<Branch>> FindAllBranches()
         {
             return await _context.Branches
-                .Include(x => x.Sclads)
-                .ThenInclude(sc => sc.Partiyas)
+                .Include(x => x.Sclads.Where(p => p.IsActive))
+                .ThenInclude(sc => sc.Partiyas.Where(p => p.IsActive))
                 .Where(x => x.IsActive)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<Branch> FindByIdBranch(int Id)
         {
             return await _context.Branches
-                .Include(x => x.Sclads)
-                .ThenInclude(sc => sc.Partiyas)
+                .Include(x => x.Sclads.Where(p => p.IsActive))
+                .ThenInclude(sc => sc.Partiyas.Where(p => p.IsActive))
                 .Where(x => x.Id == Id && x.IsActive)
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
 

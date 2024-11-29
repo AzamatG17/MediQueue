@@ -1,7 +1,6 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
 
 namespace MediQueue.Infrastructure.Persistence.Repositories
 {
@@ -23,17 +22,28 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<Group>> GetGroupWithGroupsAsync()
         {
             return await _context.Groups
-                                 .Include(c => c.Categories)
-                                 .ThenInclude(c => c.Services)
+                                 .Include(c => c.Categories.Where(p => p.IsActive))
+                                 .ThenInclude(c => c.Services.Where(p => p.IsActive))
                                  .Where(x => x.IsActive)
+                                 .AsNoTracking()
                                  .ToListAsync();
         }
 
         public async Task<Group> FindByIdWithGroupAsync(int id)
         {
             return await _context.Groups
-                    .Include(c => c.Categories)
-                    .ThenInclude(c => c.Services)
+                    .Include(c => c.Categories.Where(p => p.IsActive))
+                    .ThenInclude(c => c.Services.Where(p => p.IsActive))
+                    .Where(x => x.Id == id && x.IsActive)
+                    .AsNoTracking()
+                    .SingleOrDefaultAsync();
+        }
+
+        public async Task<Group> FindByIdGroupAsync(int id)
+        {
+            return await _context.Groups
+                    .Include(c => c.Categories.Where(p => p.IsActive))
+                    .ThenInclude(c => c.Services.Where(p => p.IsActive))
                     .Where(x => x.Id == id && x.IsActive)
                     .SingleOrDefaultAsync();
         }

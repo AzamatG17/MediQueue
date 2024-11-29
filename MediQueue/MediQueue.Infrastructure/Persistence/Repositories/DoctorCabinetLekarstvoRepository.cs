@@ -14,11 +14,12 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<DoctorCabinetLekarstvo>> FindAllDoctorCabinetLekarstvoAsync()
         {
             return await _context.DoctorCabinetLekarstvos
+                .Where(x => x.IsActive)
                 .Include(d => d.DoctorCabinet)
                     .ThenInclude(da => da.Account)
                 .Include(p => p.Partiya)
                     .ThenInclude(pl => pl.Lekarstvo)
-                .Where(x => x.IsActive)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -30,6 +31,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(p => p.Partiya)
                     .ThenInclude(pl => pl.Lekarstvo)
                 .Where(x => x.Id == id && x.IsActive)
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
     }

@@ -14,22 +14,36 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<Account>> FindAllWithRoleIdAsync()
         {
             return await _context.Set<Account>()
-                .Include(x => x.RolePermissions)
+                .Where(x => x.IsActive)
+                .Include(x => x.RolePermissions.Where(p => p.IsActive))
                 .Include(x => x.Role)
                 .Include(x => x.DoctorCabinet)
-                .Include(x => x.Services)
+                .Include(x => x.Services.Where(p => p.IsActive))
                 .ThenInclude(xc => xc.Category)
-                .Where(x => x.IsActive)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<Account> FindByIdWithRoleAsync(int Id)
         {
             return await _context.Set<Account>()
-                .Include(x => x.RolePermissions)
+                .Include(x => x.RolePermissions.Where(p => p.IsActive))
                 .Include(x => x.Role)
                 .Include(x => x.DoctorCabinet)
-                .Include(x => x.Services)
+                .Include(x => x.Services.Where(p => p.IsActive))
+                .ThenInclude(xc => xc.Category)
+                .Where(x => x.Id == Id && x.IsActive)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Account> FindByIdAccountAsync(int Id)
+        {
+            return await _context.Set<Account>()
+                .Include(x => x.RolePermissions.Where(p => p.IsActive))
+                .Include(x => x.Role)
+                .Include(x => x.DoctorCabinet)
+                .Include(x => x.Services.Where(p => p.IsActive))
                 .ThenInclude(xc => xc.Category)
                 .Where(x => x.Id == Id && x.IsActive)
                 .FirstOrDefaultAsync();
@@ -38,10 +52,10 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<Account> FindByIdWithRoleAsync(int? Id)
         {
             return await _context.Set<Account>()
-                .Include(x => x.RolePermissions)
+                .Include(x => x.RolePermissions.Where(p => p.IsActive))
                 .Include(x => x.Role)
                 .Include(x => x.DoctorCabinet)
-                .Include(x => x.Services)
+                .Include(x => x.Services.Where(p => p.IsActive))
                 .ThenInclude(xc => xc.Category)
                 .Where(x => x.Id == Id && x.IsActive)
                 .FirstOrDefaultAsync();

@@ -21,7 +21,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<Tariff>> FindAllTariffAsync()
         {
             return await _context.Tariffs
-                .Include(t => t.Wards)
+                .Include(t => t.Wards.Where(p => p.IsActive))
                     .ThenInclude(wp => wp.WardPlaces)
                 .Where(x => x.IsActive)
                 .ToListAsync();

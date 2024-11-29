@@ -33,6 +33,19 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(ss => ss.Service)
                 .Include(q => q.QuestionnaireHistory)
                 .Where(x => x.Id == id && x.IsActive)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<AnalysisResult> FindByIdAnalysisResultAsync(int id)
+        {
+            return await _context.AnalysisResults
+                .Include(fa => fa.FirstDoctor)
+                .Include(sa => sa.SecondDoctor)
+                .Include(s => s.ServiceUsage)
+                    .ThenInclude(ss => ss.Service)
+                .Include(q => q.QuestionnaireHistory)
+                .Where(x => x.Id == id && x.IsActive)
                 .FirstOrDefaultAsync();
         }
     }

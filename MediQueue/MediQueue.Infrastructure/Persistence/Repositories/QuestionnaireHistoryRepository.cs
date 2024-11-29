@@ -185,6 +185,28 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<QuestionnaireHistory> GetByIdQuestionnaireHistoryAsync(int? id)
+        {
+            return await _context.Set<QuestionnaireHistory>()
+                .Include(a => a.Account)
+                .Include(q => q.Questionnaire)
+                .Include(s => s.ServiceUsages)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Account)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.DoctorCabinetLekarstvo)
+                .ThenInclude(psp => psp.Partiya)
+                .ThenInclude(psl => psl.Lekarstvo)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Service)
+                .Include(c => c.Conclusions)
+                .ThenInclude(l => l.LekarstvoUsages)
+                .ThenInclude(ll => ll.DoctorCabinetLekarstvo)
+                .AsSplitQuery()
+                .Where(x => x.Id == id && x.IsActive)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task DeleteWithOutService(int id)
         {
             var questionnaireHistory = await _context.Set<QuestionnaireHistory>()

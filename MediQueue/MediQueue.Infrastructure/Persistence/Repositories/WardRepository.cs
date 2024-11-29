@@ -33,15 +33,13 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             var ward = await _context.Wards
                 .Include(wp => wp.WardPlaces)
+                .Include(t => t.Tariffs)
                 .Where(x => x.Id == id && x.IsActive)
                 .FirstOrDefaultAsync();
 
             if (ward != null)
             {
-                foreach (var wardPlace in ward.WardPlaces)
-                {
-                    wardPlace.IsActive = false;
-                }
+                _context.WardsPlace.RemoveRange(ward.WardPlaces);
 
                 ward.IsActive = false;
 

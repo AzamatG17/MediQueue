@@ -5,7 +5,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
 {
     public class PermissionRepository : RepositoryBase<Permission>, IPermissionRepository
     {
-        public PermissionRepository(MediQueueDbContext mediQueueDbContext) : base(mediQueueDbContext)
+        public PermissionRepository(MediQueueDbContext mediQueueDbContext)
+            : base(mediQueueDbContext)
         {
         }
     }
