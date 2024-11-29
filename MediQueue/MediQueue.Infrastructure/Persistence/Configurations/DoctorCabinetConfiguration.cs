@@ -26,12 +26,6 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasMany(d => d.DoctorCabinetLekarstvos)
                 .WithOne(dc => dc.DoctorCabinet)
                 .HasForeignKey(dc => dc.DoctorCabinetId);
-
-            builder.Navigation(x => x.DoctorCabinetLekarstvos)
-                .AutoInclude();
-
-            builder.Navigation(x => x.Account)
-                .AutoInclude();
         }
     }
 }

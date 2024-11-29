@@ -24,9 +24,6 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasMany(s => s.Partiyas)
                 .WithOne(sl => sl.Sclad)
                 .HasForeignKey(sl => sl.ScladId);
-
-            builder.Navigation(x => x.Branch)
-                .AutoInclude();
         }   
     }
 }
