@@ -87,11 +87,12 @@ public class PaymentServiceController : BaseController
             return BadRequest(CreateErrorResponse("Payment data is null."));
         }
 
-        if (id != paymentServiceForUpdateDto.id)
+        if (id != paymentServiceForUpdateDto.Id)
         {
             return BadRequest(CreateErrorResponse(
-                $"Route id: {id} does not match with parameter id: {paymentServiceForUpdateDto.id}."));
+                $"Route id: {id} does not match with parameter id: {paymentServiceForUpdateDto.Id}."));
         }
+
         try
         {
             var updatedAccount = await _paymentService.UpdatePaymentAsync(paymentServiceForUpdateDto);
