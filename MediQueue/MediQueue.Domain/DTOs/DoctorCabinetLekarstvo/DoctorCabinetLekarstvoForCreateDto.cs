@@ -3,6 +3,6 @@
 namespace MediQueue.Domain.DTOs.DoctorCabinetLekarstvo;
 
 public record DoctorCabinetLekarstvoForCreateDto(
-     int DoctorCabinetId,
+    int DoctorCabinetId,
     List<DoctorCabinetResponse> DoctorCabinetResponses
     );

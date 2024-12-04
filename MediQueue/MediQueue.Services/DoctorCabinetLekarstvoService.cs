@@ -89,9 +89,50 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
         return MapToDoctorCabinetLekarstvoDto(cabinetLekarstvoList.Last());
     }
 
-    public Task<DoctorCabinetLekarstvoDto> UpdateDoctorCabinetLekarstvoAsync(DoctorCabinetLekarstvoForUpdateDto doctorCabinetLekarstvoForUpdateDto)
+    public async Task<DoctorCabinetLekarstvoDto> UpdateDoctorCabinetLekarstvoAsync(DoctorCabinetLekarstvoForUpdateDto updateDto)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(updateDto);
+
+        var existingLekarstvo = await _repository.FindByIdAsync(updateDto.Id)
+            ?? throw new ArgumentException($"DoctorCabinetLekarstvo with id: {updateDto.Id} does not exist");
+
+        if (updateDto.DoctorCabinetId.HasValue)
+        {
+            if (!await _cabinetRepository.IsExistByIdAsync(updateDto.DoctorCabinetId.Value))
+            {
+                throw new ArgumentException($"Doctor Cabinet with id: {updateDto.DoctorCabinetId.Value} does not exist");
+            }
+            existingLekarstvo.DoctorCabinetId = updateDto.DoctorCabinetId.Value;
+        }
+
+        if (updateDto.DoctorCabinetResponses != null && updateDto.DoctorCabinetResponses.Any())
+        {
+            foreach (var response in updateDto.DoctorCabinetResponses)
+            {
+                if (!response.PartiyaId.HasValue || !response.Quantity.HasValue)
+                {
+                    throw new ArgumentException("Each response must have valid PartiyaId and Quantity");
+                }
+
+                var partiya = await _partiyaRepository.FindByIdAsync(response.PartiyaId.Value)
+                    ?? throw new ArgumentException($"Partiya with id: {response.PartiyaId} does not exist");
+
+                if (partiya.TotalQuantity.HasValue && partiya.TotalQuantity < response.Quantity.Value)
+                {
+                    throw new InvalidOperationException($"Not enough quantity in Partiya with id: {response.PartiyaId} for this operation.");
+                }
+
+                partiya.TotalQuantity -= response.Quantity.Value;
+                await _partiyaRepository.UpdateAsync(partiya);
+
+                existingLekarstvo.PartiyaId = response.PartiyaId.Value;
+                existingLekarstvo.Quantity = response.Quantity.Value;
+            }
+        }
+
+        await _repository.UpdateAsync(existingLekarstvo);
+
+        return MapToDoctorCabinetLekarstvoDto(existingLekarstvo);
     }
 
     public async Task DeleteDoctorCabinetLekarstvoAsync(int id)

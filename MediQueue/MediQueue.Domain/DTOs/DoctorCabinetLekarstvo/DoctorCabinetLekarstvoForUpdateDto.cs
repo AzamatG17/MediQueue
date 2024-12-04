@@ -1,8 +1,9 @@
-﻿namespace MediQueue.Domain.DTOs.DoctorCabinetLekarstvo;
+﻿using MediQueue.Domain.Entities.Responses;
+
+namespace MediQueue.Domain.DTOs.DoctorCabinetLekarstvo;
 
 public record DoctorCabinetLekarstvoForUpdateDto(
     int Id,
-    decimal? Quantity,
     int? DoctorCabinetId,
-    int? PartiyaId
+    List<DoctorCabinetResponse> DoctorCabinetResponses
     );

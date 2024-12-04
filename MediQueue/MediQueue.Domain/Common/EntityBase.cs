@@ -1,8 +1,7 @@
-﻿namespace MediQueue.Domain.Common
+﻿namespace MediQueue.Domain.Common;
+
+public abstract class EntityBase
 {
-    public abstract class EntityBase
-    {
-        public int Id { get; set; }
-        public bool IsActive { get; set; } = true;
-    }
+    public int Id { get; set; }
+    public bool IsActive { get; set; } = true;
 }
