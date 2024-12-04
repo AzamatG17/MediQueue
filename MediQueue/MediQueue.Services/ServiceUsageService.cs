@@ -29,20 +29,15 @@ public class ServiceUsageService : IServiceUsageService
     {
         var serviceUsages = await _repository.FindAllServiceUsages(serviceUsageResourceParametrs);
 
-        if (serviceUsages == null)
-            return null;
+        if (serviceUsages == null) return null;
 
         return serviceUsages.Select(MapToServiceUsageDto).ToList();
     }
 
     public async Task<ServiceUsageDto> GetServiceUsageByIdAsync(int id)
     {
-        var serviceUsage = await _repository.FindByIdServiceUsage(id);
-            
-        if (serviceUsage == null)
-        {
-            throw new KeyNotFoundException($"ServiceUsage with Id: {id} does not exist.");
-        }
+        var serviceUsage = await _repository.FindByIdServiceUsage(id) 
+            ?? throw new KeyNotFoundException($"ServiceUsage with Id: {id} does not exist.");
         
         return MapToServiceUsageDto(serviceUsage);
     }
@@ -56,17 +51,11 @@ public class ServiceUsageService : IServiceUsageService
             throw new ArgumentException($"Account with Id: {serviceUsageForCreate.AccountId} does not exist.");
         }
 
-        var questionareHistory = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(serviceUsageForCreate.QuestionnaireHistoryId);
-        if (questionareHistory == null)
-        {
-            throw new ArgumentException($"QuestionaireHistory with Id: {serviceUsageForCreate.QuestionnaireHistoryId} does not exist.");
-        }
+        var questionareHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(serviceUsageForCreate.QuestionnaireHistoryId)
+            ?? throw new ArgumentException($"QuestionaireHistory with Id: {serviceUsageForCreate.QuestionnaireHistoryId} does not exist.");
 
-        var service = await _serviceRepository.FindByIdAsync(serviceUsageForCreate.ServiceId);
-        if (service == null)
-        {
-            throw new ArgumentException($"Service with Id: {serviceUsageForCreate.ServiceId} does not exist.");
-        }
+        var service = await _serviceRepository.FindByIdAsync(serviceUsageForCreate.ServiceId)
+        ?? throw new ArgumentException($"Service with Id: {serviceUsageForCreate.ServiceId} does not exist.");
 
         var serviceUsage = new ServiceUsage
         {
@@ -80,7 +69,7 @@ public class ServiceUsageService : IServiceUsageService
 
         await _repository.CreateAsync(serviceUsage);
 
-        questionareHistory.Balance -= serviceUsage.Amount;
+        questionareHistory.Balance += serviceUsage.Amount;
         questionareHistory.IsPayed = questionareHistory.Balance >= 0;
 
         await _questionnaireHistoryRepositoty.UpdateAsync(questionareHistory);
@@ -92,28 +81,21 @@ public class ServiceUsageService : IServiceUsageService
     {
         ArgumentNullException.ThrowIfNull(serviceUsageForUpdate);
 
-        var existingServiceUsage = await _repository.FindByIdAsync(serviceUsageForUpdate.Id);
-        if (existingServiceUsage == null)
-        {
-            throw new KeyNotFoundException($"ServiceUsage with Id: {serviceUsageForUpdate.Id} does not exist.");
-        }
-
+        var existingServiceUsage = await _repository.FindByIdAsync(serviceUsageForUpdate.Id)
+            ?? throw new KeyNotFoundException($"ServiceUsage with Id: {serviceUsageForUpdate.Id} does not exist.");
+        
         if (!await _accountRepository.IsExistByIdAsync(serviceUsageForUpdate.AccountId))
         {
             throw new ArgumentException($"Account with Id: {serviceUsageForUpdate.AccountId} does not exist.");
         }
 
-        var questionnaireHistory = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(serviceUsageForUpdate.QuestionnaireHistoryId);
-        if (questionnaireHistory == null)
-        {
-            throw new ArgumentException($"QuestionnaireHistory with Id: {serviceUsageForUpdate.QuestionnaireHistoryId} does not exist.");
-        }
-
-        var service = await _serviceRepository.FindByIdAsync(serviceUsageForUpdate.ServiceId);
-        if (service == null)
-        {
-            throw new ArgumentException($"Service with Id: {serviceUsageForUpdate.ServiceId} does not exist.");
-        }
+        var questionnaireHistory = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(serviceUsageForUpdate.QuestionnaireHistoryId)
+            ?? throw new ArgumentException($"QuestionnaireHistory with Id: {serviceUsageForUpdate.QuestionnaireHistoryId} does not exist.");
+        
+        var service = await _serviceRepository.FindByIdAsync(serviceUsageForUpdate.ServiceId)
+            ?? throw new ArgumentException($"Service with Id: {serviceUsageForUpdate.ServiceId} does not exist.");
+        
+        questionnaireHistory.Balance -= existingServiceUsage.TotalPrice;
 
         existingServiceUsage.ServiceId = serviceUsageForUpdate.ServiceId;
         existingServiceUsage.AccountId = serviceUsageForUpdate.AccountId;
@@ -136,7 +118,7 @@ public class ServiceUsageService : IServiceUsageService
         await _repository.DeleteAsync(id);
     }
 
-    private ServiceUsageDto MapToServiceUsageDto(ServiceUsage s)
+    private static ServiceUsageDto MapToServiceUsageDto(ServiceUsage s)
     {
         return new ServiceUsageDto(
             s.Id,

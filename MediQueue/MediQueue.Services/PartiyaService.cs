@@ -29,9 +29,8 @@ public class PartiyaService : IPartiyaService
 
     public async Task<PartiyaDto> GetPartiyaByIdAsync(int id)
     {
-        var partiya = await _repository.FindByIdPartiyaAsync(id);
-
-        if (partiya == null) return null;
+        var partiya = await _repository.FindByIdPartiyaAsync(id)
+            ?? throw new KeyNotFoundException($"Partiya with id: {id} does not exist.");
 
         return MapToPartiyaDto(partiya);
     }
@@ -72,7 +71,7 @@ public class PartiyaService : IPartiyaService
     {
         ArgumentNullException.ThrowIfNull(nameof(partiyaForUpdateDto));
 
-        var partiya = await _repository.FindByIdPartiyaAsync(partiyaForUpdateDto.Id);
+        var partiya = await _repository.FindByIdPartiyAsync(partiyaForUpdateDto.Id);
 
         if (partiya == null) return null;
 
@@ -106,7 +105,7 @@ public class PartiyaService : IPartiyaService
         await _repository.DeleteAsync(id);
     }
 
-    private PartiyaDto MapToPartiyaDto(Partiya p)
+    private static PartiyaDto MapToPartiyaDto(Partiya p)
     {
         return new PartiyaDto(
             p.Id,

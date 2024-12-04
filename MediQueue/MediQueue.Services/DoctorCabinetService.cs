@@ -28,9 +28,8 @@ public class DoctorCabinetService : IDoctorCabinetService
 
     public async Task<DoctorCabinetDto> GetDoctorCabinetByIdAsync(int id)
     {
-        var doctorCabinet = await _repository.FindByIdDoctorCabinetAsync(id);
-
-        if (doctorCabinet == null) return null;
+        var doctorCabinet = await _repository.FindByIdDoctorCabinetAsync(id)
+            ?? throw new KeyNotFoundException($"Doctor Cabinet with id: {id} does not exist.");
 
         return MapToDoctorCabinetDto(doctorCabinet);
     }
@@ -69,12 +68,11 @@ public class DoctorCabinetService : IDoctorCabinetService
             throw new ArgumentException($"Account with id: {doctorCabinetForUpdate.AccountId} does not exist");
         }
 
-        var doctorCabinet = new DoctorCabinet
-        {
-            Id = doctorCabinetForUpdate.Id,
-            RoomNumber = doctorCabinetForUpdate?.RoomNumber,
-            AccountId = doctorCabinetForUpdate?.AccountId
-        };
+        var doctorCabinet = await _repository.FindByIdAsync(doctorCabinetForUpdate.Id)
+            ?? throw new KeyNotFoundException($"Doctor Cabinet with id: {doctorCabinetForUpdate.Id} does not exist.");
+
+        doctorCabinet.RoomNumber = doctorCabinetForUpdate?.RoomNumber;
+        doctorCabinet.AccountId = doctorCabinetForUpdate?.AccountId;
 
         await _repository.UpdateAsync(doctorCabinet);
 
@@ -86,7 +84,7 @@ public class DoctorCabinetService : IDoctorCabinetService
         await _repository.DeleteAsync(id);
     }
 
-    private DoctorCabinetDto MapToDoctorCabinetDto(DoctorCabinet d)
+    private static DoctorCabinetDto MapToDoctorCabinetDto(DoctorCabinet d)
     {
         return new DoctorCabinetDto(
             d.Id,
@@ -99,7 +97,7 @@ public class DoctorCabinetService : IDoctorCabinetService
             );
     }
 
-    private DoctorCabinetLekarstvoDto MapToDoctorCabinetLekarstvoDto(DoctorCabinetLekarstvo d)
+    private static DoctorCabinetLekarstvoDto MapToDoctorCabinetLekarstvoDto(DoctorCabinetLekarstvo d)
     {
         return new DoctorCabinetLekarstvoDto(
             d.Id,

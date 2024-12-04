@@ -73,7 +73,6 @@ public static class DependencyInjection
         services.AddScoped<ILekarstvoService, LekarstvoService>();
         services.AddScoped<ICategoryLekarstvoService, CategoryLekarstvoService>();
         services.AddScoped<IConclusionService, ConclusionService>();
-        services.AddScoped<IPaymentLekarstvoService, PaymentLekarstvoService>();
         services.AddScoped<IAnalysisResultService, AnalysisResultService>();
         services.AddScoped<IDoctorCabinetService, DoctorCabinetService>();
         services.AddScoped<IDoctorCabinetLekarstvoService, DoctorCabinetLekarstvoService>();
@@ -108,7 +107,6 @@ public static class DependencyInjection
         services.AddScoped<ILekarstvoRepository, LekarstvoRepository>();
         services.AddScoped<ICategoryLekarstvoRepository, CategoryLekarstvoRepository>();
         services.AddScoped<IConclusionRepository, ConclusionRepository>();
-        services.AddScoped<IPaymentLekarstvoRepository, PaymentLekarstvoRepository>();
         services.AddScoped<IServiceUsageRepository, ServiceUsageRepository>();
         services.AddScoped<IAnalysisResultRepository, AnalysisResultRepository>();
         services.AddScoped<IPartiyaRepository, PartiyaRepository>();

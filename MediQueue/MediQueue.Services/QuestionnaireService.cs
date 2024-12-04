@@ -27,22 +27,23 @@ public class QuestionnaireService : IQuestionnaireService
     {
         var quest = await _questionnaireRepository.GetAllWithQuestionnaireHistoryAsync(questionnaireResourceParameters);
 
+        if (quest == null) return null;
+
         return quest.Select(MapToQuestionnaireDto).ToList();
     }
 
     public async Task<QuestionnaireDto> GetQuestionnaireByIdAsync(int id)
     {
-        var quest = await _questionnaireRepository.GetByIdWithQuestionnaireHistory(id);
-        if (quest == null)
-        {
-            throw new KeyNotFoundException($"Questionnaire with {id} not found");
-        }
+        var quest = await _questionnaireRepository.GetByIdWithQuestionnaireHistory(id)
+            ?? throw new KeyNotFoundException($"Questionnaire with {id} not found");
 
         return MapToQuestionnaireDto(quest);
     }
 
     public async Task<QuestionnaireDto> CreateQuestionnaireAsync(QuestionnaireForCreateDto questionnaireForCreateDto)
     {
+        ArgumentNullException.ThrowIfNull(nameof(questionnaireForCreateDto));
+
         int uniqueQuestionnaireId = await GenerateUniqueQuestionnaireIdAsync();
 
         var quest = new Questionnaire
@@ -95,10 +96,7 @@ public class QuestionnaireService : IQuestionnaireService
 
     public async Task<QuestionnaireDto> UpdateQuestionnaireAsync(QuestionnaireForUpdateDto questionnaireForUpdateDto)
     {
-        if (questionnaireForUpdateDto == null)
-        {
-            throw new ArgumentNullException(nameof(questionnaireForUpdateDto));
-        }
+        ArgumentNullException.ThrowIfNull(questionnaireForUpdateDto);
 
         var quest = _mapper.Map<Questionnaire>(questionnaireForUpdateDto);
 
@@ -143,7 +141,7 @@ public class QuestionnaireService : IQuestionnaireService
         await _questionnaireHistoryService.CreateQuestionnaireHistoryAsync(questonnaireForCreate);
     }
 
-    private QuestionnaireDto MapToQuestionnaireDto(Questionnaire questionnaire)
+    private static QuestionnaireDto MapToQuestionnaireDto(Questionnaire questionnaire)
     {
         return new QuestionnaireDto(
             questionnaire.Id,
@@ -172,7 +170,7 @@ public class QuestionnaireService : IQuestionnaireService
             );
     }
 
-    private QuestionnaireHistoryWithServiceDto MapToQuestionnaireHistoryDto(QuestionnaireHistory questionnaire)
+    private static QuestionnaireHistoryWithServiceDto MapToQuestionnaireHistoryDto(QuestionnaireHistory questionnaire)
     {
         return new QuestionnaireHistoryWithServiceDto(
             questionnaire.Id,
@@ -191,7 +189,7 @@ public class QuestionnaireService : IQuestionnaireService
             : new List<ServiceUsageDto>());
     }
 
-    private ServiceUsageDto MapToServiceDto(ServiceUsage serviceUsage)
+    private static ServiceUsageDto MapToServiceDto(ServiceUsage serviceUsage)
     {
         return new ServiceUsageDto(
             serviceUsage.Id,

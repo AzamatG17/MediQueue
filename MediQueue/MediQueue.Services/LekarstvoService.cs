@@ -29,9 +29,8 @@ public class LekarstvoService : ILekarstvoService
 
     public async Task<LekarstvoDto> GetLekarstvoByIdAsync(int id)
     {
-        var lekarstvo = await _repository.FindByIdLekarstvoAsync(id);
-
-        if (lekarstvo == null) return null;
+        var lekarstvo = await _repository.FindByIdLekarstvoAsync(id)
+            ?? throw new KeyNotFoundException($"Lekarstvo with id: {id} does not exist.");
 
         return MapToLekarstvoDto(lekarstvo);
     }
@@ -57,7 +56,13 @@ public class LekarstvoService : ILekarstvoService
         if (!await _categoryLekarstvoRepository.IsExistByIdAsync(lekarstvoForUpdateDto.CategoryLekarstvoId))
             throw new ArgumentException($"CategoryLekarstvo with id: {lekarstvoForUpdateDto.CategoryLekarstvoId} does not exist");
 
-        var lekarstvo = await MapToLekarstvoUpdate(lekarstvoForUpdateDto);
+        var lekarstvo = await _repository.FindByIdAsync(lekarstvoForUpdateDto.Id)
+            ?? throw new KeyNotFoundException($"Lekarstov with id: {lekarstvoForUpdateDto.Id} does not exist.");
+
+        lekarstvo.Name = lekarstvoForUpdateDto.Name;
+        lekarstvo.PhotoBase64 = lekarstvoForUpdateDto.PhotoBase64;
+        lekarstvo.MeasurementUnit = lekarstvoForUpdateDto.MeasurementUnit;
+        lekarstvo.CategoryLekarstvoId = lekarstvoForUpdateDto.CategoryLekarstvoId;
 
         await _repository.UpdateAsync(lekarstvo);
 
@@ -67,18 +72,6 @@ public class LekarstvoService : ILekarstvoService
     public async Task DeleteLekarstvoAsync(int id)
     {
         await _repository.DeleteAsync(id);
-    }
-
-    private async Task<Lekarstvo> MapToLekarstvoUpdate(LekarstvoForUpdateDto lekarstvo)
-    {
-        return new Lekarstvo
-        {
-            Id = lekarstvo.Id,
-            Name = lekarstvo.Name,
-            PhotoBase64 = lekarstvo.PhotoBase64,
-            MeasurementUnit = lekarstvo.MeasurementUnit,
-            CategoryLekarstvoId = lekarstvo.CategoryLekarstvoId
-        };
     }
 
     private async Task<Lekarstvo> MapToLekarstvo(LekarstvoForCreateDto lekarstvo)
@@ -92,7 +85,7 @@ public class LekarstvoService : ILekarstvoService
         };
     }
 
-    private LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
+    private static LekarstvoDto MapToLekarstvoDto(Lekarstvo lekarstvo)
     {
         decimal totalQuantityLEkarstvo = lekarstvo.Partiyas?.Sum(x => x.TotalQuantity ?? 0) ?? 0;
 

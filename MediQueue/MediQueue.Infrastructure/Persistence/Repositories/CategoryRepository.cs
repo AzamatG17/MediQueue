@@ -25,10 +25,21 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                                  .Include(c => c.Groups)
                                  .Include(c => c.Services)
                                  .Where(x => x.IsActive)
+                                 .AsNoTracking()
                                  .ToListAsync();
         }
 
         public async Task<Category> FindByIdWithGroupAsync(int id)
+        {
+            return await _context.Categories
+                    .Include(c => c.Groups)
+                    .Include(c => c.Services)
+                    .Where(x => x.Id == id && x.IsActive)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync();
+        }
+
+        public async Task<Category> FindByIdCategoryAsync(int id)
         {
             return await _context.Categories
                     .Include(c => c.Groups)

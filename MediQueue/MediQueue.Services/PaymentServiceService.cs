@@ -30,16 +30,15 @@ public class PaymentServiceService : IPaymentServiceService
     {
         var payments = await _repository.GetAllPaymentServicesAsync();
 
+        if (payments == null) return null;
+
         return payments.Select(MapToPaymentServiceDto).ToList();
     }
 
     public async Task<PaymentServiceDto> GetPaymentByIdAsync(int id)
     {
-        var payment = await _repository.GetByIdPaymentServiceAsync(id);
-        if (payment == null)
-        {
-            throw new KeyNotFoundException(nameof(payment));
-        }
+        var payment = await _repository.GetByIdPaymentServiceAsync(id)
+            ?? throw new KeyNotFoundException($"Payment Service with id: {id} does not exist.");
 
         return MapToPaymentServiceDto(payment);
     }
@@ -68,6 +67,11 @@ public class PaymentServiceService : IPaymentServiceService
             else if (payment.MedicationType == MedicationType.Lekarstvo)
             {
                 var paymentLekarstvo = await PaymentForLekarstvo(payment, questionnaireHistory);
+                createdPayments.Add(paymentLekarstvo);
+            }
+            else if (payment.MedicationType == MedicationType.Stationary)
+            {
+                var paymentLekarstvo = await PaymentForStationaryStayUsage(payment, questionnaireHistory);
                 createdPayments.Add(paymentLekarstvo);
             }
             else
@@ -207,15 +211,152 @@ public class PaymentServiceService : IPaymentServiceService
         return paymentService;
     }
 
-    public async Task<PaymentServiceDto> UpdatePaymentAsync(PaymentServiceForUpdateDto roleForUpdateDto)
+    private async Task<PaymentService> PaymentForStationaryStayUsage(PaymentServiceForCreateDto payment, QuestionnaireHistory questionnaireHistory)
     {
-        ArgumentNullException.ThrowIfNull(roleForUpdateDto);
+        var stationaryStayUsage = questionnaireHistory.StationaryStays
+                                        .FirstOrDefault(s => s.Id == payment.StationaryStayUsageId);
 
-        var payment = _mapper.Map<PaymentService>(roleForUpdateDto);
+        if (stationaryStayUsage == null)
+            throw new KeyNotFoundException($"StationaryStayUsage with ID {payment.StationaryStayUsageId} not found.");
 
-        await _repository.UpdateAsync(payment);
+        var existingPayments = questionnaireHistory.PaymentServices
+            .Where(p => p.StationaryStayUsageId == stationaryStayUsage.Id);
 
-        return _mapper.Map<PaymentServiceDto>(payment);
+        var totalPaidAmount = existingPayments.Sum(p => p.PaidAmount ?? 0);
+        var remainingAmount = (stationaryStayUsage.TotalPrice ?? 0) - totalPaidAmount;
+
+        if (payment.PaidAmount > remainingAmount)
+            throw new InvalidOperationException($"Paid amount exceeds the remaining amount for StationaryStayUsage ID {stationaryStayUsage.Id}.");
+
+        var paymentService = new PaymentService
+        {
+            TotalAmount = stationaryStayUsage.TotalPrice,
+            PaidAmount = payment.PaidAmount,
+            OutstandingAmount = remainingAmount - payment.PaidAmount,
+            PaymentDate = DateTime.Now,
+            PaymentType = payment.PaymentType ?? PaymentType.Cash,
+            QuestionnaireHistoryId = questionnaireHistory.Id,
+            AccountId = payment.AccountId,
+            StationaryStayUsageId = stationaryStayUsage.Id,
+            MedicationType = MedicationType.Stationary,
+            PaymentStatus = DeterminePaymentStatus(payment.PaidAmount, remainingAmount)
+        };
+
+        questionnaireHistory.PaymentServices.Add(paymentService);
+        questionnaireHistory.Balance += payment.PaidAmount;
+        questionnaireHistory.IsPayed = questionnaireHistory.Balance >= 0;
+
+        stationaryStayUsage.Amount = remainingAmount - payment.PaidAmount;
+        stationaryStayUsage.IsPayed = stationaryStayUsage.Amount == 0;
+
+        await _questionnaireHistoryRepositoty.SaveChangeAsync();
+
+        return paymentService;
+    }
+
+    public async Task<PaymentServiceDto> UpdatePaymentAsync(PaymentServiceForUpdateDto paymentServiceForUpdateDto)
+    {
+        ArgumentNullException.ThrowIfNull(paymentServiceForUpdateDto, nameof(paymentServiceForUpdateDto));
+
+        var existingPayment = await _repository.GetPaymentServiceByIdAsync(paymentServiceForUpdateDto.Id)
+            ?? throw new KeyNotFoundException($"PaymentService with ID {paymentServiceForUpdateDto.Id} not found");
+
+        var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdQuestionnaireHistoryAsync(existingPayment.QuestionnaireHistoryId)
+            ?? throw new KeyNotFoundException($"QuestionnaireHistory with ID {existingPayment.QuestionnaireHistoryId} not found");
+
+        if (paymentServiceForUpdateDto.PaidAmount <= 0)
+        {
+            throw new InvalidOperationException($"The paid amount must be greater than zero. Provided: {paymentServiceForUpdateDto.PaidAmount}.");
+        }
+
+        decimal adjustmentAmount = (decimal)(paymentServiceForUpdateDto.PaidAmount - existingPayment.PaidAmount);
+
+        if (existingPayment.MedicationType == MedicationType.Service)
+        {
+            await UpdatePaymentForService(existingPayment, questionnaireHistory, adjustmentAmount);
+        }
+        else if (existingPayment.MedicationType == MedicationType.Lekarstvo)
+        {
+            await UpdatePaymentForLekarstvo(existingPayment, questionnaireHistory, adjustmentAmount);
+        }
+        else
+        {
+            throw new InvalidOperationException($"Unsupported MedicationType: {existingPayment.MedicationType}");
+        }
+
+        await _repository.UpdateAsync(existingPayment);
+
+        await _questionnaireHistoryRepositoty.SaveChangeAsync();
+
+        return new PaymentServiceDto(
+            existingPayment.Id,
+            existingPayment.TotalAmount,
+            existingPayment.PaidAmount,
+            existingPayment.OutstandingAmount,
+            existingPayment.PaymentDate,
+            existingPayment.PaymentType,
+            existingPayment.PaymentStatus,
+            existingPayment.MedicationType,
+            existingPayment.AccountId,
+            $"{existingPayment.Account?.LastName} {existingPayment.Account?.FirstName} {existingPayment.Account?.SurName}" ?? "",
+            existingPayment.ServiceId,
+            existingPayment.Service?.Name ?? "",
+            existingPayment.DoctorCabinetLekarstvoId,
+            existingPayment.DoctorCabinetLekarstvo?.Partiya?.Lekarstvo?.Name ?? "",
+            existingPayment.QuestionnaireHistoryId);
+    }
+
+    private async Task UpdatePaymentForService(PaymentService existingPayment, QuestionnaireHistory questionnaireHistory, decimal adjustmentAmount)
+    {
+        var serviceUsage = questionnaireHistory.ServiceUsages
+                           .FirstOrDefault(s => s.Id == existingPayment.ServiceId)
+            ?? throw new KeyNotFoundException($"Service with ID {existingPayment.ServiceId} not found in QuestionnaireHistory.");
+
+        var remainingAmount = serviceUsage.Amount ?? serviceUsage.TotalPrice -
+                              questionnaireHistory.PaymentServices.Where(p => p.ServiceId == serviceUsage.Id && p.Id != existingPayment.Id)
+                              .Sum(p => p.PaidAmount ?? 0);
+
+        if (adjustmentAmount > remainingAmount * -1)
+        {
+            throw new InvalidOperationException($"Adjusted paid amount exceeds the remaining amount for Service ID {serviceUsage.Id}.");
+        }
+
+        serviceUsage.Amount += adjustmentAmount;
+        serviceUsage.IsPayed = serviceUsage.Amount == 0;
+
+        questionnaireHistory.Balance += adjustmentAmount;
+        questionnaireHistory.IsPayed = questionnaireHistory.Balance >= 0;
+
+        existingPayment.PaidAmount += adjustmentAmount;
+        existingPayment.OutstandingAmount = serviceUsage.Amount;
+        existingPayment.PaymentStatus = DeterminePaymentStatus(existingPayment.PaidAmount, serviceUsage.Amount);
+    }
+
+    private async Task UpdatePaymentForLekarstvo(PaymentService existingPayment, QuestionnaireHistory questionnaireHistory, decimal adjustmentAmount)
+    {
+        var lekarstvoUsage = questionnaireHistory.Conclusions
+                                   .SelectMany(c => c.LekarstvoUsages)
+                                   .FirstOrDefault(l => l.Id == existingPayment.DoctorCabinetLekarstvoId)
+            ?? throw new KeyNotFoundException($"Lekarstvo with ID {existingPayment.DoctorCabinetLekarstvoId} not found.");
+
+        var remainingAmount = lekarstvoUsage.Amount ?? lekarstvoUsage.TotalPrice -
+                              questionnaireHistory.PaymentServices.Where(p => p.DoctorCabinetLekarstvoId == lekarstvoUsage.Id && p.Id != existingPayment.Id)
+                              .Sum(p => p.PaidAmount ?? 0);
+
+        if (adjustmentAmount > remainingAmount * -1)
+        {
+            throw new InvalidOperationException($"Adjusted paid amount exceeds the remaining amount for Lekarstvo ID {lekarstvoUsage.DoctorCabinetLekarstvoId}.");
+        }
+
+        lekarstvoUsage.Amount += adjustmentAmount;
+        lekarstvoUsage.IsPayed = lekarstvoUsage.Amount == 0;
+
+        questionnaireHistory.Balance += adjustmentAmount;
+        questionnaireHistory.IsPayed = questionnaireHistory.Balance >= 0;
+
+        existingPayment.PaidAmount += adjustmentAmount;
+        existingPayment.OutstandingAmount = lekarstvoUsage.Amount;
+        existingPayment.PaymentStatus = DeterminePaymentStatus(existingPayment.PaidAmount, lekarstvoUsage.Amount);
     }
 
     public async Task DeletePaymentAsync(int id)
@@ -223,7 +364,7 @@ public class PaymentServiceService : IPaymentServiceService
         await _repository.DeleteAsync(id);
     }
 
-    private PaymentStatus DeterminePaymentStatus(decimal? paidAmount, decimal? remainingAmount)
+    private static PaymentStatus DeterminePaymentStatus(decimal? paidAmount, decimal? remainingAmount)
     {
         if (paidAmount == 0)
             return PaymentStatus.Unpaid;
@@ -234,7 +375,7 @@ public class PaymentServiceService : IPaymentServiceService
         return PaymentStatus.Paid;
     }
 
-    private PaymentServiceDto MapToPaymentServiceDto(PaymentService p)
+    private static PaymentServiceDto MapToPaymentServiceDto(PaymentService p)
     {
         return new PaymentServiceDto(
             p.Id,

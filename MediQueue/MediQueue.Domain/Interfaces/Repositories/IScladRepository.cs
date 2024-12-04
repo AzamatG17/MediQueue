@@ -6,5 +6,6 @@ namespace MediQueue.Domain.Interfaces.Repositories
     {
         Task<IEnumerable<Sclad>> FindAllScladAsync();
         Task<Sclad> FindbyIdScladAsync(int id);
+        Task<Sclad> FindByIdScladAsync(int id);
     }
 }

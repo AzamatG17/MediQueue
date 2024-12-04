@@ -18,6 +18,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(s => s.Service)
                 .Include(q => q.QuestionnaireHistory)
                 .Where(x => x.IsActive && (serviceUsageResourceParametrs.IsPayed.HasValue ? x.IsPayed == serviceUsageResourceParametrs.IsPayed.Value : x.IsPayed == true))
+                .AsNoTracking()
                 .AsQueryable();
 
             if (serviceUsageResourceParametrs.QuestionnaireHistoryId.HasValue)
@@ -46,6 +47,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(s => s.Service)
                 .Include(q => q.QuestionnaireHistory)
                 .Where(x => x.Id == id && x.IsActive)
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
 

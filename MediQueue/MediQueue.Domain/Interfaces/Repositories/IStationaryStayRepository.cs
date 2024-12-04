@@ -2,9 +2,10 @@
 
 namespace MediQueue.Domain.Interfaces.Repositories
 {
-    public interface IStationaryStayRepository : IRepositoryBase<StationaryStay>
+    public interface IStationaryStayRepository : IRepositoryBase<StationaryStayUsage>
     {
-        Task<IEnumerable<StationaryStay>> FindAllStationaryStayAsync();
-        Task<StationaryStay> FindByIdStationaryStayAsync(int id);
+        Task<IEnumerable<StationaryStayUsage>> FindAllStationaryStayAsync();
+        Task<StationaryStayUsage> FindByIdStationaryStayAsync(int id);
+        Task<StationaryStayUsage> FindByIdStationaryAsync(int id);
     }
 }

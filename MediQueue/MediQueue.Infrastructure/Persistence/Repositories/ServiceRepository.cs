@@ -18,7 +18,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                                  .ToListAsync();
         }
 
-        public async Task<IEnumerable<Service>> GetAllServiceWithCategory()
+        public async Task<IEnumerable<Service>> GetAllServiceWithCategoryAsync()
         {
             return await _context.Services
                 .Include(c => c.Category)
@@ -27,10 +27,24 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(a => a.Accounts)
                 .ThenInclude(ac => ac.DoctorCabinet)
                 .Where(x => x.IsActive)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
-        public async Task<Service> GetByIdWithCategory(int id)
+        public async Task<Service> GetByIdWithCategoryAsync(int id)
+        {
+            return await _context.Services
+                .Include(c => c.Category)
+                .Include(a => a.Accounts)
+                .ThenInclude(ar => ar.Role)
+                .Include(a => a.Accounts)
+                .ThenInclude(ac => ac.DoctorCabinet)
+                .Where(x => x.Id == id && x.IsActive)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Service> GetByIdServiceAsync(int id)
         {
             return await _context.Services
                 .Include(c => c.Category)

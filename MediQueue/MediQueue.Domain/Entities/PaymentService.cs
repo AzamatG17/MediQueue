@@ -20,6 +20,8 @@ public class PaymentService : EntityBase
     public Service? Service { get; set; }
     public int? DoctorCabinetLekarstvoId { get; set; }
     public DoctorCabinetLekarstvo? DoctorCabinetLekarstvo { get; set; }
+    public int? StationaryStayUsageId { get; set; }
+    public StationaryStayUsage? StationaryStayUsage { get; set; }
     public int? QuestionnaireHistoryId { get; set; }
     public QuestionnaireHistory? QuestionnaireHistory { get; set; }
 }

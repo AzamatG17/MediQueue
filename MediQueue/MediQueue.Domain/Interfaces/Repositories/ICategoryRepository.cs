@@ -7,6 +7,7 @@ namespace MediQueue.Domain.Interfaces.Repositories
         Task<IEnumerable<Category>> FindByGroupIdsAsync(List<int> groupIds);
         Task<IEnumerable<Category>> GetCategoriesWithGroupsAsync();
         Task<Category> FindByIdWithGroupAsync(int id);
+        Task<Category> FindByIdCategoryAsync(int id);
 
     }
 }

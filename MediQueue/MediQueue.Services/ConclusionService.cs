@@ -131,7 +131,7 @@ public class ConclusionService : IConclusionService
         throw new NotImplementedException();
     }
 
-    private Conclusion MappingToConclusion(ConclusionForCreatreDto dto)
+    private static Conclusion MappingToConclusion(ConclusionForCreatreDto dto)
     {
         return new Conclusion
         {
@@ -146,7 +146,7 @@ public class ConclusionService : IConclusionService
         };
     }
 
-    private ConclusionDto MappingToConclusionDto(Conclusion conclusion)
+    private static ConclusionDto MappingToConclusionDto(Conclusion conclusion)
     {
         return new ConclusionDto(
             conclusion.Id,

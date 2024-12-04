@@ -3,6 +3,7 @@ using MediQueue.Domain.DTOs.Conclusion;
 using MediQueue.Domain.DTOs.Discount;
 using MediQueue.Domain.DTOs.PaymentService;
 using MediQueue.Domain.DTOs.ServiceUsage;
+using MediQueue.Domain.DTOs.StationaryStay;
 
 namespace MediQueue.Domain.DTOs.QuestionnaireHistory;
 
@@ -29,5 +30,6 @@ public record QuestionnaireHistoryDto(
     List<DiscountDto>? DiscountDtos,
     List<ServiceUsageDto>? ServiceUsages,
     List<PaymentServiceDto>? PaymentServices,
-    List<ConclusionDto>? ConclusionDtos
+    List<ConclusionDto>? ConclusionDtos,
+    List<StationaryStayDto>? StationaryStays
     );

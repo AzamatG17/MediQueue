@@ -88,10 +88,10 @@ public class QuestionnaireHistoryController : BaseController
             return BadRequest(CreateErrorResponse("QuestionnaireHistory data is null."));
         }
 
-        if (id != questionnaireHistoryForUpdateDto.id)
+        if (id != questionnaireHistoryForUpdateDto.Id)
         {
             return BadRequest(CreateErrorResponse(
-                $"Route id: {id} does not match with parameter id: {questionnaireHistoryForUpdateDto.id}."));
+                $"Route id: {id} does not match with parameter id: {questionnaireHistoryForUpdateDto.Id}."));
         }
         try
         {

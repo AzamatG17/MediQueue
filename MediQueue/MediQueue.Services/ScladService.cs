@@ -39,19 +39,15 @@ public class ScladService : IScladService
 
     public async Task<ScladDto> GetScladByIdAsync(int id)
     {
-        var sclad = await _cladRepository.FindbyIdScladAsync(id);
-
-        if (sclad == null) return null;
+        var sclad = await _cladRepository.FindbyIdScladAsync(id)
+            ?? throw new KeyNotFoundException($"Sclad with id: {id} does not exist.");
 
         return await MapToScladDto(sclad);
     }
 
     public async Task<ScladDto> CreateScladAsync(ScladForCreateDto scladForCreateDto)
     {
-        if (scladForCreateDto == null)
-        {
-            throw new ArgumentNullException(nameof(scladForCreateDto));
-        }
+        ArgumentNullException.ThrowIfNull(scladForCreateDto);
 
         var branchExists = await _branchRepository.ExistsAsync(scladForCreateDto.Branchid);
         if (!branchExists)
@@ -68,12 +64,9 @@ public class ScladService : IScladService
 
     public async Task<ScladDto> UpdateScladAsync(ScladForUpdateDto scladForUpdateDto)
     {
-        if (scladForUpdateDto == null)
-        {
-            throw new ArgumentNullException(nameof(scladForUpdateDto));
-        }
+        ArgumentNullException.ThrowIfNull(scladForUpdateDto);
 
-        var existingSclad = await _cladRepository.FindbyIdScladAsync(scladForUpdateDto.Id);
+        var existingSclad = await _cladRepository.FindByIdScladAsync(scladForUpdateDto.Id);
         if (existingSclad == null)
         {
             throw new InvalidOperationException($"Sclad with ID {scladForUpdateDto.Id} does not exist.");
@@ -127,7 +120,7 @@ public class ScladService : IScladService
                 : new List<PartiyaDto>());
     }
 
-    private PartiyaDto MapToLekarstvoDto(Partiya p)
+    private static PartiyaDto MapToLekarstvoDto(Partiya p)
     {
         return new PartiyaDto(
             p.Id,

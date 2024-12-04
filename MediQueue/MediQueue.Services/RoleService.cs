@@ -32,12 +32,8 @@ public class RoleService : IRoleService
 
     public async Task<RoleDto> GetRoleByIdAsync(int id)
     {
-        var role = await _roleRepository.FindByIdAsync(id);
-
-        if (role == null)
-        {
-            throw new KeyNotFoundException($"Role with {id} not found");
-        }
+        var role = await _roleRepository.FindByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Role with {id} not found");
 
         var roleDto = new RoleDto(
             role.Id,
@@ -49,10 +45,7 @@ public class RoleService : IRoleService
 
     public async Task<RoleDto> CreateRoleAsync(RoleForCreateDto roleForCreateDto)
     {
-        if (roleForCreateDto == null)
-        {
-            throw new ArgumentNullException(nameof(roleForCreateDto));
-        }
+        ArgumentNullException.ThrowIfNull(roleForCreateDto);
 
         var role = new Role
         {
@@ -71,10 +64,7 @@ public class RoleService : IRoleService
 
     public async Task<RoleDto> UpdateRoleAsync(RoleForUpdateDto roleForUpdateDto)
     {
-        if (roleForUpdateDto == null)
-        {
-            throw new ArgumentNullException(nameof(roleForUpdateDto));
-        }
+        ArgumentNullException.ThrowIfNull(roleForUpdateDto);
 
         var role = new Role
         {

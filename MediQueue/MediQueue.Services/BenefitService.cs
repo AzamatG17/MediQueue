@@ -25,10 +25,9 @@ public class BenefitService : IBenefitService
 
     public async Task<BenefitDto> GetBenefitByIdAsync(int id)
     {
-        var benefit = await _repository.FindByIdAsync(id);
+        var benefit = await _repository.FindByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Benefit with {id} not found");
 
-        if (benefit == null) return null;
-        
         return MapToBenefitDto(benefit);
     }
 
@@ -78,7 +77,7 @@ public class BenefitService : IBenefitService
         await _repository.DeleteAsync(id);
     }
 
-    private BenefitDto MapToBenefitDto(Benefit benefit)
+    private static BenefitDto MapToBenefitDto(Benefit benefit)
     {
         return new BenefitDto(
             benefit.Id,

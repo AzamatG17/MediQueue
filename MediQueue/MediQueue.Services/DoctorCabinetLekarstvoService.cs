@@ -29,9 +29,8 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
 
     public async Task<DoctorCabinetLekarstvoDto> GetDoctorCabinetLekarstvoByIdAsync(int id)
     {
-        var cabinetLekarstvo = await _repository.FindByIdDoctorCabinetLekarstvoAsync(id);
-
-        if (cabinetLekarstvo == null) return null;
+        var cabinetLekarstvo = await _repository.FindByIdDoctorCabinetLekarstvoAsync(id)
+            ?? throw new KeyNotFoundException($"Doctor Cabinet Lekarstvo with id: {id} does not exist.");
 
         return MapToDoctorCabinetLekarstvoDto(cabinetLekarstvo);
     }
@@ -45,34 +44,49 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
             throw new ArgumentException($"Doctor Cabinet with id: {doctorCabinetLekarstvoForCreateDto.DoctorCabinetId} does not exist");
         }
 
-        var partiya = await _partiyaRepository.FindByIdAsync(doctorCabinetLekarstvoForCreateDto.PartiyaId);
-        if (partiya == null)
+        if (doctorCabinetLekarstvoForCreateDto.DoctorCabinetResponses == null ||
+        !doctorCabinetLekarstvoForCreateDto.DoctorCabinetResponses.Any())
         {
-            throw new ArgumentException($"Partiya with id: {doctorCabinetLekarstvoForCreateDto.PartiyaId} does not exist");
+            throw new ArgumentException("DoctorCabinetResponses cannot be null or empty");
         }
 
-        if (partiya.TotalQuantity.HasValue && partiya.TotalQuantity < doctorCabinetLekarstvoForCreateDto.Quantity)
+        var cabinetLekarstvoList = new List<DoctorCabinetLekarstvo>();
+
+        foreach (var response in doctorCabinetLekarstvoForCreateDto.DoctorCabinetResponses)
         {
-            throw new InvalidOperationException("Not enough quantity in Partiya for this operation.");
+            if (!response.PartiyaId.HasValue || !response.Quantity.HasValue)
+            {
+                throw new ArgumentException("Each response must have valid PartiyaId and Quantity");
+            }
+
+            var partiya = await _partiyaRepository.FindByIdAsync(response.PartiyaId.Value)
+                ?? throw new ArgumentException($"Partiya with id: {response.PartiyaId} does not exist");
+
+            if (partiya.TotalQuantity.HasValue && partiya.TotalQuantity < response.Quantity.Value)
+            {
+                throw new InvalidOperationException($"Not enough quantity in Partiya with id: {response.PartiyaId} for this operation.");
+            }
+
+            partiya.TotalQuantity -= response.Quantity.Value;
+            await _partiyaRepository.UpdateAsync(partiya);
+
+            var cabinetLekarstvo = new DoctorCabinetLekarstvo
+            {
+                Quantity = response.Quantity.Value,
+                DoctorCabinetId = doctorCabinetLekarstvoForCreateDto.DoctorCabinetId,
+                PartiyaId = response.PartiyaId.Value,
+                CreateDate = DateTime.Now,
+            };
+
+            cabinetLekarstvoList.Add(cabinetLekarstvo);
         }
 
-        // Deduct the quantity from Partiya
-        partiya.TotalQuantity -= doctorCabinetLekarstvoForCreateDto.Quantity;
-
-        // Update Partiya in the database
-        await _partiyaRepository.UpdateAsync(partiya);
-
-        var cabinetLekarstvo = new DoctorCabinetLekarstvo
+        foreach (var lekarstvo in cabinetLekarstvoList)
         {
-            Quantity = (decimal)doctorCabinetLekarstvoForCreateDto.Quantity,
-            DoctorCabinetId = doctorCabinetLekarstvoForCreateDto.DoctorCabinetId,
-            PartiyaId = doctorCabinetLekarstvoForCreateDto.PartiyaId,
-            CreateDate = DateTime.Now,
-        };
+            await _repository.CreateAsync(lekarstvo);
+        }
 
-        await _repository.CreateAsync(cabinetLekarstvo);
-
-        return MapToDoctorCabinetLekarstvoDto(cabinetLekarstvo);
+        return MapToDoctorCabinetLekarstvoDto(cabinetLekarstvoList.Last());
     }
 
     public Task<DoctorCabinetLekarstvoDto> UpdateDoctorCabinetLekarstvoAsync(DoctorCabinetLekarstvoForUpdateDto doctorCabinetLekarstvoForUpdateDto)
@@ -87,11 +101,8 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
 
     public async Task UseLekarstvoAsync(int id, decimal amount)
     {
-        var lekarstvo = await _repository.FindByIdDoctorCabinetLekarstvoAsync(id);
-        if (lekarstvo == null)
-        {
-            throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
-        }
+        var lekarstvo = await _repository.FindByIdDoctorCabinetLekarstvoAsync(id)
+            ?? throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
 
         if (amount <= 0)
             throw new ArgumentException("Quantity must be included.");
@@ -106,12 +117,9 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
 
     public async Task AddLekarstvoQuantityAsync(int id, decimal amount)
     {
-        var lekarstvo = await _repository.FindByIdAsync(id);
-        if (lekarstvo == null)
-        {
-            throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
-        }
-
+        var lekarstvo = await _repository.FindByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
+        
         if (amount <= 0)
             throw new ArgumentException("Quantity must be included.");
 
@@ -120,7 +128,7 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
         await _repository.UpdateAsync(lekarstvo);
     }
 
-    private DoctorCabinetLekarstvoDto MapToDoctorCabinetLekarstvoDto(DoctorCabinetLekarstvo d)
+    private static DoctorCabinetLekarstvoDto MapToDoctorCabinetLekarstvoDto(DoctorCabinetLekarstvo d)
     {
         return new DoctorCabinetLekarstvoDto(
             d.Id,

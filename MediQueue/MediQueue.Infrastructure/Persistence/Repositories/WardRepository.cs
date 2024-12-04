@@ -17,10 +17,21 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(wp => wp.WardPlaces)
                 .Include(t => t.Tariffs)
                 .Where(x => x.IsActive)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<Ward> FindByIdWardAsync(int id)
+        {
+            return await _context.Wards
+                .Include(wp => wp.WardPlaces)
+                .Include(t => t.Tariffs)
+                .Where(x => x.Id == id && x.IsActive)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Ward> FindByIdWardAsNoTrackingAsync(int id)
         {
             return await _context.Wards
                 .Include(wp => wp.WardPlaces)
@@ -33,15 +44,13 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             var ward = await _context.Wards
                 .Include(wp => wp.WardPlaces)
+                .Include(t => t.Tariffs)
                 .Where(x => x.Id == id && x.IsActive)
                 .FirstOrDefaultAsync();
 
             if (ward != null)
             {
-                foreach (var wardPlace in ward.WardPlaces)
-                {
-                    wardPlace.IsActive = false;
-                }
+                _context.WardsPlace.RemoveRange(ward.WardPlaces);
 
                 ward.IsActive = false;
 

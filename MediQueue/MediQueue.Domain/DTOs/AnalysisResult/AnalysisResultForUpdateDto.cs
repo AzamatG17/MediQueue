@@ -8,4 +8,4 @@ public record AnalysisResultForUpdateDto(
     AnalysisMeasurementUnit? Unit,
     string? PhotoBase64,
     TestStatus? Status,
-    int? AccountId);
+    int AccountId);

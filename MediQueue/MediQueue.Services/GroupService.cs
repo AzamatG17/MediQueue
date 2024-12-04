@@ -26,26 +26,22 @@ public class GroupService : IGroupService
     {
         var group = await _groupRepository.GetGroupWithGroupsAsync();
 
+        if (group == null) return null;
+
         return group.Select(MapToGroupAllDateDto).ToList();
     }
 
     public async Task<GroupForAllDateDto> GetGroupByIdAsync(int id)
     {
-        var group = await _groupRepository.FindByIdWithGroupAsync(id);
-        if (group == null)
-        {
-            throw new KeyNotFoundException($"Group with {id} not found");
-        }
+        var group = await _groupRepository.FindByIdWithGroupAsync(id)
+            ?? throw new KeyNotFoundException($"Group with {id} not found");
 
         return MapToGroupAllDateDto(group);
     }
 
     public async Task<GroupDto> CreateGroupAsync(GroupForCreateDto groupForCreateDto)
     {
-        if (groupForCreateDto == null)
-        {
-            throw new ArgumentNullException(nameof(groupForCreateDto));
-        }
+        ArgumentNullException.ThrowIfNull(groupForCreateDto);
 
         var group = await MapToCategoryAsync(groupForCreateDto);
 
@@ -58,11 +54,8 @@ public class GroupService : IGroupService
     {
         ArgumentNullException.ThrowIfNull(groupForUpdateDto);
 
-        var group = await _groupRepository.FindByIdWithGroupAsync(groupForUpdateDto.Id);
-        if (group == null)
-        {
-            throw new KeyNotFoundException($"Group with {groupForUpdateDto.Id} not found");
-        }
+        var group = await _groupRepository.FindByIdWithGroupAsync(groupForUpdateDto.Id)
+            ?? throw new KeyNotFoundException($"Group with {groupForUpdateDto.Id} not found");
 
         group.GroupName = groupForUpdateDto.GroupName;
 
@@ -103,7 +96,7 @@ public class GroupService : IGroupService
         };
     }
 
-    private GroupDto MapToCategoryDto(Group category)
+    private static GroupDto MapToCategoryDto(Group category)
     {
         var groupInfos = category.Categories?.Select(g => new GroupInfoResponse(
             g.Id,
@@ -117,7 +110,7 @@ public class GroupService : IGroupService
         );
     }
 
-    private GroupForAllDateDto MapToGroupAllDateDto(Group group)
+    private static GroupForAllDateDto MapToGroupAllDateDto(Group group)
     {
         return new GroupForAllDateDto(
             group.Id,
@@ -126,7 +119,7 @@ public class GroupService : IGroupService
         );
     }
 
-    private CategoryForGroupDto MapToCategoryDto(Category category)
+    private static CategoryForGroupDto MapToCategoryDto(Category category)
     {
         return new CategoryForGroupDto(
             category.Id,
@@ -135,7 +128,7 @@ public class GroupService : IGroupService
         );
     }
 
-    private ServiceHelperDto MapToServiceDto(Service service)
+    private static ServiceHelperDto MapToServiceDto(Service service)
     {
         return new ServiceHelperDto(
             service.Id,

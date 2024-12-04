@@ -5,6 +5,8 @@ using MediQueue.Domain.DTOs.LekarstvaUsage;
 using MediQueue.Domain.DTOs.PaymentService;
 using MediQueue.Domain.DTOs.QuestionnaireHistory;
 using MediQueue.Domain.DTOs.ServiceUsage;
+using MediQueue.Domain.DTOs.StationaryStay;
+using MediQueue.Domain.DTOs.Tariff;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
 using MediQueue.Domain.Interfaces.Repositories;
@@ -56,11 +58,8 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
 
     public async Task<QuestionnaireHistoryDto> GetQuestionnaireHistoryByIdAsync(int id)
     {
-        var questionn = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(id);
-        if (questionn == null)
-        {
-            throw new KeyNotFoundException($"QuestionnaireHistory with {id} not found");
-        }
+        var questionn = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(id)
+            ?? throw new KeyNotFoundException($"QuestionnaireHistory with {id} not found");
 
         return await MapToQuestionnaireHistoryDto(questionn);
     }
@@ -69,10 +68,8 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     {
         ArgumentNullException.ThrowIfNull(questionnaireHistoryForCreateDto);
 
-        var questionnaire = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForCreateDto.QuestionnaireId);
-
-        if (questionnaire == null)
-            throw new KeyNotFoundException($"Questionnairy Id: {questionnaireHistoryForCreateDto.QuestionnaireId} does not exist!");
+        var questionnaire = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForCreateDto.QuestionnaireId)
+            ?? throw new KeyNotFoundException($"Questionnairy Id: {questionnaireHistoryForCreateDto.QuestionnaireId} does not exist!");
 
         var questionnaireHistory = await MapToQuestionnaryHistory(questionnaireHistoryForCreateDto);
 
@@ -87,54 +84,23 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
 
     public async Task<QuestionnaireHistoryDto> UpdateQuestionnaireHistoryAsync(QuestionnaireHistoryForUpdateDto questionnaireHistoryForUpdateDto)
     {
-        if (questionnaireHistoryForUpdateDto == null)
-        {
-            throw new ArgumentNullException(nameof(questionnaireHistoryForUpdateDto));
-        }
+        ArgumentNullException.ThrowIfNull(questionnaireHistoryForUpdateDto);
 
-        var questionn = await _questionnaireHistoryRepositoty.FindByIdAsync(questionnaireHistoryForUpdateDto.id);
-        if (questionn == null)
-        {
-            throw new KeyNotFoundException($"QuestionnaireHistory with {questionn.Id} not found");
-        }
+        var existingHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(questionnaireHistoryForUpdateDto.Historyid)
+            ?? throw new KeyNotFoundException($"QuestionnaireHistory with {questionnaireHistoryForUpdateDto.Historyid} not found");
 
-        if (questionnaireHistoryForUpdateDto.IsPayed == false)
-        {
-            questionn.Balance = await GenerateBalanse(questionnaireHistoryForUpdateDto.ServiceIds);
-        }
-        else
-        {
-            questionn.Balance = 0m;
-        }
+        var questionnaire = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForUpdateDto.QuestionnaireId)
+            ?? throw new KeyNotFoundException($"Questionnairy Id: {questionnaireHistoryForUpdateDto.QuestionnaireId} does not exist!");
 
-        questionn.HistoryDiscription = questionnaireHistoryForUpdateDto.HistoryDiscription;
-        questionn.DateCreated = questionnaireHistoryForUpdateDto.DateCreated;
-        questionn.IsPayed = questionnaireHistoryForUpdateDto.IsPayed;
-        questionn.AccountId = questionnaireHistoryForUpdateDto.AccountId;
-        questionn.QuestionnaireId = questionnaireHistoryForUpdateDto.QuestionnaireId;
+        var updatedHistory = await MapToQuestionnaireHistoryForUpdate(questionnaireHistoryForUpdateDto, existingHistory, questionnaire.Id);
 
-        var existiongServiceIds = questionn.ServiceUsages.Select(s => s.Id).ToList();
+        await _questionnaireHistoryRepositoty.UpdateAsync(updatedHistory);
 
-        var updatedServices = await _serviceRepository.FindByServiceIdsAsync(questionnaireHistoryForUpdateDto.ServiceIds);
-        var updatedServiceIds = updatedServices.Select(s => s.Id).ToList();
+        questionnaire.Balance += updatedHistory.Balance - existingHistory.Balance;
 
-        var serviceToAdd = updatedServices.Where(c => !existiongServiceIds.Contains(c.Id)).ToList();
+        await _questionnaireRepository.UpdateAsync(questionnaire);
 
-        var serviceToRemove = questionn.ServiceUsages.Where(c => !updatedServiceIds.Contains(c.Id)).ToList();
-
-        foreach (var servicesToRemove in serviceToRemove)
-        {
-            questionn.ServiceUsages.Remove(servicesToRemove);
-        }
-
-        foreach (var servicesToAdd in serviceToAdd)
-        {
-            //questionn.ServiceUsages.Add(servicesToAdd);
-        }
-
-        await _questionnaireHistoryRepositoty.UpdateAsync(questionn);
-
-        return await MapToQuestionnaireHistoryDto(questionn);
+        return await MapToQuestionnaireHistoryDto(updatedHistory);
     }
 
     public async Task DeleteQuestionnaireHistoryAsync(int id)
@@ -172,7 +138,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             p.MedicationType,
             p.AccountId,
             $"{p.Account?.LastName ?? ""} {p.Account?.FirstName ?? ""} {p.Account?.SurName ?? ""}".Trim(),
-            p.ServiceId,
+            p.ServiceId, 
             p.Service?.Name ?? "",
             p.DoctorCabinetLekarstvoId,
             p.DoctorCabinetLekarstvo?.Partiya?.Lekarstvo?.Name ?? "",
@@ -216,6 +182,32 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             b.Percent
             )).ToList();
 
+        var stationaryStay = questionnaireHistory.StationaryStays?.Select(b => new StationaryStayDto(
+            b.Id,
+            b.StartTime,
+            b.NumberOfDays,
+            b.QuantityUsed,
+            b.TotalPrice,
+            b.Amount,
+            b.IsPayed,
+            b.QuestionnaireHistoryId,
+            b.Tariff != null ? new TariffHelperDto(
+                b.Tariff.Id,
+                b.Tariff.Name ?? "",
+                b.Tariff.PricePerDay) : null,
+            b.WardPlace != null ? new Domain.DTOs.WardPlace.WardPlaceDto(
+                b.WardPlace.Id,
+                b.WardPlace.WardPlaceName ?? "",
+                b.WardPlace.WardId,
+                b.WardPlace.Ward?.WardName ?? "",
+                b.WardPlace.IsOccupied,
+                b.WardPlace.StationaryStayId) : null,
+            b.Nutrition != null ? new Domain.DTOs.Nutrition.NutritionDto(
+                b.Nutrition.Id,
+                b.Nutrition.MealPlan ?? "",
+                b.Nutrition.CostPerDay) : null
+            )).ToList();
+
         return new QuestionnaireHistoryDto(
             questionnaireHistory.Id,
             questionnaireHistory.Historyid,
@@ -239,7 +231,8 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             discountDtos,
             serviceUsage,
             paymentDtos,
-            conclusionDtos
+            conclusionDtos,
+            stationaryStay
         );
     }
 
@@ -289,14 +282,64 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             DateCreated = DateTime.Now,
             Balance = sumOfServiceUsage,
             IsPayed = false,
-            InitialDiscountPercentage = applicableDiscounts.FirstOrDefault()?.Percent,
-            InitialBenefitPercentage = applicableBenefits.FirstOrDefault()?.Percent,
+            InitialDiscountPercentage = applicableDiscounts.FirstOrDefault()?.Percent ?? 0,
+            InitialBenefitPercentage = applicableBenefits.FirstOrDefault()?.Percent ?? 0,
             AccountId = questionnaireHistoryForCreateDto?.AccountId,
             QuestionnaireId = questionnaryId?.Id,
             ServiceUsages = serviceUsages,
             Discounts = applicableDiscounts,
             Benefits = applicableBenefits
         };
+    }
+
+    private async Task<QuestionnaireHistory> MapToQuestionnaireHistoryForUpdate(QuestionnaireHistoryForUpdateDto questionnaireHistoryForUpdateDto, QuestionnaireHistory existingHistory, int questionaryId)
+    {
+        bool hasDiscount = questionnaireHistoryForUpdateDto.DiscountIds?.Any(id => id != 0) == true;
+        bool hasBenefit = questionnaireHistoryForUpdateDto.BenefitIds?.Any(id => id != 0) == true;
+
+        if (hasDiscount && hasBenefit)
+            throw new InvalidOperationException("You can only choose one of the options: either Discount or Benefit, but not both.");
+
+        var serviceIds = questionnaireHistoryForUpdateDto.ServiceAndAccountIds?.Select(item => item.ServiceId) ?? Enumerable.Empty<int>();
+        var services = await _serviceRepository.FindByServiceIdsAsync(serviceIds.ToList());
+
+        if (questionnaireHistoryForUpdateDto.ServiceAndAccountIds != null)
+        {
+            foreach (var item in questionnaireHistoryForUpdateDto.ServiceAndAccountIds)
+            {
+                if (item.AccountId == 0)
+                {
+                    continue;
+                }
+
+                var account = await _accountRepository.FindByIdWithRoleAsync(item.AccountId)
+                ?? throw new InvalidOperationException($"Account with ID {item.AccountId} does not exist.");
+
+                if (!account.Services.Any(service => service.Id == item.ServiceId))
+                    throw new InvalidOperationException($"Service with ID {item.ServiceId} is not associated with Account {item.AccountId}.");
+            }
+        }
+
+        var applicableDiscounts = await GetApplicableDiscounts(questionnaireHistoryForUpdateDto.DiscountIds);
+        var applicableBenefits = await GetApplicableBenefits(questionnaireHistoryForUpdateDto.BenefitIds);
+
+        var serviceUsages = await GenerateServiceUsages(questionnaireHistoryForUpdateDto.ServiceAndAccountIds, applicableDiscounts, applicableBenefits);
+
+        var sumOfServiceUsage = serviceUsages.Sum(a => a.Amount);
+
+        existingHistory.HistoryDiscription = questionnaireHistoryForUpdateDto.HistoryDiscription ?? existingHistory.HistoryDiscription;
+        existingHistory.DateCreated = questionnaireHistoryForUpdateDto.DateCreated ?? existingHistory.DateCreated;
+        existingHistory.Balance = sumOfServiceUsage;
+        existingHistory.IsPayed = questionnaireHistoryForUpdateDto.IsPayed ?? existingHistory.IsPayed;
+        existingHistory.InitialDiscountPercentage = applicableDiscounts.FirstOrDefault()?.Percent ?? 0;
+        existingHistory.InitialBenefitPercentage = applicableBenefits.FirstOrDefault()?.Percent ?? 0;
+        existingHistory.AccountId = questionnaireHistoryForUpdateDto.AccountId ?? existingHistory.AccountId;
+        existingHistory.QuestionnaireId = questionaryId;
+        existingHistory.ServiceUsages = serviceUsages;
+        existingHistory.Discounts = applicableDiscounts;
+        existingHistory.Benefits = applicableBenefits;
+
+        return existingHistory; 
     }
 
     private async Task<List<ServiceUsage>> GenerateServiceUsages(List<ServiceAndAccountResponse> serviceAndAccountIds, List<Discount> applicableDiscounts, List<Benefit> applicableBenefits)

@@ -29,19 +29,15 @@ public class BranchService : IBranchService
 
     public async Task<BranchDto> GetBranchByIdAsync(int id)
     {
-        var branch = await _repository.FindByIdBranch(id);
-
-        if (branch == null) return null;
+        var branch = await _repository.FindByIdBranch(id)
+            ?? throw new KeyNotFoundException($"Branch with {id} not found");
 
         return MapToBranchDto(branch);
     }
 
     public async Task<BranchDto> CreateBranchAsync(BranchForCreateDto branchForCreateDto)
     {
-        if (branchForCreateDto == null)
-        {
-            throw new ArgumentNullException(nameof(branchForCreateDto));
-        }
+        ArgumentNullException.ThrowIfNull(branchForCreateDto);
 
         var branch = await MapToBranch(branchForCreateDto);
 
@@ -52,10 +48,7 @@ public class BranchService : IBranchService
 
     public async Task<BranchDto> UpdateBranchAsync(BranchForUpdatreDto branchForUpdatreDto)
     {
-        if (branchForUpdatreDto == null)
-        {
-            throw new ArgumentNullException(nameof(branchForUpdatreDto));
-        }
+        ArgumentNullException.ThrowIfNull(branchForUpdatreDto);
 
         var branch = await MapToBranchForUpdate(branchForUpdatreDto);
 
@@ -88,7 +81,7 @@ public class BranchService : IBranchService
         };
     }
 
-    private BranchDto MapToBranchDto(Branch branch)
+    private static BranchDto MapToBranchDto(Branch branch)
     {
         return new BranchDto(
             branch.Id,
@@ -99,7 +92,7 @@ public class BranchService : IBranchService
                 : new List<ScladDto>());
     }
 
-    private ScladDto MapToScladDto(Sclad? sclad)
+    private static ScladDto MapToScladDto(Sclad? sclad)
     {
         return new ScladDto(
             sclad.Id,
@@ -111,7 +104,7 @@ public class BranchService : IBranchService
                 : new List<PartiyaDto>());
     }
 
-    private PartiyaDto MapToLekarstvoDto(Partiya p)
+    private static PartiyaDto MapToLekarstvoDto(Partiya p)
     {
         return new PartiyaDto(
             p.Id,

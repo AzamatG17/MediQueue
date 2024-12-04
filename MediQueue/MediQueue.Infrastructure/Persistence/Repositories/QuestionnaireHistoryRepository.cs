@@ -36,6 +36,13 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(c => c.ServiceUsage)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.Account)
+                .Include(st => st.StationaryStays)
+                    .ThenInclude(stt => stt.Tariff)
+                .Include(st => st.StationaryStays)
+                    .ThenInclude(stw => stw.WardPlace)
+                    .ThenInclude(stwp => stwp.Ward)
+                .Include(st => st.StationaryStays)
+                    .ThenInclude(stn => stn.Nutrition)
                 .AsNoTracking()
                 .AsSplitQuery()
                 .Where(x => x.IsActive)
@@ -88,6 +95,14 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(c => c.ServiceUsage)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.Account)
+                .Include(st => st.StationaryStays)
+                    .ThenInclude(stt => stt.Tariff)
+                .Include(st => st.StationaryStays)
+                    .ThenInclude(stw => stw.WardPlace)
+                    .ThenInclude(stwp => stwp.Ward)
+                .Include(st => st.StationaryStays)
+                    .ThenInclude(stn => stn.Nutrition)
+                .AsNoTracking()
                 .Where(x => x.Id == id && x.IsActive)
                 .FirstOrDefaultAsync(); ;
         }
@@ -116,7 +131,14 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(c => c.ServiceUsage)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.Account)
-                .AsSplitQuery()
+                .Include(st => st.StationaryStays)
+                    .ThenInclude(stt => stt.Tariff)
+                .Include(st => st.StationaryStays)
+                    .ThenInclude(stw => stw.WardPlace)
+                    .ThenInclude(stwp => stwp.Ward)
+                .Include(st => st.StationaryStays)
+                    .ThenInclude(stn => stn.Nutrition)
+                .AsNoTracking()
                 .Where(x => x.Historyid == id && x.IsActive)
                 .FirstOrDefaultAsync();
         }
@@ -145,7 +167,7 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                     .ThenInclude(c => c.ServiceUsage)
                 .Include(q => q.Conclusions)
                     .ThenInclude(c => c.Account)
-                .AsSplitQuery()
+                .AsNoTracking()
                 .Where(x => x.QuestionnaireId == id && x.IsActive)
                 .FirstOrDefaultAsync();
         }
@@ -180,8 +202,52 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(c => c.Conclusions)
                 .ThenInclude(l => l.LekarstvoUsages)
                 .ThenInclude(ll => ll.DoctorCabinetLekarstvo)
-                .AsSplitQuery()
+                .Include(st => st.StationaryStays)
                 .Where(x => x.Historyid == id && x.IsActive)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<QuestionnaireHistory> GetByIdAsync(int id)
+        {
+            return await _context.Set<QuestionnaireHistory>()
+                .Include(a => a.Account)
+                .Include(q => q.Questionnaire)
+                .Include(s => s.ServiceUsages)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Account)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.DoctorCabinetLekarstvo)
+                .ThenInclude(psp => psp.Partiya)
+                .ThenInclude(psl => psl.Lekarstvo)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Service)
+                .Include(c => c.Conclusions)
+                .ThenInclude(l => l.LekarstvoUsages)
+                .ThenInclude(ll => ll.DoctorCabinetLekarstvo)
+                .Include(st => st.StationaryStays)
+                .Where(x => x.Historyid == id && x.IsActive)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<QuestionnaireHistory> GetByIdQuestionnaireHistoryAsync(int? id)
+        {
+            return await _context.Set<QuestionnaireHistory>()
+                .Include(a => a.Account)
+                .Include(q => q.Questionnaire)
+                .Include(s => s.ServiceUsages)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Account)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.DoctorCabinetLekarstvo)
+                .ThenInclude(psp => psp.Partiya)
+                .ThenInclude(psl => psl.Lekarstvo)
+                .Include(p => p.PaymentServices)
+                .ThenInclude(pl => pl.Service)
+                .Include(c => c.Conclusions)
+                .ThenInclude(l => l.LekarstvoUsages)
+                .ThenInclude(ll => ll.DoctorCabinetLekarstvo)
+                .Include(st => st.StationaryStays)
+                .Where(x => x.Id == id && x.IsActive)
                 .FirstOrDefaultAsync();
         }
 

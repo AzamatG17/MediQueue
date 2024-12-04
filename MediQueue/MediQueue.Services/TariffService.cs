@@ -30,9 +30,8 @@ public class TariffService : ITariffService
 
     public async Task<TariffDto> GetTariffByIdAsync(int id)
     {
-        var tariff = await _repository.FindByIdTariffAsync(id);
-
-        if (tariff == null) return null;
+        var tariff = await _repository.FindByIdTariffAsync(id)
+            ?? throw new KeyNotFoundException($"Tariff with id: {id} does not exist.");
 
         return MapTariffToTariffDto(tariff);
     }
@@ -89,14 +88,5 @@ public class TariffService : ITariffService
                 )).ToList()
                 : new List<WardHelperDto>()
         );
-    }
-
-    private static Tariff MapTariffForCreateDtoToTariff(TariffForCreateDto tariffForCreateDto)
-    {
-        return new Tariff
-        {
-            Name = tariffForCreateDto.Name,
-            PricePerDay = tariffForCreateDto.PricePerDay
-        };
     }
 }

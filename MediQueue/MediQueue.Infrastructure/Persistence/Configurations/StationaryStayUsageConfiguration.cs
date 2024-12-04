@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MediQueue.Infrastructure.Persistence.Configurations
 {
-    internal class StationaryStayConfiguration : IEntityTypeConfiguration<StationaryStay>
+    internal class StationaryStayUsageConfiguration : IEntityTypeConfiguration<StationaryStayUsage>
     {
-        public void Configure(EntityTypeBuilder<StationaryStay> builder)
+        public void Configure(EntityTypeBuilder<StationaryStayUsage> builder)
         {
-            builder.ToTable(nameof(StationaryStay));
+            builder.ToTable(nameof(StationaryStayUsage));
             builder.HasKey(x => x.Id);
 
             builder.Property(e => e.StartTime)
@@ -17,8 +17,17 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(e => e.NumberOfDays)
                    .HasDefaultValue(null);
 
-            builder.Property(e => e.TotalCost)
-                .HasColumnType("decimal(18, 2)");
+            builder.Property(x => x.IsActive)
+                .HasDefaultValue(true);
+
+            builder.Property(x => x.QuantityUsed)
+                 .HasColumnType("decimal(18,2)");
+
+            builder.Property(x => x.TotalPrice)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Property(x => x.Amount)
+                .HasColumnType("decimal(18,2)");
 
             builder.HasOne(e => e.Tariff)
                    .WithMany()
@@ -27,7 +36,7 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.HasOne(e => e.WardPlace)
                    .WithOne(w => w.StationaryStay)
-                   .HasForeignKey<StationaryStay>(e => e.WardPlaceId)
+                   .HasForeignKey<StationaryStayUsage>(e => e.WardPlaceId)
                    .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(e => e.Nutrition)

@@ -16,10 +16,20 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Partiyas
                 .Include(l => l.Lekarstvo)
                 .Where(x => x.IsActive)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<Partiya> FindByIdPartiyaAsync(int id)
+        {
+            return await _context.Partiyas
+                .Include(l => l.Lekarstvo)
+                .Where(x => x.Id == id && x.IsActive)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Partiya> FindByIdPartiyAsync(int id)
         {
             return await _context.Partiyas
                 .Include(l => l.Lekarstvo)
