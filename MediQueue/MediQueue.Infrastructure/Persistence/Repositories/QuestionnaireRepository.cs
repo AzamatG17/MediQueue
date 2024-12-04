@@ -21,6 +21,7 @@ public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionn
                         .ThenInclude(qh => qh.ServiceUsages)
                             .ThenInclude(s => s.Service)
                         .AsNoTracking()
+                        .AsSplitQuery()
                         .Where(x => x.IsActive)
                         .AsQueryable();
 
@@ -77,6 +78,7 @@ public class QuestionnaireRepository : RepositoryBase<Questionnaire>, IQuestionn
             .Include(a => a.QuestionnaireHistories)
             .ThenInclude(q => q.ServiceUsages)
             .Where(x => x.Id == Id && x.IsActive)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
     }
 

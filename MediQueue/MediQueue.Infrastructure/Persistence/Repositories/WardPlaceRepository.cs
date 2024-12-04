@@ -16,10 +16,19 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.WardsPlace
                 .Include(w => w.Ward)
                 .Where(x => x.IsActive)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<WardPlace> FindByIdWardPlaceAsync(int id)
+        {
+            return await _context.WardsPlace
+                .Include(w => w.Ward)
+                .Where(x => x.Id == id && x.IsActive)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<WardPlace> FindByIdWardPlaceAsNoTrackingAsync(int id)
         {
             return await _context.WardsPlace
                 .Include(w => w.Ward)

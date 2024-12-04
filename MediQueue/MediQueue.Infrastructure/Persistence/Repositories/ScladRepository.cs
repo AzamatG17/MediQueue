@@ -16,10 +16,20 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
             return await _context.Sclads
                 .Include(x => x.Partiyas)
                 .Where(x => x.IsActive)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<Sclad> FindbyIdScladAsync(int id)
+        {
+            return await _context.Sclads
+                .Include(x => x.Partiyas)
+                .Where(x => x.Id == id && x.IsActive)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Sclad> FindByIdScladAsync(int id)
         {
             return await _context.Sclads
                 .Include(x => x.Partiyas)

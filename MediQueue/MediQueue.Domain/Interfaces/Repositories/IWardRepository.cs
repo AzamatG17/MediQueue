@@ -6,6 +6,7 @@ namespace MediQueue.Domain.Interfaces.Repositories
     {
         Task<IEnumerable<Ward>> FindAllWardsAsync();
         Task<Ward> FindByIdWardAsync(int id);
+        Task<Ward> FindByIdWardAsNoTrackingAsync(int id);
         Task DeleteWardPlace(int id);
     }
 }
