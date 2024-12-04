@@ -30,6 +30,8 @@ public class PaymentServiceService : IPaymentServiceService
     {
         var payments = await _repository.GetAllPaymentServicesAsync();
 
+        if (payments == null) return null;
+
         return payments.Select(MapToPaymentServiceDto).ToList();
     }
 
@@ -65,6 +67,11 @@ public class PaymentServiceService : IPaymentServiceService
             else if (payment.MedicationType == MedicationType.Lekarstvo)
             {
                 var paymentLekarstvo = await PaymentForLekarstvo(payment, questionnaireHistory);
+                createdPayments.Add(paymentLekarstvo);
+            }
+            else if (payment.MedicationType == MedicationType.Stationary)
+            {
+                var paymentLekarstvo = await PaymentForStationaryStayUsage(payment, questionnaireHistory);
                 createdPayments.Add(paymentLekarstvo);
             }
             else
@@ -200,6 +207,49 @@ public class PaymentServiceService : IPaymentServiceService
             questionaire.Balance += payment.PaidAmount;
             await _questionnaireRepository.UpdateAsync(questionaire);
         }
+
+        return paymentService;
+    }
+
+    private async Task<PaymentService> PaymentForStationaryStayUsage(PaymentServiceForCreateDto payment, QuestionnaireHistory questionnaireHistory)
+    {
+        var stationaryStayUsage = questionnaireHistory.StationaryStays
+                                        .FirstOrDefault(s => s.Id == payment.StationaryStayUsageId);
+
+        if (stationaryStayUsage == null)
+            throw new KeyNotFoundException($"StationaryStayUsage with ID {payment.StationaryStayUsageId} not found.");
+
+        var existingPayments = questionnaireHistory.PaymentServices
+            .Where(p => p.StationaryStayUsageId == stationaryStayUsage.Id);
+
+        var totalPaidAmount = existingPayments.Sum(p => p.PaidAmount ?? 0);
+        var remainingAmount = (stationaryStayUsage.TotalPrice ?? 0) - totalPaidAmount;
+
+        if (payment.PaidAmount > remainingAmount)
+            throw new InvalidOperationException($"Paid amount exceeds the remaining amount for StationaryStayUsage ID {stationaryStayUsage.Id}.");
+
+        var paymentService = new PaymentService
+        {
+            TotalAmount = stationaryStayUsage.TotalPrice,
+            PaidAmount = payment.PaidAmount,
+            OutstandingAmount = remainingAmount - payment.PaidAmount,
+            PaymentDate = DateTime.Now,
+            PaymentType = payment.PaymentType ?? PaymentType.Cash,
+            QuestionnaireHistoryId = questionnaireHistory.Id,
+            AccountId = payment.AccountId,
+            StationaryStayUsageId = stationaryStayUsage.Id,
+            MedicationType = MedicationType.Stationary,
+            PaymentStatus = DeterminePaymentStatus(payment.PaidAmount, remainingAmount)
+        };
+
+        questionnaireHistory.PaymentServices.Add(paymentService);
+        questionnaireHistory.Balance += payment.PaidAmount;
+        questionnaireHistory.IsPayed = questionnaireHistory.Balance >= 0;
+
+        stationaryStayUsage.Amount = remainingAmount - payment.PaidAmount;
+        stationaryStayUsage.IsPayed = stationaryStayUsage.Amount == 0;
+
+        await _questionnaireHistoryRepositoty.SaveChangeAsync();
 
         return paymentService;
     }

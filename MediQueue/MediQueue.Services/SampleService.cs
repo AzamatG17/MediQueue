@@ -28,7 +28,8 @@ public class SampleService : ISampleService
 
     public async Task<SampleDto> GetSampleByIdAsync(int id)
     {
-        var sample = await _repository.FindByIdAsync(id);
+        var sample = await _repository.FindByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Sample with id: {id} does not exist.");
 
         if (sample == null) return null;
 

@@ -28,10 +28,8 @@ public class DoctorCabinetService : IDoctorCabinetService
 
     public async Task<DoctorCabinetDto> GetDoctorCabinetByIdAsync(int id)
     {
-        var doctorCabinet = await _repository.FindByIdDoctorCabinetAsync(id);
-
-        if (doctorCabinet == null)
-            throw new KeyNotFoundException($"Doctor Cabinet with id: {id} does not exist.");
+        var doctorCabinet = await _repository.FindByIdDoctorCabinetAsync(id)
+            ?? throw new KeyNotFoundException($"Doctor Cabinet with id: {id} does not exist.");
 
         return MapToDoctorCabinetDto(doctorCabinet);
     }

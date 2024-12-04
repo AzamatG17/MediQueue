@@ -55,7 +55,7 @@ public class WardService : IWardService
     {
         ArgumentNullException.ThrowIfNull(nameof(wardForUpdateDto));
 
-        var existingWard = await _repository.FindByIdWardAsync(wardForUpdateDto.id)
+        var existingWard = await _repository.FindByIdWardAsNoTrackingAsync(wardForUpdateDto.id)
             ?? throw new KeyNotFoundException($"Ward with ID {wardForUpdateDto.id} not found.");
 
         var tariffs = await _tariffRepository.FindByIdsAsync(wardForUpdateDto.TariffIds);

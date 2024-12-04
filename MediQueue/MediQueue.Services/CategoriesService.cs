@@ -139,31 +139,4 @@ public class CategoriesService : ICategoryService
             category.Groups.Add(groupToAdd);
         }
     }
-
-    private async Task UpdateServicesAsync(Category category, List<int> newServiceIds)
-    {
-        // Get existing service IDs
-        var existingServices = category.Services.ToList();
-        var existingServiceIds = existingServices.Select(s => s.Id).ToHashSet();
-
-        // Retrieve updated services from the repository
-        var updatedServices = await _serviceRepository.FindByServiceIdsAsync(newServiceIds);
-        var updatedServiceIds = updatedServices.Select(s => s.Id).ToHashSet();
-
-        // Determine which services to add and which to remove
-        var servicesToAdd = updatedServices.Where(s => !existingServiceIds.Contains(s.Id)).ToList();
-        var servicesToRemove = existingServices.Where(s => !updatedServiceIds.Contains(s.Id)).ToList();
-
-        // Remove services that are no longer associated with the category
-        foreach (var serviceToRemove in servicesToRemove)
-        {
-            category.Services.Remove(serviceToRemove);
-        }
-
-        // Add new services to the category
-        foreach (var serviceToAdd in servicesToAdd)
-        {
-            category.Services.Add(serviceToAdd);
-        }
-    }
 }

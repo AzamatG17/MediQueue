@@ -26,6 +26,8 @@ public class GroupService : IGroupService
     {
         var group = await _groupRepository.GetGroupWithGroupsAsync();
 
+        if (group == null) return null;
+
         return group.Select(MapToGroupAllDateDto).ToList();
     }
 

@@ -90,8 +90,8 @@ public class AuthorizationService : IAuthorizationService
         var account = await _context.Accounts.FindAsync(session.AccountId);
         var newAccessToken = _jwtProvider.GenerateToken(account, session.SessionId);
 
-        session.AccessToken = newAccessToken; // Обновляем refresh token
-        session.RefreshTokenExpiry = DateTime.UtcNow.AddHours(12); // Устанавливаем новый срок действия
+        session.AccessToken = newAccessToken;
+        session.RefreshTokenExpiry = DateTime.UtcNow.AddHours(12);
 
         await _context.SaveChangesAsync();
 

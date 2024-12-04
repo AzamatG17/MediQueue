@@ -10,6 +10,7 @@ public class ServicesService : IServicesService
     private readonly IServiceRepository _repository;
     private readonly ICategoryRepository _categoryRepository;
     private readonly IAccountRepository _accountRepository;
+
     public ServicesService(
         IServiceRepository repository,
         ICategoryRepository categoryRepository,
@@ -22,17 +23,16 @@ public class ServicesService : IServicesService
 
     public async Task<IEnumerable<ServiceDtos>> GetAllServicesAsync()
     {
-        var service = await _repository.GetAllServiceWithCategory();
+        var service = await _repository.GetAllServiceWithCategoryAsync();
 
-        if (service == null)
-            return null;
+        if (service == null) return null;
 
         return service.Select(MapToServiceDto).ToList();
     }
 
     public async Task<ServiceDtos> GetServiceByIdAsync(int id)
     {
-        var service = await _repository.GetByIdWithCategory(id) 
+        var service = await _repository.GetByIdWithCategoryAsync(id) 
             ?? throw new KeyNotFoundException($"Service with {id} not found");
 
         return MapToServiceDto(service);
@@ -40,9 +40,10 @@ public class ServicesService : IServicesService
 
     public async Task<ServiceDtos> CreateServiceAsync(ServiceForCreateDto serviceForCreateDto)
     {
-        var category = await _categoryRepository.FindByIdAsync(serviceForCreateDto.CategoryId);
-        if (category == null)
-            throw new KeyNotFoundException($"Category with ID {serviceForCreateDto.CategoryId} not found.");
+        ArgumentNullException.ThrowIfNull(nameof(serviceForCreateDto));
+
+        var category = await _categoryRepository.FindByIdAsync(serviceForCreateDto.CategoryId)
+            ?? throw new KeyNotFoundException($"Category with ID {serviceForCreateDto.CategoryId} not found.");
 
         var service = new Service
         {
@@ -70,9 +71,8 @@ public class ServicesService : IServicesService
     {
         ArgumentNullException.ThrowIfNull(nameof(serviceForUpdateDto));
 
-        var existingService = await _repository.GetByIdWithCategory(serviceForUpdateDto.id);
-        if (existingService == null)
-            throw new KeyNotFoundException($"Service with ID {serviceForUpdateDto.id} not found.");
+        var existingService = await _repository.GetByIdServiceAsync(serviceForUpdateDto.id)
+            ?? throw new KeyNotFoundException($"Service with ID {serviceForUpdateDto.id} not found.");
 
         existingService.Name = serviceForUpdateDto.Name;
         existingService.Amount = serviceForUpdateDto.Amount;
@@ -111,7 +111,7 @@ public class ServicesService : IServicesService
         }
     }
 
-    private ServiceDtos MapToServiceDto(Service s)
+    private static ServiceDtos MapToServiceDto(Service s)
     {
         return new ServiceDtos(
             s.Id,
