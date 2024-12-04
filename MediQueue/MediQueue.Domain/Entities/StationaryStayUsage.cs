@@ -1,12 +1,9 @@
-﻿using MediQueue.Domain.Common;
+﻿namespace MediQueue.Domain.Entities;
 
-namespace MediQueue.Domain.Entities;
-
-public class StationaryStay : EntityBase
+public class StationaryStayUsage : BaseUsage
 {
     public DateTime? StartTime { get; set; }
     public int? NumberOfDays { get; set; }
-    public decimal? TotalCost { get; set; }
 
     public int? TariffId { get; set; }
     public virtual Tariff? Tariff { get; set; }
@@ -14,6 +11,6 @@ public class StationaryStay : EntityBase
     public virtual WardPlace? WardPlace { get; set; }
     public int? NutritionId { get; set; }
     public virtual Nutrition? Nutrition { get; set; }
-    public int? QuestionnaireHistoryId { get; set; }
-    public virtual QuestionnaireHistory? QuestionnaireHistory { get; set; }
+
+    public virtual ICollection<PaymentService>? PaymentServices { get; set; }
 }

@@ -1,9 +1,8 @@
-﻿namespace MediQueue.Domain.Entities.Enums
+﻿namespace MediQueue.Domain.Entities.Enums;
+
+public enum PaymentStatus
 {
-    public enum PaymentStatus
-    {
-        Unpaid,
-        Partial,
-        Paid
-    }
+    Unpaid,
+    Partial,
+    Paid
 }

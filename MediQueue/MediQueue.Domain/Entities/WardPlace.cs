@@ -10,5 +10,5 @@ public class WardPlace : EntityBase
     public int? WardId { get; set; }
     public virtual Ward? Ward { get; set; }
     public int? StationaryStayId { get; set; }
-    public virtual StationaryStay? StationaryStay { get; set; }
+    public virtual StationaryStayUsage? StationaryStay { get; set; }
 }
