@@ -8,6 +8,7 @@ namespace MediQueue.Domain.DTOs.PaymentService
         MedicationType? MedicationType,
         int? ServiceId,
         int? LekarstvoId,
+        int? StationaryStayUsageId,
         int? QuestionnaireHistoryId,
         int? AccountId);
 }

@@ -1,8 +1,10 @@
 ﻿
+using MediQueue.Domain.Entities.Responses;
+
 namespace MediQueue.Domain.DTOs.QuestionnaireHistory
 {
     public record QuestionnaireHistoryForUpdateDto(
-        int id,
+        int Id,
         int? Historyid,
         string? HistoryDiscription,
         DateTime? DateCreated, 
@@ -10,7 +12,7 @@ namespace MediQueue.Domain.DTOs.QuestionnaireHistory
         bool? IsPayed,
         int? AccountId, 
         int? QuestionnaireId,
-        List<int>? ServiceIds,
+        List<ServiceAndAccountResponse>? ServiceAndAccountIds,
         List<int>? DiscountIds,
         List<int>? BenefitIds
         );
