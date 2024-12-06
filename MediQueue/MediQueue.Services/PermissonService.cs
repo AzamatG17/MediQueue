@@ -21,7 +21,7 @@ public class PermissonService : IPermissionService
         _dbContext = mediQueueDbContext ?? throw new ArgumentNullException(nameof(mediQueueDbContext));
     }
 
-    public async Task<(IEnumerable<Controllers>, IEnumerable<PermissionDto>)> GetAllPermissionsAsync()
+    public async Task<(IEnumerable<Controller>, IEnumerable<PermissionDto>)> GetAllPermissionsAsync()
     {
         var permission = await _permissionRepository.FindAllAsync();
 
@@ -55,7 +55,7 @@ public class PermissonService : IPermissionService
         throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<Controllers>> GetAllControllers()
+    public async Task<IEnumerable<Controller>> GetAllControllers()
     {
         return await _dbContext.Controllers
             .AsNoTracking()
