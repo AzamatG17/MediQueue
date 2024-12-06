@@ -13,7 +13,7 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
 
             builder.Property(e => e.WardName)
                    .HasMaxLength(255);
-
+            
             builder.HasMany(e => e.WardPlaces)
                    .WithOne(e => e.Ward)
                    .HasForeignKey(e => e.WardId)

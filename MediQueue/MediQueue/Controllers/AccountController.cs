@@ -37,7 +37,7 @@ public class AccountController : BaseController
     }
 
     [PermissionAuthorize(1, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
         try

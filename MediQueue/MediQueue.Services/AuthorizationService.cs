@@ -14,6 +14,7 @@ public class AuthorizationService : IAuthorizationService
     private readonly MediQueueDbContext _context;
     private readonly IMapper _mapper;
     private readonly IJwtProvider _jwtProvider;
+
     public AuthorizationService(MediQueueDbContext dbContext, IMapper mapper, IJwtProvider jwtProvider)
     {
         _context = dbContext;

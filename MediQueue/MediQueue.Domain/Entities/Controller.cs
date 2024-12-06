@@ -2,7 +2,7 @@
 
 namespace MediQueue.Domain.Entities
 {
-    public class Controllers : EntityBase
+    public class Controller : EntityBase
     {
         public string ControllerName { get; set; }
     }

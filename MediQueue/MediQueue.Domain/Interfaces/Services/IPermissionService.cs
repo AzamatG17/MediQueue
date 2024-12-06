@@ -5,7 +5,7 @@ namespace MediQueue.Domain.Interfaces.Services
 {
     public interface IPermissionService
     {
-        Task<(IEnumerable<Controllers>, IEnumerable<PermissionDto>)> GetAllPermissionsAsync();
+        Task<(IEnumerable<Controller>, IEnumerable<PermissionDto>)> GetAllPermissionsAsync();
         Task<PermissionDto> GetPermissionByIdAsync(int id);
         Task<PermissionDto> CreatePermissionAsync(PermissionForCreateDto permissionForCreateDto);
         Task<PermissionDto> UpdatePermissionAsync(PermissionForUpdateDto permissionForUpdateDto);

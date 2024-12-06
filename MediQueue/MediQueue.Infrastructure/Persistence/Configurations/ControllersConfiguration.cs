@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MediQueue.Infrastructure.Persistence.Configurations
 {
-    public class ControllersConfiguration : IEntityTypeConfiguration<Controllers>
+    public class ControllersConfiguration : IEntityTypeConfiguration<Controller>
     {
-        public void Configure(EntityTypeBuilder<Controllers> builder)
+        public void Configure(EntityTypeBuilder<Controller> builder)
         {
-            builder.ToTable(nameof(Controllers));
+            builder.ToTable(nameof(Controller));
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.IsActive)
