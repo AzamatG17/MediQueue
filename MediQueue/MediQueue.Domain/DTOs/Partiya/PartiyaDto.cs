@@ -11,6 +11,7 @@ public record PartiyaDto(
     decimal? TotalQuantity,
     decimal? PriceQuantity,
     string? PhotoBase64,
+    string? MeasurementUnit,
     int? LekarstvoId,
     string? LekarstvoName,
     int? ScladId,
