@@ -2,7 +2,6 @@
 using MediQueue.Domain.DTOs.Lekarstvo;
 using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.Entities;
-using MediQueue.Domain.Entities.Enums;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -17,13 +16,11 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
         _categoryLekarstvoRepository = categoryLekarstvoRepository ?? throw new ArgumentNullException(nameof(categoryLekarstvoRepository));
     }
 
-    public async Task<IEnumerable<CategoryLekarstvoDto>> GetAllCategoryLekarstvosAsync()
+    public async Task<IEnumerable<CategoryLekarstvoDto>?> GetAllCategoryLekarstvosAsync()
     {
         var cateforyLekarstvo = await _categoryLekarstvoRepository.FindAllCategoryLekarstvo();
 
-        if (cateforyLekarstvo == null) return null;
-
-        return cateforyLekarstvo.Select(MapToCategoryLekarstvoDto).ToList();
+        return cateforyLekarstvo?.Select(MapToCategoryLekarstvoDto).ToList();
     }
 
     public async Task<CategoryLekarstvoDto> GetCategoryLekarstvoByIdAsync(int id)
@@ -83,15 +80,11 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
     {
         decimal totalQuantityLEkarstvo = lekarstvo.Partiyas.Sum(x => x.TotalQuantity ?? 0);
 
-        var measurementUnit = lekarstvo.MeasurementUnit.HasValue
-        ? Enum.GetName(typeof(MeasurementUnit), lekarstvo.MeasurementUnit) ?? ""
-        : "";
-
         return new LekarstvoDto(
             lekarstvo.Id,
             lekarstvo.Name,
             lekarstvo.PhotoBase64,
-            measurementUnit,
+            lekarstvo.MeasurementUnit.ToString(),
             lekarstvo.CategoryLekarstvoId,
             lekarstvo.CategoryLekarstvo?.Name ?? "",
             totalQuantityLEkarstvo,
@@ -104,6 +97,7 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
                 p.TotalQuantity,
                 p.PriceQuantity,
                 p.PhotoBase64,
+                lekarstvo.MeasurementUnit.ToString(),
                 p.LekarstvoId,
                 p.Lekarstvo?.Name ?? "",
                 p.ScladId,

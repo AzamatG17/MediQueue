@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediQueue.Domain.DTOs.Role;
+﻿using MediQueue.Domain.DTOs.Role;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
@@ -10,12 +9,10 @@ namespace MediQueue.Services;
 public class RoleService : IRoleService
 {
     private readonly IRoleRepository _roleRepository;
-    private readonly IMapper _mapper;
 
-    public RoleService(IRoleRepository roleRepository, IMapper mapper)
+    public RoleService(IRoleRepository roleRepository)
     {
         _roleRepository = roleRepository ?? throw new ArgumentNullException(nameof(roleRepository));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
     public async Task<IEnumerable<RoleDto>> GetAllRolesAsync()

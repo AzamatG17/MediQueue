@@ -116,6 +116,7 @@ public class PartiyaService : IPartiyaService
             p.TotalQuantity,
             p.PriceQuantity,
             p.PhotoBase64,
+            p.Lekarstvo?.MeasurementUnit.ToString(),
             p.LekarstvoId,
             p.Lekarstvo?.Name ?? "",
             p.ScladId,

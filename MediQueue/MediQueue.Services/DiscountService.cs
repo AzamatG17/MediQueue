@@ -77,7 +77,7 @@ public class DiscountService : IDiscountService
         await _repository.DeleteAsync(id);
     }
 
-    private DiscountDto MapToDiscountDto(Discount discount)
+    private static DiscountDto MapToDiscountDto(Discount discount)
     {
         return new DiscountDto(
             discount.Id,

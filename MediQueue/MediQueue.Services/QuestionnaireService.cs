@@ -121,12 +121,6 @@ public class QuestionnaireService : IQuestionnaireService
         return newId;
     }
 
-    private int GenerateRandomId()
-    {
-        Random random = new Random();
-        return random.Next(1000000, 999999999);
-    }
-
     private async Task CreateQuestionnaireHistory(string? HistoryDiscription, int? AccountId, int? QuestionnaireId, List<ServiceAndAccountResponse>? ServiceIds, List<int>? DiscountIds, List<int>? BenefitIds)
     {
         var questonnaireForCreate = new QuestionnaireHistoryForCreateDto(
@@ -204,5 +198,11 @@ public class QuestionnaireService : IQuestionnaireService
             serviceUsage.QuestionnaireHistoryId,
             serviceUsage.QuestionnaireHistory?.Id ?? 0
             );
+    }
+
+    private static int GenerateRandomId()
+    {
+        Random random = new Random();
+        return random.Next(1000000, 999999999);
     }
 }

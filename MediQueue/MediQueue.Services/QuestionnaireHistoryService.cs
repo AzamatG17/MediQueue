@@ -434,7 +434,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         return newId;
     }
 
-    private int GenerateRandomId()
+    private static int GenerateRandomId()
     {
         Random random = new Random();
         return random.Next(1000000, 999999999);

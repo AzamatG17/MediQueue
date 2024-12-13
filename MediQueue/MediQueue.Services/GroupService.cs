@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediQueue.Domain.DTOs.Category;
+﻿using MediQueue.Domain.DTOs.Category;
 using MediQueue.Domain.DTOs.Group;
 using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Entities;
@@ -13,12 +12,10 @@ public class GroupService : IGroupService
 {
     private readonly IGroupRepository _groupRepository;
     private readonly ICategoryRepository _categoryRepository;
-    private readonly IMapper _mapper;
 
-    public GroupService(IGroupRepository groupRepository, IMapper mapper, ICategoryRepository categoryRepository)
+    public GroupService(IGroupRepository groupRepository, ICategoryRepository categoryRepository)
     {
         _groupRepository = groupRepository ?? throw new ArgumentNullException(nameof(groupRepository));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
     }
 
@@ -43,7 +40,7 @@ public class GroupService : IGroupService
     {
         ArgumentNullException.ThrowIfNull(groupForCreateDto);
 
-        var group = await MapToCategoryAsync(groupForCreateDto);
+        var group = MapToCategory(groupForCreateDto);
 
         await _groupRepository.CreateAsync(group);
 
@@ -88,7 +85,7 @@ public class GroupService : IGroupService
         await _groupRepository.DeleteGroupAsync(id);
     }
 
-    private async Task<Group> MapToCategoryAsync(GroupForCreateDto groupForCreateDto)
+    private static Group MapToCategory(GroupForCreateDto groupForCreateDto)
     {
         return new Group
         {
