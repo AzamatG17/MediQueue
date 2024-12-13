@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Lekarstvo;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Domain.ResourceParameters;
 using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,11 +22,11 @@ public class LekarstvoController : BaseController
 
     [PermissionAuthorize(6, 1)]
     [HttpGet]
-    public async Task<ActionResult> GetAsync()
+    public async Task<ActionResult> GetAsync([FromQuery] LekarstvoResourceParametrs lekarstvoResourceParametrs)
     {
         try
         {
-            var accounts = await _lekarstvoService.GetAllLekarstvosAsync();
+            var accounts = await _lekarstvoService.GetAllLekarstvosAsync(lekarstvoResourceParametrs);
 
             return Ok(accounts);
         }
