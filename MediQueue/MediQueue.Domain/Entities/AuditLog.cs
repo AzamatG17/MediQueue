@@ -1,16 +1,13 @@
-﻿using MediQueue.Domain.Common;
+﻿namespace MediQueue.Domain.Entities;
 
-namespace MediQueue.Domain.Entities;
-
-public class AuditLog : EntityBase
+public class AuditLog
 {
-    public string EntityId { get; set; }
-    public string Action { get; set; }
-    public string Changes { get; set; }
+    public int Id { get; set; }
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-
-    public int? ControllerId { get; set; }
-    public virtual Controller? Controllerlers { get; set; }
+    public string? Action { get; set; } = string.Empty;
+    public string? TableName { get; set; } = string.Empty;
+    public string? RecordId { get; set; }
+    public string? Changes { get; set; }
     public int? AccountId { get; set; }
     public virtual Account? Account { get; set; }
 }

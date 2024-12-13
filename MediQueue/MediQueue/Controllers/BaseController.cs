@@ -5,7 +5,7 @@ namespace MediQueue.Controllers
 {
     public abstract class BaseController : ControllerBase
     {
-        protected ActionResult HandleError(Exception ex, string customMessage = null)
+        protected ActionResult HandleError(Exception ex, string? customMessage = null)
         {
             var message = ex.InnerException != null
                 ? $"{ex.Message}. Inner exception: {ex.InnerException.Message}"

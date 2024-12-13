@@ -1,9 +1,9 @@
 ﻿using MediQueue.Domain.DTOs.Lekarstvo;
 using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.Entities;
-using MediQueue.Domain.Entities.Enums;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Domain.ResourceParameters;
 
 namespace MediQueue.Services;
 
@@ -18,9 +18,9 @@ public class LekarstvoService : ILekarstvoService
         _categoryLekarstvoRepository = categoryLekarstvoRepository ?? throw new ArgumentNullException(nameof(categoryLekarstvoRepository));
     }
 
-    public async Task<IEnumerable<LekarstvoDto>> GetAllLekarstvosAsync()
+    public async Task<IEnumerable<LekarstvoDto>> GetAllLekarstvosAsync(LekarstvoResourceParametrs lekarstvoResourceParametrs)
     {
-        var lekarstvo = await _repository.FindAllLekarstvoAsync();
+        var lekarstvo = await _repository.FindAllLekarstvoAsync(lekarstvoResourceParametrs);
 
         if (lekarstvo == null) return null;
 
@@ -89,15 +89,11 @@ public class LekarstvoService : ILekarstvoService
     {
         decimal totalQuantityLEkarstvo = lekarstvo.Partiyas?.Sum(x => x.TotalQuantity ?? 0) ?? 0;
 
-        var measurementUnit = lekarstvo.MeasurementUnit.HasValue
-        ? Enum.GetName(typeof(MeasurementUnit), lekarstvo.MeasurementUnit) ?? ""
-        : "";
-
         return new LekarstvoDto(
             lekarstvo.Id,
             lekarstvo.Name,
             lekarstvo.PhotoBase64,
-            measurementUnit,
+            lekarstvo.MeasurementUnit.ToString(),
             lekarstvo.CategoryLekarstvoId,
             lekarstvo.CategoryLekarstvo?.Name ?? "",
             totalQuantityLEkarstvo,
@@ -110,6 +106,7 @@ public class LekarstvoService : ILekarstvoService
                 p.TotalQuantity,
                 p.PriceQuantity,
                 p.PhotoBase64,
+                lekarstvo.MeasurementUnit.ToString(),
                 p.LekarstvoId,
                 p.Lekarstvo?.Name ?? "",
                 p.ScladId,

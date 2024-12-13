@@ -15,7 +15,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Branches
                 .Include(x => x.Sclads.Where(p => p.IsActive))
-                .ThenInclude(sc => sc.Partiyas.Where(p => p.IsActive))
+                    .ThenInclude(sc => sc.Partiyas.Where(p => p.IsActive))
+                    .ThenInclude(l => l.Lekarstvo)
                 .Where(x => x.IsActive)
                 .AsNoTracking()
                 .ToListAsync();
@@ -25,7 +26,8 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
             return await _context.Branches
                 .Include(x => x.Sclads.Where(p => p.IsActive))
-                .ThenInclude(sc => sc.Partiyas.Where(p => p.IsActive))
+                    .ThenInclude(sc => sc.Partiyas.Where(p => p.IsActive))
+                    .ThenInclude(l => l.Lekarstvo)
                 .Where(x => x.Id == Id && x.IsActive)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();

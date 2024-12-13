@@ -4,7 +4,7 @@ namespace MediQueue.Domain.Interfaces.Services;
 
 public interface ICategoryLekarstvoService
 {
-    Task<IEnumerable<CategoryLekarstvoDto>> GetAllCategoryLekarstvosAsync();
+    Task<IEnumerable<CategoryLekarstvoDto>?> GetAllCategoryLekarstvosAsync();
     Task<CategoryLekarstvoDto> GetCategoryLekarstvoByIdAsync(int id);
     Task<CategoryLekarstvoDto> CreateCategoryLekarstvoAsync(CategoryLekarstvoForCreateDto lekarstvoForCreateDto);
     Task<CategoryLekarstvoDto> UpdateCategoryLekarstvoAsync(CategoryLekarstvoForUpdateDto lekarstvoForUpdateDto);

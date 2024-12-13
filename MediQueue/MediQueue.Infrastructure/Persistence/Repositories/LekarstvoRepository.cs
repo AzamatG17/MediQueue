@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
+using MediQueue.Domain.ResourceParameters;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediQueue.Infrastructure.Persistence.Repositories
@@ -11,15 +12,36 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
         }
 
-        public async Task<IEnumerable<Lekarstvo>> FindAllLekarstvoAsync()
+        public async Task<IEnumerable<Lekarstvo>> FindAllLekarstvoAsync(LekarstvoResourceParametrs lekarstvoResourceParametrs)
         {
-            return await _context.Lekarstvos
+            var query = _context.Lekarstvos
                 .Where(x => x.IsActive)
-                .Include(c => c.CategoryLekarstvo)
-                .Include(p => p.Partiyas.Where(p => p.IsActive))
-                .ThenInclude(ps => ps.Sclad)
                 .AsNoTracking()
-                .ToListAsync();
+                .AsQueryable();
+
+            if (lekarstvoResourceParametrs.IsExist == true)
+            {
+                query = query
+                    .Include(c => c.CategoryLekarstvo)
+                    .Include(l => l.Partiyas.Where(p => p.IsActive && p.TotalQuantity > 0))
+                    .ThenInclude(p => p.Sclad);
+            }
+            else
+            {
+                query = query
+                    .Include(c => c.CategoryLekarstvo)
+                    .Include(l => l.Partiyas.Where(p => p.IsActive))
+                    .ThenInclude(p => p.Sclad);
+            }
+
+            query = lekarstvoResourceParametrs.OrderBy switch
+            {
+                "idDesc" => query.OrderByDescending(q => q.Id),
+                "idAsc" => query.OrderBy(q => q.Id),
+                _ => query
+            };
+
+            return await query.ToListAsync();
         }
 
         public async Task<Lekarstvo> FindByIdLekarstvoAsync(int id)

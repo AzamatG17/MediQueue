@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediQueue.Domain.DTOs.Category;
+﻿using MediQueue.Domain.DTOs.Category;
 using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
@@ -12,15 +11,11 @@ public class CategoriesService : ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IGroupRepository _groupRepository;
-    private readonly IServiceRepository _serviceRepository;
-    private readonly IMapper _mapper;
 
-    public CategoriesService(ICategoryRepository categoryRepository, IMapper mapper, IGroupRepository groupRepository, IServiceRepository serviceRepository)
+    public CategoriesService(ICategoryRepository categoryRepository, IGroupRepository groupRepository)
     {
         _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _groupRepository = groupRepository ?? throw new ArgumentNullException(nameof(groupRepository));
-        _serviceRepository = serviceRepository ?? throw new ArgumentNullException(nameof(serviceRepository));
     }
 
     public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()

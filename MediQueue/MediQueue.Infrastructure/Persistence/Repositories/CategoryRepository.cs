@@ -22,11 +22,12 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<Category>> GetCategoriesWithGroupsAsync()
         {
             return await _context.Categories
-                                 .Include(c => c.Groups)
-                                 .Include(c => c.Services)
-                                 .Where(x => x.IsActive)
-                                 .AsNoTracking()
-                                 .ToListAsync();
+                    .Include(c => c.Groups)
+                    .Include(c => c.Services)
+                    .Where(x => x.IsActive)
+                    .AsNoTracking()
+                    .ToListAsync();
+
         }
 
         public async Task<Category> FindByIdWithGroupAsync(int id)

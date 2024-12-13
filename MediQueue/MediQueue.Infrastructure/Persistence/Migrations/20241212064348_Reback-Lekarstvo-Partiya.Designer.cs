@@ -4,6 +4,7 @@ using MediQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediQueue.Infrastructure.persistence.Migrations
 {
     [DbContext(typeof(MediQueueDbContext))]
-    partial class MediQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241212064348_Reback-Lekarstvo-Partiya")]
+    partial class RebackLekarstvoPartiya
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,26 +228,26 @@ namespace MediQueue.Infrastructure.persistence.Migrations
                     b.Property<int?>("AccountId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Action")
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NewValues")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("OldValues")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("Operation")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Changes")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("RecordId")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("TableName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

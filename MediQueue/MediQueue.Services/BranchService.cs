@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediQueue.Domain.DTOs.Branch;
+﻿using MediQueue.Domain.DTOs.Branch;
 using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.DTOs.Sclad;
 using MediQueue.Domain.Entities;
@@ -11,11 +10,10 @@ namespace MediQueue.Services;
 public class BranchService : IBranchService
 {
     private readonly IBranchRepository _repository;
-    private readonly IMapper _mapper;
-    public BranchService(IBranchRepository repository, IMapper mapper)
+
+    public BranchService(IBranchRepository repository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
     public async Task<IEnumerable<BranchDto>> GetAllBranchsAsync()
@@ -39,7 +37,7 @@ public class BranchService : IBranchService
     {
         ArgumentNullException.ThrowIfNull(branchForCreateDto);
 
-        var branch = await MapToBranch(branchForCreateDto);
+        var branch = MapToBranch(branchForCreateDto);
 
         await _repository.CreateAsync(branch);
 
@@ -50,7 +48,7 @@ public class BranchService : IBranchService
     {
         ArgumentNullException.ThrowIfNull(branchForUpdatreDto);
 
-        var branch = await MapToBranchForUpdate(branchForUpdatreDto);
+        var branch = MapToBranchForUpdate(branchForUpdatreDto);
 
         await _repository.UpdateAsync(branch);
 
@@ -62,7 +60,7 @@ public class BranchService : IBranchService
         await _repository.DeleteAsync(id);
     }
 
-    private async Task<Branch> MapToBranch(BranchForCreateDto branchForCreateDto)
+    private static Branch MapToBranch(BranchForCreateDto branchForCreateDto)
     {
         return new Branch
         {
@@ -71,7 +69,7 @@ public class BranchService : IBranchService
         };
     }
 
-    private async Task<Branch> MapToBranchForUpdate(BranchForUpdatreDto branchForUpdatreDto)
+    private static Branch MapToBranchForUpdate(BranchForUpdatreDto branchForUpdatreDto)
     {
         return new Branch
         {
@@ -115,6 +113,7 @@ public class BranchService : IBranchService
             p.TotalQuantity,
             p.PriceQuantity,
             p.PhotoBase64,
+            p.Lekarstvo?.MeasurementUnit.ToString(),
             p.LekarstvoId,
             p.Lekarstvo?.Name ?? "",
             p.ScladId,
