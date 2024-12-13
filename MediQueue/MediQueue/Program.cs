@@ -1,4 +1,5 @@
 using MediQueue.Extensions;
+using MediQueue.Middlewares;
 using Serilog;
 
 namespace MediQueue;
@@ -23,6 +24,7 @@ public class Program
         //    .MinimumLevel.Verbose()
         //    .Enrich.FromLogContext()
         //    .WriteTo.Console(new CustomJsonFormatter())
+        //    .WriteTo.File("logs/HTTPLogging.txt", restrictedToMinimumLevel: LogEventLevel.Information, rollingInterval: RollingInterval.Day)
         //    .WriteTo.File(new CustomJsonFormatter(), "logs/logs.txt", rollingInterval: RollingInterval.Day)
         //    .WriteTo.File(new CustomJsonFormatter(), "logs/error_.txt", Serilog.Events.LogEventLevel.Error, rollingInterval: RollingInterval.Day)
         //    .CreateLogger();
@@ -36,6 +38,8 @@ public class Program
         builder.Services
             .AddConfigurationOptions(configuration)
             .ConfigureServices(configuration);
+
+        builder.Services.AddHttpContextAccessor();
 
         var app = builder.Build();
 
@@ -51,11 +55,15 @@ public class Program
             app.UseSwaggerUI();
         }
 
+        app.UseHttpLogging();
+
         app.UseErrorHandler();
         //app.UseHttpsRedirection();
 
         app.UseCors("AllowAll");
 
+        app.UseMiddleware<ErrorHandlerMiddleware>();
+        //app.UseMiddleware<RequestResponseLoggingMiddleware>();
         app.UseMiddleware<TokenValidationMiddleware>();
 
         app.UseAuthorization();
