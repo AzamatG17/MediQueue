@@ -86,6 +86,7 @@ public static class DependencyInjection
         services.AddScoped<ITariffService, TariffService>();
         services.AddScoped<IWardPlaceService, WardPlaceService>();
         services.AddScoped<IWardService, WardService>();
+        services.AddScoped<IAuditLogService, AuditLogService>();
 
         services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
         services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
