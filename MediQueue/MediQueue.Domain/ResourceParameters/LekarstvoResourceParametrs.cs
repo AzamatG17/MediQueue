@@ -1,8 +1,7 @@
-﻿namespace MediQueue.Domain.ResourceParameters
+﻿namespace MediQueue.Domain.ResourceParameters;
+
+public class LekarstvoResourceParametrs : ResourceParametersBase
 {
-    public class LekarstvoResourceParametrs : ResourceParametersBase
-    {
-        public bool? IsExist { get; set; }
-        public override string OrderBy { get; set; } = "idDesc";
-    }
+    public bool? IsExist { get; set; }
+    public override string OrderBy { get; set; } = "idDesc";
 }

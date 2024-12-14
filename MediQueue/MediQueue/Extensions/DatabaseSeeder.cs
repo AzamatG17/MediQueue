@@ -48,7 +48,8 @@ namespace MediQueue.Extensions
                 new Controller { ControllerName = "StationaryStay", IsActive = true },
                 new Controller { ControllerName = "Tariff", IsActive = true },
                 new Controller { ControllerName = "WardPlace", IsActive = true },
-                new Controller { ControllerName = "Ward", IsActive = true }
+                new Controller { ControllerName = "Ward", IsActive = true },
+                new Controller { ControllerName = "AuditLog", IsActive = true }
             };
 
             mediQueueDbContext.Controllers.AddRange(controllers);
