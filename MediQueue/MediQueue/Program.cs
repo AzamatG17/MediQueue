@@ -1,5 +1,4 @@
 using MediQueue.Extensions;
-using MediQueue.Middlewares;
 using Serilog;
 
 namespace MediQueue;
@@ -55,15 +54,12 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.UseHttpLogging();
-
         app.UseErrorHandler();
         //app.UseHttpsRedirection();
 
         app.UseCors("AllowAll");
 
-        app.UseMiddleware<ErrorHandlerMiddleware>();
-        //app.UseMiddleware<RequestResponseLoggingMiddleware>();
+        //app.UseMiddleware<ErrorHandlerMiddleware>();
         app.UseMiddleware<TokenValidationMiddleware>();
 
         app.UseAuthorization();

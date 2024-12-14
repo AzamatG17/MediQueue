@@ -105,6 +105,7 @@ namespace MediQueue.Infrastructure.JwtToken
                 "Tariff" => 29,
                 "WardPlace" => 30,
                 "Ward" => 31,
+                "AuditLog" => 32,
                 _ => 0
             };
         }
