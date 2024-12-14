@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Domain.ResourceParameters;
 using MediQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,21 +15,45 @@ public class AuditLogService : IAuditLogService
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public async Task<IEnumerable<AuditLog>> GetAllLogAsync()
+    public async Task<IEnumerable<AuditLog>> GetAllAuditLogAsync(AuditLogResourceParameters auditLogResourceParameters)
     {
-        return await _context.AuditLogs
-            .OrderByDescending(x => x.Timestamp)
-            .ToListAsync();
-    }
+        var query = _context.AuditLogs
+            .AsNoTracking()
+            .AsQueryable();
 
-    public Task<IEnumerable<AuditLog>> GetByIdLogsAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
+        if (auditLogResourceParameters.Id.HasValue)
+        {
+            query = query.Where(q => q.Id == auditLogResourceParameters.Id.Value);
+        }
+        if (auditLogResourceParameters.AccountId.HasValue)
+        {
+            query = query.Where(q => q.AccountId == auditLogResourceParameters.AccountId.Value);
+        }
+        if (auditLogResourceParameters.StartDateTime.HasValue)
+        {
+            query = query.Where(q => q.Timestamp >= auditLogResourceParameters.StartDateTime.Value);
+        }
+        if (auditLogResourceParameters.EndDateTime.HasValue)
+        {
+            query = query.Where(q => q.Timestamp >= auditLogResourceParameters.EndDateTime.Value);
+        }
+        if (!string.IsNullOrEmpty(auditLogResourceParameters.TableName))
+        {
+            query = query.Where(q => q.TableName.Contains(auditLogResourceParameters.TableName));
+        }
 
-    public async Task LogAsync(AuditLog log)
-    {
-        _context.AuditLogs.Add(log);
-        await _context.SaveChangesAsync();
+        if (auditLogResourceParameters.Action.HasValue)
+        {
+            query = query.Where(q => q.Action == auditLogResourceParameters.Action.ToString());
+        }
+
+        query = auditLogResourceParameters.OrderBy switch
+        {
+            "idDesc" => query.OrderByDescending(q => q.Id),
+            "idAsc" => query.OrderBy(q => q.Id),
+            _ => query
+        };
+
+        return await query.ToListAsync();
     }
 }
