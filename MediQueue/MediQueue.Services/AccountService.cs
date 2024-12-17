@@ -3,6 +3,7 @@ using MediQueue.Domain.DTOs.Account;
 using MediQueue.Domain.DTOs.Role;
 using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.Persistence;
@@ -45,6 +46,12 @@ public class AccountService : IAccountService
     public async Task<AccountDto> CreateAccountAsync(AccountForCreateDto accountForCreateDto)
     {
         ArgumentNullException.ThrowIfNull(accountForCreateDto);
+
+        var account = await _accountRepository.FindByLoginAsync(accountForCreateDto.Login);
+        if (account is not null)
+        {
+            throw new UserLoginAlreadyTakenException($"Login: {accountForCreateDto.Login} is already taken.");
+        }
 
         var role = await _roleRepository.FindByIdAsync(accountForCreateDto.RoleId)
             ?? throw new ArgumentException("Role not found.");
