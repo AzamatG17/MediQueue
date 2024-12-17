@@ -12,10 +12,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.HasKey(x => x.Id);
 
             builder.Property(e => e.StartTime)
-                   .HasColumnType("datetime");
+                .HasColumnType("datetime");
 
             builder.Property(e => e.NumberOfDays)
-                   .HasDefaultValue(null);
+                .HasDefaultValue(null);
 
             builder.Property(x => x.IsActive)
                 .HasDefaultValue(true);
@@ -30,24 +30,29 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
                 .HasColumnType("decimal(18,2)");
 
             builder.HasOne(e => e.Tariff)
-                   .WithMany()
-                   .HasForeignKey(e => e.TariffId)
-                   .OnDelete(DeleteBehavior.SetNull);
+                .WithMany()
+                .HasForeignKey(e => e.TariffId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(e => e.WardPlace)
-                   .WithOne(w => w.StationaryStay)
-                   .HasForeignKey<StationaryStayUsage>(e => e.WardPlaceId)
-                   .OnDelete(DeleteBehavior.SetNull);
+                .WithOne(w => w.StationaryStay)
+                .HasForeignKey<StationaryStayUsage>(e => e.WardPlaceId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(e => e.Nutrition)
-                   .WithMany()
-                   .HasForeignKey(e => e.NutritionId)
-                   .OnDelete(DeleteBehavior.SetNull);
+                .WithMany()
+                .HasForeignKey(e => e.NutritionId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(e => e.QuestionnaireHistory)
-                   .WithMany(qh => qh.StationaryStays)
-                   .HasForeignKey(e => e.QuestionnaireHistoryId)
-                   .OnDelete(DeleteBehavior.SetNull);
+                .WithMany(qh => qh.StationaryStays)
+                .HasForeignKey(e => e.QuestionnaireHistoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasMany(e => e.ProcedureBookings)
+                .WithOne(st => st.StationaryStayUsage)
+                .HasForeignKey(st => st.StationaryStayUsageId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

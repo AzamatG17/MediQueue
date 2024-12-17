@@ -61,6 +61,13 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<Account> FindByLoginAsync(string login)
+        {
+            return await _context.Set<Account>()
+                .Where(x => x.Login == login && x.IsActive)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<List<Account>> FindByIdsAccount(List<int> ids)
         {
             return await _context.Accounts

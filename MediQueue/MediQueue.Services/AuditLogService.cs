@@ -41,7 +41,6 @@ public class AuditLogService : IAuditLogService
         {
             query = query.Where(q => q.TableName.Contains(auditLogResourceParameters.TableName));
         }
-
         if (auditLogResourceParameters.Action.HasValue)
         {
             query = query.Where(q => q.Action == auditLogResourceParameters.Action.ToString());
