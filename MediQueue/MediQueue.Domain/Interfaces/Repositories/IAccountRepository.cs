@@ -8,6 +8,7 @@ namespace MediQueue.Domain.Interfaces.Repositories
         Task<Account> FindByIdWithRoleAsync(int Id);
         Task<Account> FindByIdAccountAsync(int Id);
         Task<Account> FindByIdWithRoleAsync(int? Id);
+        Task<Account> FindByLoginAsync(string login);
         Task<List<Account>> FindByIdsAccount(List<int> ids);
         Task<bool> IsExistByIdAsync(int? id);
     }
