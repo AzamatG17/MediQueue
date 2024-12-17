@@ -44,6 +44,9 @@ namespace MediQueue.Infrastructure.Persistence
         public virtual DbSet<Ward> Wards { get; set; }
         public virtual DbSet<WardPlace> WardsPlace { get; set; }
         public virtual DbSet<AuditLog> AuditLogs { get; set; }
+        public virtual DbSet<Procedure> Procedures { get; set; }
+        public virtual DbSet<ProcedureBooking> ProcedureBookings { get; set; }
+        public virtual DbSet<ProcedureCategory> ProcedureCategories { get; set; }
         #endregion
 
         public MediQueueDbContext(DbContextOptions<MediQueueDbContext> options, IHttpContextAccessor httpContextAccessor)
