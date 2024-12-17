@@ -12,5 +12,6 @@ public class StationaryStayUsage : BaseUsage
     public int? NutritionId { get; set; }
     public virtual Nutrition? Nutrition { get; set; }
 
+    public virtual ICollection<ProcedureBooking>? ProcedureBookings { get; set; }
     public virtual ICollection<PaymentService>? PaymentServices { get; set; }
 }
