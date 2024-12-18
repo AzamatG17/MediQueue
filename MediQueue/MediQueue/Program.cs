@@ -1,4 +1,5 @@
 using MediQueue.Extensions;
+using MediQueue.Helpers;
 using Serilog;
 
 namespace MediQueue;
@@ -59,7 +60,6 @@ public class Program
 
         app.UseCors("AllowAll");
 
-        //app.UseMiddleware<ErrorHandlerMiddleware>();
         app.UseMiddleware<TokenValidationMiddleware>();
 
         app.UseAuthorization();

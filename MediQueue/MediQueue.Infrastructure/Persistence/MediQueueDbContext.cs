@@ -106,7 +106,7 @@ namespace MediQueue.Infrastructure.Persistence
             {
                 TableName = entry.Entity.GetType().Name,
                 Action = entry.State.ToString(),
-                UserId = (int)GetCurrentAccountId()
+                UserId = GetCurrentAccountId() ?? null
             };
 
             foreach (var property in entry.Properties)

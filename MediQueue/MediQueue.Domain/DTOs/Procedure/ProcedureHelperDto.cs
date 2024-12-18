@@ -4,8 +4,8 @@ public record ProcedureHelperDto(
     int Id,
     string? Name,
     string? Description,
-    TimeSpan StartTime,
-    TimeSpan EndTime,
+    TimeOnly StartTime,
+    TimeOnly EndTime,
     int MaxPatients,
     int? ProcedureCategoryId,
     string? ProcedureCategoryName

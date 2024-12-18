@@ -17,10 +17,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(a => a.Description);
 
             builder.Property(e => e.StartTime)
-                .HasColumnType("datetime");
+                .HasColumnType("TIME");
 
             builder.Property(e => e.EndTime)
-                .HasColumnType("datetime");
+                .HasColumnType("TIME");
 
             builder.Property(e => e.MaxPatients);
 

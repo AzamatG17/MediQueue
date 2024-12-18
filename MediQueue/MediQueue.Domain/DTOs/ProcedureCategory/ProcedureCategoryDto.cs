@@ -5,5 +5,5 @@ namespace MediQueue.Domain.DTOs.ProcedureCategory;
 public record ProcedureCategoryDto(
     int Id,
     string? Name,
-    List<ProcedureDto>? ProcedureDtos
+    List<ProcedureHelperDto>? ProcedureDtos
     );

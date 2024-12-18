@@ -20,7 +20,6 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
     private readonly IQuestionnaireRepository _questionnaireRepository;
     private readonly IServiceRepository _serviceRepository;
-    private readonly IServiceUsageRepository _serviceUsageRepository;
     private readonly IDiscountRepository _discountRepository;
     private readonly IBenefitRepository _benefitRepository;
     private readonly IAccountRepository _accountRepository;
@@ -29,7 +28,6 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty,
         IServiceRepository serviceRepository,
         IQuestionnaireRepository questionnaireRepository,
-        IServiceUsageRepository serviceUsageRepository,
         IDiscountRepository discountRepository,
         IBenefitRepository bankRepository,
         IAccountRepository accountRepository)
@@ -37,7 +35,6 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
         _serviceRepository = serviceRepository ?? throw new ArgumentNullException(nameof(serviceRepository));
         _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
-        _serviceUsageRepository = serviceUsageRepository ?? throw new ArgumentNullException(nameof(serviceUsageRepository));
         _discountRepository = discountRepository ?? throw new ArgumentNullException(nameof(discountRepository));
         _benefitRepository = bankRepository ?? throw new ArgumentNullException(nameof(bankRepository));
         _accountRepository = accountRepository ?? throw new ArgumentNullException(nameof(accountRepository));

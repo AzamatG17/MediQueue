@@ -49,8 +49,7 @@ public class ScladService : IScladService
     {
         ArgumentNullException.ThrowIfNull(scladForCreateDto);
 
-        var branchExists = await _branchRepository.ExistsAsync(scladForCreateDto.Branchid);
-        if (!branchExists)
+        if (!await _branchRepository.IsExistByIdAsync(scladForCreateDto.Branchid))
         {
             throw new InvalidOperationException($"Branch with ID {scladForCreateDto.Branchid} does not exist.");
         }
@@ -66,16 +65,13 @@ public class ScladService : IScladService
     {
         ArgumentNullException.ThrowIfNull(scladForUpdateDto);
 
-        var existingSclad = await _cladRepository.FindByIdScladAsync(scladForUpdateDto.Id);
-        if (existingSclad == null)
-        {
-            throw new InvalidOperationException($"Sclad with ID {scladForUpdateDto.Id} does not exist.");
-        }
+        var existingSclad = await _cladRepository.FindByIdScladAsync(scladForUpdateDto.Id)
+            ?? throw new InvalidOperationException($"Sclad with ID {scladForUpdateDto.Id} does not exist.");
 
         existingSclad.Name = scladForUpdateDto.Name;
         existingSclad.Branchid = scladForUpdateDto.Branchid;
 
-        var sclad = await MapToScladForUpdate(scladForUpdateDto);
+        var sclad = MapToScladForUpdate(scladForUpdateDto);
 
         await _context.SaveChangesAsync();
 
@@ -87,7 +83,7 @@ public class ScladService : IScladService
         await _cladRepository.DeleteAsync(id);
     }
 
-    private async Task<Sclad> MapToScladForUpdate(ScladForUpdateDto scladForUpdateDto)
+    private static Sclad MapToScladForUpdate(ScladForUpdateDto scladForUpdateDto)
     {
         return new Sclad
         {
