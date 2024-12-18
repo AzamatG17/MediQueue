@@ -87,6 +87,9 @@ public static class DependencyInjection
         services.AddScoped<IWardPlaceService, WardPlaceService>();
         services.AddScoped<IWardService, WardService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
+        services.AddScoped<IProcedureBookingService, ProcedureBookingService>();
+        services.AddScoped<IProcedureCategoryService, ProcedureCategoryService>();
+        services.AddScoped<IProcedureService, ProcedureService>();
 
         services.AddScoped<IAuthorizationHandler, JwtPermissionHandler>();
         services.AddScoped<IAuthorizationRequirement, JwtPermissionRequirement>();
@@ -123,6 +126,9 @@ public static class DependencyInjection
         services.AddScoped<ITariffRepository, TariffRepository>();
         services.AddScoped<IWardPlaceRepository, WardPlaceRepository>();
         services.AddScoped<IWardRepository, WardRepository>();
+        services.AddScoped<IProcedureBookingRepository, ProcedureBookingRepository>();
+        services.AddScoped<IProcedureCategoryRepository, ProcedureCategoryRepository>();
+        services.AddScoped<IProcedureRepository, ProcedureRepository>();
     }
 
     private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
