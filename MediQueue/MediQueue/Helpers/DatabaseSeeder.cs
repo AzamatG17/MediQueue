@@ -1,7 +1,7 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Infrastructure.Persistence;
 
-namespace MediQueue.Extensions
+namespace MediQueue.Helpers
 {
     public static class DatabaseSeeder
     {
