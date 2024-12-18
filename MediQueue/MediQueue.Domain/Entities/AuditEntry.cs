@@ -17,7 +17,7 @@ namespace MediQueue.Domain.Entities
 
         public string TableName { get; set; }
         public string Action { get; set; }
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
 
         public Dictionary<string, object> KeyValues { get; }
         public Dictionary<string, object> OldValues { get; }
