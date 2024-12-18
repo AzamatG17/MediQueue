@@ -6,10 +6,10 @@ public record ProcedureDto(
     int Id,
     string? Name,
     string? Description,
-    TimeSpan StartTime,
-    TimeSpan EndTime,
+    TimeOnly StartTime,
+    TimeOnly EndTime,
     int MaxPatients,
     int? ProcedureCategoryId,
     string? ProcedureCategoryName,
-    List<ProcedureBookingDto>? ProcedureBookingDtos
+    List<ProcedureBookingHelperDto> ProcedureBookingDtos
     );
