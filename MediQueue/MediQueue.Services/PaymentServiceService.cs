@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediQueue.Domain.DTOs.PaymentService;
+﻿using MediQueue.Domain.DTOs.PaymentService;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Enums;
 using MediQueue.Domain.Interfaces.Repositories;
@@ -12,16 +11,13 @@ public class PaymentServiceService : IPaymentServiceService
     private readonly IPaymentServiceRepository _repository;
     private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
     private readonly IQuestionnaireRepository _questionnaireRepository;
-    private readonly IMapper _mapper;
 
     public PaymentServiceService(
         IPaymentServiceRepository repository,
-        IMapper mapper,
         IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty,
         IQuestionnaireRepository questionnaireRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
         _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
     }

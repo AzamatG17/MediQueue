@@ -10,7 +10,6 @@ namespace MediQueue.Services;
 public class ConclusionService : IConclusionService
 {
     private readonly IConclusionRepository _repository;
-    private readonly ILekarstvoRepository _lekarstvoRepository;
     private readonly IQuestionnaireHistoryRepositoty _questionnaireHistoryRepositoty;
     private readonly IQuestionnaireRepository _questionnaireRepository;
     private readonly IDoctorCabinetLekarstvoService _doctorCabinetLekarstvoService;
@@ -20,7 +19,6 @@ public class ConclusionService : IConclusionService
 
     public ConclusionService(
         IConclusionRepository repository,
-        ILekarstvoRepository lekarstvoRepository,
         IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty,
         IQuestionnaireRepository questionnaireRepository,
         IDoctorCabinetLekarstvoService doctorCabinetLekarstvoService,
@@ -29,7 +27,6 @@ public class ConclusionService : IConclusionService
         IAccountRepository accountRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-        _lekarstvoRepository = lekarstvoRepository ?? throw new ArgumentNullException(nameof(lekarstvoRepository));
         _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
         _questionnaireRepository = questionnaireRepository ?? throw new ArgumentNullException(nameof(questionnaireRepository));
         _doctorCabinetLekarstvoRepository = doctorCabinetLekarstvoRepository ?? throw new ArgumentNullException(nameof(doctorCabinetLekarstvoRepository));
