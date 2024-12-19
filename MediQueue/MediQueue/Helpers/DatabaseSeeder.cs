@@ -49,7 +49,10 @@ namespace MediQueue.Helpers
                 new Controller { ControllerName = "Tariff", IsActive = true },
                 new Controller { ControllerName = "WardPlace", IsActive = true },
                 new Controller { ControllerName = "Ward", IsActive = true },
-                new Controller { ControllerName = "AuditLog", IsActive = true }
+                new Controller { ControllerName = "AuditLog", IsActive = true },
+                new Controller { ControllerName = "ProcedureBooking", IsActive = true },
+                new Controller { ControllerName = "ProcedureCategory", IsActive = true},
+                new Controller { ControllerName = "Procedure", IsActive = true },
             };
 
             mediQueueDbContext.Controllers.AddRange(controllers);
