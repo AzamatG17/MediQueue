@@ -19,7 +19,7 @@ public class ProcedureBookingController : BaseController
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
-    [PermissionAuthorize(7, 1)]
+    [PermissionAuthorize(33, 1)]
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
@@ -35,7 +35,7 @@ public class ProcedureBookingController : BaseController
         }
     }
 
-    [PermissionAuthorize(7, 2)]
+    [PermissionAuthorize(33, 2)]
     [HttpGet("{id}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
@@ -58,7 +58,7 @@ public class ProcedureBookingController : BaseController
         }
     }
 
-    [PermissionAuthorize(7, 3)]
+    [PermissionAuthorize(33, 3)]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] ProcedureBookingForCreateDto procedureBookingForCreateDto)
     {
@@ -78,7 +78,7 @@ public class ProcedureBookingController : BaseController
         }
     }
 
-    [PermissionAuthorize(7, 4)]
+    [PermissionAuthorize(33, 4)]
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] ProcedureBookingForUpdateDto procedureBookingForUpdateDto)
     {
@@ -108,7 +108,7 @@ public class ProcedureBookingController : BaseController
         }
     }
 
-    [PermissionAuthorize(7, 5)]
+    [PermissionAuthorize(33, 5)]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
