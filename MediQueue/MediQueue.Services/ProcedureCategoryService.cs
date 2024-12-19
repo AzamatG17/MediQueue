@@ -66,19 +66,21 @@ public class ProcedureCategoryService : IProcedureCategoryService
 
     private static ProcedureCategoryDto MapToProcedureCategoryDto(ProcedureCategory pc)
     {
+        var procedures = pc.Procedures?.Select(p => new Domain.DTOs.Procedure.ProcedureHelperDto(
+        p.Id,
+        p.Name,
+        p.Description,
+        p.StartTime,
+        p.EndTime,
+        p.MaxPatients,
+        p.ProcedureCategoryId,
+        null
+        )).ToList() ?? [];
+
         return new ProcedureCategoryDto(
             pc.Id,
             pc.Name,
-            pc.Procedures.Select(p => new Domain.DTOs.Procedure.ProcedureHelperDto(
-                p.Id,
-                p.Name,
-                p.Description,  
-                p.StartTime,
-                p.EndTime,
-                p.MaxPatients,
-                p.ProcedureCategoryId,
-                null
-                )).ToList() ?? []
-            );
+            procedures
+        );
     }
 }

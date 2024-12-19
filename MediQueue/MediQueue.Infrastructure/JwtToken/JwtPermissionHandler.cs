@@ -106,6 +106,9 @@ namespace MediQueue.Infrastructure.JwtToken
                 "WardPlace" => 30,
                 "Ward" => 31,
                 "AuditLog" => 32,
+                "ProcedureBooking" => 33,
+                "ProcedureCategory" => 34,
+                "Procedure" => 35,
                 _ => 0
             };
         }

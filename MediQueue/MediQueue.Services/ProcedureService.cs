@@ -3,6 +3,7 @@ using MediQueue.Domain.DTOs.ProcedureBooking;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
+using MediQueue.Domain.ResourceParameters;
 
 namespace MediQueue.Services;
 
@@ -17,9 +18,9 @@ public class ProcedureService : IProcedureService
         _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
     }
 
-    public async Task<IEnumerable<ProcedureDto>> GetAllProceduresAsync()
+    public async Task<IEnumerable<ProcedureDto>> GetAllProceduresAsync(ProcedureResourceParameters ProcedureResourceParameters)
     {
-        var procedure = await _repository.FindAllProcedureAsync();
+        var procedure = await _repository.FindAllProcedureAsync(ProcedureResourceParameters);
 
         if (procedure is null) return null;
 
@@ -90,20 +91,21 @@ public class ProcedureService : IProcedureService
     private static ProcedureDto MapToProcedureDto(Procedure p)
     {
         return new ProcedureDto(
-            p.Id,
-            p.Name,
-            p.Description,
-            p.StartTime,
-            p.EndTime,
-            p.MaxPatients,
-            p.ProcedureCategoryId,
-            p.ProcedureCategory?.Name ?? string.Empty,
-            p.ProcedureBookings.Select(pb => new ProcedureBookingHelperDto(
+        p.Id,
+        p.Name,
+        p.Description,
+        p.StartTime,
+        p.EndTime,
+        p.MaxPatients,
+        p.ProcedureCategoryId,
+        p.ProcedureCategory?.Name ?? string.Empty,
+        (p.ProcedureBookings ?? [])
+            .Select(pb => new ProcedureBookingHelperDto(
                 pb.Id,
                 pb.BookingDate,
                 pb.ProcedureId,
                 null
-                )).ToList() ?? new List<ProcedureBookingHelperDto>()
-            );
+            )).ToList()
+    );
     }
 }

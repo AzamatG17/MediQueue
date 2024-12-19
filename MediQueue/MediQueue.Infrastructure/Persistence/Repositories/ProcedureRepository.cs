@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.Entities;
 using MediQueue.Domain.Interfaces.Repositories;
+using MediQueue.Domain.ResourceParameters;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediQueue.Infrastructure.Persistence.Repositories
@@ -11,12 +12,32 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         {
         }
 
-        public async Task<IEnumerable<Procedure>> FindAllProcedureAsync()
+        public async Task<IEnumerable<Procedure>> FindAllProcedureAsync(ProcedureResourceParameters procedureResourceParameters)
         {
-            return await _context.Procedures
+            var query = _context.Procedures
                 .Include(pc => pc.ProcedureCategory)
                 .Include(pb => pb.ProcedureBookings)
                 .Where(x => x.IsActive)
+                .AsQueryable();
+
+            if (procedureResourceParameters.StartDate.HasValue)
+            {
+                query = query.Where(p => p.ProcedureBookings.Any(pb => pb.BookingDate.Date >= procedureResourceParameters.StartDate.Value.Date));
+            }
+
+            if (procedureResourceParameters.EndDate.HasValue)
+            {
+                query = query.Where(p => p.ProcedureBookings.Any(pb => pb.BookingDate.Date <= procedureResourceParameters.EndDate.Value.Date));
+            }
+
+            query = procedureResourceParameters.OrderBy switch
+            {
+                "idDesc" => query.OrderByDescending(q => q.Id),
+                "idAsc" => query.OrderBy(q => q.Id),
+                _ => query
+            };
+
+            return await query
                 .AsNoTracking()
                 .ToListAsync();
         }
