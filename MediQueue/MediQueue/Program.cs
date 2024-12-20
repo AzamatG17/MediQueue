@@ -23,8 +23,7 @@ public class Program
         //Log.Logger = new LoggerConfiguration()
         //    .MinimumLevel.Verbose()
         //    .Enrich.FromLogContext()
-        //    .WriteTo.Console(new CustomJsonFormatter())
-        //    .WriteTo.File("logs/HTTPLogging.txt", restrictedToMinimumLevel: LogEventLevel.Information, rollingInterval: RollingInterval.Day)
+        //    .WriteTo.Console(new CustomJsonFormatter()).WriteTo.File("logs/HTTPLogging.txt", restrictedToMinimumLevel: LogEventLevel.Information, rollingInterval: RollingInterval.Day)
         //    .WriteTo.File(new CustomJsonFormatter(), "logs/logs.txt", rollingInterval: RollingInterval.Day)
         //    .WriteTo.File(new CustomJsonFormatter(), "logs/error_.txt", Serilog.Events.LogEventLevel.Error, rollingInterval: RollingInterval.Day)
         //    .CreateLogger();
