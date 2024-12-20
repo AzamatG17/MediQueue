@@ -5,6 +5,8 @@ public record ProcedureForCreateDto(
     string? Description,
     TimeOnly StartTime,
     TimeOnly EndTime,
+    int IntervalDuration,
+    int BreakDuration,
     int MaxPatients,
     int ProcedureCategoryId
     );
