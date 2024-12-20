@@ -22,6 +22,10 @@ namespace MediQueue.Infrastructure.Persistence.Configurations
             builder.Property(e => e.EndTime)
                 .HasColumnType("TIME");
 
+            builder.Property(e => e.IntervalDuration);
+
+            builder.Property(e => e.BreakDuration);
+
             builder.Property(e => e.MaxPatients);
 
             builder.HasOne(e => e.ProcedureCategory)

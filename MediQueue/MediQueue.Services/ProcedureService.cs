@@ -18,13 +18,20 @@ public class ProcedureService : IProcedureService
         _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
     }
 
-    public async Task<IEnumerable<ProcedureDto>> GetAllProceduresAsync(ProcedureResourceParameters ProcedureResourceParameters)
+    public async Task<IEnumerable<ProcedureDto>> GetAllProceduresAsync(ProcedureResourceParameters parameters)
     {
-        var procedure = await _repository.FindAllProcedureAsync(ProcedureResourceParameters);
+        if (!parameters.StartDate.HasValue || !parameters.EndDate.HasValue)
+        {
+            throw new ArgumentException("StartDate and EndDate must be specified.");
+        }
 
-        if (procedure is null) return null;
+        var procedures = await _repository.FindAllProcedureAsync(parameters);
 
-        return procedure.Select(MapToProcedureDto);
+        return procedures.Select(procedure =>
+        {
+            var timeSlots = GenerateTimeSlots(procedure, parameters.StartDate.Value, parameters.EndDate.Value);
+            return MapToProcedureDto(procedure, timeSlots);
+        });
     }
 
     public async Task<ProcedureDto> GetProcedureByIdAsync(int id)
@@ -32,7 +39,8 @@ public class ProcedureService : IProcedureService
         var procedure = await _repository.FindByIdProcedureAsync(id)
             ?? throw new KeyNotFoundException($"Procedure with id: {id} does not found.");
 
-        return MapToProcedureDto(procedure);
+        var timeSlots = GenerateTimeSlots(procedure, DateTime.Today, DateTime.Today);
+        return MapToProcedureDto(procedure, timeSlots);
     }
 
     public async Task<ProcedureDto> CreateProcedureAsync(ProcedureForCreateDto dto)
@@ -50,13 +58,15 @@ public class ProcedureService : IProcedureService
             Description = dto.Description,
             StartTime = dto.StartTime,
             EndTime = dto.EndTime,
+            IntervalDuration = dto.IntervalDuration,
+            BreakDuration = dto.BreakDuration,
             MaxPatients = dto.MaxPatients,
             ProcedureCategoryId = dto.ProcedureCategoryId,
         };
 
         await _repository.CreateAsync(procedure);
 
-        return MapToProcedureDto(procedure);
+        return MapToProcedureDto(procedure, new List<TimeSlotDto>());
     }
 
     public async Task<ProcedureDto> UpdateProcedureAsync(ProcedureForUpdateDto dto)
@@ -75,12 +85,14 @@ public class ProcedureService : IProcedureService
         procedure.Description = dto.Description;
         procedure.StartTime = dto.StartTime;
         procedure.EndTime = dto.EndTime;
+        procedure.IntervalDuration = dto.IntervalDuration;
+        procedure.BreakDuration = dto.BreakDuration;
         procedure.MaxPatients = dto.MaxPatients;
         procedure.ProcedureCategoryId = dto.ProcedureCategoryId;
 
         await _repository.UpdateAsync(procedure);
 
-        return MapToProcedureDto(procedure);
+        return MapToProcedureDto(procedure, new List<TimeSlotDto>());
     }
 
     public async Task DeleteProcedureAsync(int id)
@@ -88,24 +100,73 @@ public class ProcedureService : IProcedureService
         await _repository.DeleteAsync(id);
     }
 
-    private static ProcedureDto MapToProcedureDto(Procedure p)
+
+    // Генерация временных интервалов для процедуры
+    private static List<TimeSlotDto> GenerateTimeSlots(Procedure procedure, DateTime startDate, DateTime endDate)
+    {
+        if (procedure == null) throw new ArgumentNullException(nameof(procedure));
+        if (startDate > endDate) throw new ArgumentException("Start date cannot be later than end date.");
+        if (procedure.IntervalDuration <= 0) throw new ArgumentException("Interval duration must be positive.");
+        if (procedure.BreakDuration < 0) throw new ArgumentException("Break duration cannot be negative.");
+
+        var timeSlots = new List<TimeSlotDto>();
+
+        foreach (var date in GetDateRange(startDate, endDate))
+        {
+            for (var time = procedure.StartTime; time < procedure.EndTime;)
+            {
+                var endTime = time.AddMinutes(procedure.IntervalDuration);
+                if (endTime > procedure.EndTime) break;
+
+                var occupiedCount = procedure.ProcedureBookings
+                    .Count(pb => pb.BookingDate.Date == date &&
+                                 TimeOnly.FromDateTime(pb.BookingDate) >= time &&
+                                 TimeOnly.FromDateTime(pb.BookingDate) < endTime);
+
+                if (occupiedCount < procedure.MaxPatients)
+                {
+                    timeSlots.Add(new TimeSlotDto(
+                        time,
+                        endTime,
+                        occupiedCount,
+                        procedure.MaxPatients
+                    ));
+                }
+
+                time = endTime.AddMinutes(procedure.BreakDuration);
+            }
+        }
+
+        return timeSlots;
+    }
+
+    private static IEnumerable<DateTime> GetDateRange(DateTime startDate, DateTime endDate)
+    {
+        for (var date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
+        {
+            yield return date;
+        }
+    }
+
+    private static ProcedureDto MapToProcedureDto(Procedure procedure, List<TimeSlotDto> timeSlots)
     {
         return new ProcedureDto(
-        p.Id,
-        p.Name,
-        p.Description,
-        p.StartTime,
-        p.EndTime,
-        p.MaxPatients,
-        p.ProcedureCategoryId,
-        p.ProcedureCategory?.Name ?? string.Empty,
-        (p.ProcedureBookings ?? [])
-            .Select(pb => new ProcedureBookingHelperDto(
-                pb.Id,
-                pb.BookingDate,
-                pb.ProcedureId,
-                null
-            )).ToList()
-    );
+            procedure.Id,
+            procedure.Name,
+            procedure.Description,
+            procedure.StartTime,
+            procedure.EndTime,
+            procedure.MaxPatients,
+            procedure.ProcedureCategoryId,
+            procedure.ProcedureCategory?.Name ?? string.Empty,
+            (procedure.ProcedureBookings ?? new List<ProcedureBooking>())
+                .Select(pb => new ProcedureBookingHelperDto(
+                    pb.Id,
+                    pb.BookingDate,
+                    pb.ProcedureId,
+                    null
+                )).ToList(),
+            timeSlots
+        );
     }
 }
