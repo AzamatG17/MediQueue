@@ -8,6 +8,8 @@ public class Procedure : EntityBase
     public string? Description { get; set; }
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
+    public int IntervalDuration { get; set; }
+    public int BreakDuration { get; set; }
     public int MaxPatients { get; set; } = 1;
 
     public int? ProcedureCategoryId { get; set; }
