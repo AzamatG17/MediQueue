@@ -47,6 +47,9 @@ public class ProcedureService : IProcedureService
     {
         ArgumentNullException.ThrowIfNull(nameof(dto));
 
+        if (dto.IntervalDuration <= 0) throw new ArgumentException("Interval duration must be positive.");
+        if (dto.BreakDuration < 0) throw new ArgumentException("Break duration cannot be negative.");
+
         if (! await _categoryRepository.IsExistByIdAsync(dto.ProcedureCategoryId))
         {
             throw new KeyNotFoundException($"Procedure Category with id: {dto.ProcedureCategoryId} does not exist.");
@@ -66,12 +69,15 @@ public class ProcedureService : IProcedureService
 
         await _repository.CreateAsync(procedure);
 
-        return MapToProcedureDto(procedure, new List<TimeSlotDto>());
+        return MapToProcedureDto(procedure, []);
     }
 
     public async Task<ProcedureDto> UpdateProcedureAsync(ProcedureForUpdateDto dto)
     {
         ArgumentNullException.ThrowIfNull(nameof(dto));
+
+        if (dto.IntervalDuration <= 0) throw new ArgumentException("Interval duration must be positive.");
+        if (dto.BreakDuration < 0) throw new ArgumentException("Break duration cannot be negative.");
 
         var procedure = await _repository.FindByIdAsync(dto.Id)
             ?? throw new KeyNotFoundException($"Procedure with id: {dto.Id} does not exist");
@@ -92,7 +98,7 @@ public class ProcedureService : IProcedureService
 
         await _repository.UpdateAsync(procedure);
 
-        return MapToProcedureDto(procedure, new List<TimeSlotDto>());
+        return MapToProcedureDto(procedure, []);
     }
 
     public async Task DeleteProcedureAsync(int id)
@@ -102,25 +108,28 @@ public class ProcedureService : IProcedureService
 
 
     // Генерация временных интервалов для процедуры
-    private static List<TimeSlotDto> GenerateTimeSlots(Procedure procedure, DateTime startDate, DateTime endDate)
+    private static Dictionary<DateTime, List<TimeSlotDto>> GenerateTimeSlots(Procedure procedure, DateTime startDate, DateTime endDate)
     {
         if (procedure == null) throw new ArgumentNullException(nameof(procedure));
         if (startDate > endDate) throw new ArgumentException("Start date cannot be later than end date.");
         if (procedure.IntervalDuration <= 0) throw new ArgumentException("Interval duration must be positive.");
         if (procedure.BreakDuration < 0) throw new ArgumentException("Break duration cannot be negative.");
 
-        var timeSlots = new List<TimeSlotDto>();
+        var timeSlotsByDate = new Dictionary<DateTime, List<TimeSlotDto>>();
 
         foreach (var date in GetDateRange(startDate, endDate))
         {
-            for (var time = procedure.StartTime; time < procedure.EndTime;)
+            var timeSlots = new List<TimeSlotDto>();
+            var time = procedure.StartTime;
+
+            while (time < procedure.EndTime)
             {
                 var endTime = time.AddMinutes(procedure.IntervalDuration);
                 if (endTime > procedure.EndTime) break;
 
                 var occupiedCount = procedure.ProcedureBookings
-                    .Count(pb => pb.BookingDate.Date == date &&
-                                 TimeOnly.FromDateTime(pb.BookingDate) >= time &&
+                    .Where(pb => pb.BookingDate.Date == date)
+                    .Count(pb => TimeOnly.FromDateTime(pb.BookingDate) >= time &&
                                  TimeOnly.FromDateTime(pb.BookingDate) < endTime);
 
                 if (occupiedCount < procedure.MaxPatients)
@@ -135,9 +144,11 @@ public class ProcedureService : IProcedureService
 
                 time = endTime.AddMinutes(procedure.BreakDuration);
             }
+
+            timeSlotsByDate[date] = timeSlots;
         }
 
-        return timeSlots;
+        return timeSlotsByDate;
     }
 
     private static IEnumerable<DateTime> GetDateRange(DateTime startDate, DateTime endDate)
@@ -148,7 +159,7 @@ public class ProcedureService : IProcedureService
         }
     }
 
-    private static ProcedureDto MapToProcedureDto(Procedure procedure, List<TimeSlotDto> timeSlots)
+    private static ProcedureDto MapToProcedureDto(Procedure procedure, Dictionary<DateTime, List<TimeSlotDto>> timeSlotsByDate)
     {
         return new ProcedureDto(
             procedure.Id,
@@ -166,7 +177,10 @@ public class ProcedureService : IProcedureService
                     pb.ProcedureId,
                     null
                 )).ToList(),
-            timeSlots
+            timeSlotsByDate.Select(kvp => new TimeSlotGroupedByDateDto(
+                kvp.Key,
+                kvp.Value.OrderBy(slot => slot.StartTime).ToList()
+            )).ToList()
         );
     }
 }
