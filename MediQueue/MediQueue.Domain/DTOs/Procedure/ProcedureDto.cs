@@ -12,7 +12,12 @@ public record ProcedureDto(
     int? ProcedureCategoryId,
     string? ProcedureCategoryName,
     List<ProcedureBookingHelperDto> ProcedureBookingDtos,
-    List<TimeSlotDto> TimeSlotDtos
+    List<TimeSlotGroupedByDateDto> TimeSlotDtos
+);
+
+public record TimeSlotGroupedByDateDto(
+    DateTime Date,
+    List<TimeSlotDto> TimeSlots
 );
 
 public record TimeSlotDto(
