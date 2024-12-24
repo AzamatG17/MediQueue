@@ -11,7 +11,7 @@ public record ProcedureDto(
     int MaxPatients,
     int? ProcedureCategoryId,
     string? ProcedureCategoryName,
-    List<ProcedureBookingHelperDto> ProcedureBookingDtos,
+    //List<ProcedureBookingHelperDto> ProcedureBookingDtos,
     List<TimeSlotGroupedByDateDto> TimeSlotDtos
 );
 
@@ -24,5 +24,6 @@ public record TimeSlotDto(
     TimeOnly StartTime,
     TimeOnly EndTime,
     int OccupiedPatients,
-    int MaxPatients
+    int MaxPatients,
+    List<ProcedureBookingHelperDto> Bookings
 );

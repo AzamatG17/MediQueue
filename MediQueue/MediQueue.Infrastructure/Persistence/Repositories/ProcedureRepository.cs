@@ -20,16 +20,6 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Where(x => x.IsActive)
                 .AsQueryable();
 
-            //if (procedureResourceParameters.StartDate.HasValue)
-            //{
-            //    query = query.Where(p => p.ProcedureBookings.Any(pb => pb.BookingDate.Date >= procedureResourceParameters.StartDate.Value.Date));
-            //}
-
-            //if (procedureResourceParameters.EndDate.HasValue)
-            //{
-            //    query = query.Where(p => p.ProcedureBookings.Any(pb => pb.BookingDate.Date <= procedureResourceParameters.EndDate.Value.Date));
-            //}
-
             query = procedureResourceParameters.OrderBy switch
             {
                 "idDesc" => query.OrderByDescending(q => q.Id),

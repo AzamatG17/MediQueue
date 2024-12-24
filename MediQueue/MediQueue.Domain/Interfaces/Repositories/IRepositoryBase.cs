@@ -1,4 +1,5 @@
 ﻿using MediQueue.Domain.Common;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace MediQueue.Domain.Interfaces.Repositories
 {
@@ -11,5 +12,6 @@ namespace MediQueue.Domain.Interfaces.Repositories
         Task DeleteAsync(int id);
         Task<bool> IsExistByIdAsync(int id);
         Task SaveChangesAsync();
+        Task<IDbContextTransaction> BeginTransactionAsync();
     }
 }

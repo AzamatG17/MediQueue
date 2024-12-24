@@ -1,4 +1,6 @@
-﻿namespace MediQueue.Domain.DTOs.StationaryStay;
+﻿using MediQueue.Domain.DTOs.ProcedureBooking;
+
+namespace MediQueue.Domain.DTOs.StationaryStay;
 
 public record StationaryStayForCreateDto(
     DateTime? StartTime,
@@ -6,5 +8,11 @@ public record StationaryStayForCreateDto(
     int QuestionnaireHistoryId,
     int TariffId,
     int WardPlaceId,
-    int NutritionId
+    int NutritionId,
+    List<ProcedureBookingsForCreateDto>? ProcedureBookings
+    );
+
+public record ProcedureBookingsForCreateDto(
+    DateTime BookingDate,
+    int ProcedureId
     );

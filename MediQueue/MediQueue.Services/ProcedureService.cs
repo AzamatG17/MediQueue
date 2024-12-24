@@ -127,20 +127,24 @@ public class ProcedureService : IProcedureService
                 var endTime = time.AddMinutes(procedure.IntervalDuration);
                 if (endTime > procedure.EndTime) break;
 
-                var occupiedCount = procedure.ProcedureBookings
-                    .Where(pb => pb.BookingDate.Date == date)
-                    .Count(pb => TimeOnly.FromDateTime(pb.BookingDate) >= time &&
-                                 TimeOnly.FromDateTime(pb.BookingDate) < endTime);
+                var bookingsInSlot = procedure.ProcedureBookings
+                    .Where(pb => pb.BookingDate.Date == date &&
+                                 TimeOnly.FromDateTime(pb.BookingDate) >= time &&
+                                 TimeOnly.FromDateTime(pb.BookingDate) < endTime)
+                    .Select(pb => new ProcedureBookingHelperDto(
+                        pb.Id,
+                        pb.BookingDate,
+                        pb.ProcedureId,
+                        null
+                    )).ToList();
 
-                if (occupiedCount < procedure.MaxPatients)
-                {
-                    timeSlots.Add(new TimeSlotDto(
-                        time,
-                        endTime,
-                        occupiedCount,
-                        procedure.MaxPatients
-                    ));
-                }
+                timeSlots.Add(new TimeSlotDto(
+                    time,
+                    endTime,
+                    bookingsInSlot.Count, 
+                    procedure.MaxPatients, 
+                    bookingsInSlot          
+                ));
 
                 time = endTime.AddMinutes(procedure.BreakDuration);
             }
@@ -170,13 +174,6 @@ public class ProcedureService : IProcedureService
             procedure.MaxPatients,
             procedure.ProcedureCategoryId,
             procedure.ProcedureCategory?.Name ?? string.Empty,
-            (procedure.ProcedureBookings ?? new List<ProcedureBooking>())
-                .Select(pb => new ProcedureBookingHelperDto(
-                    pb.Id,
-                    pb.BookingDate,
-                    pb.ProcedureId,
-                    null
-                )).ToList(),
             timeSlotsByDate.Select(kvp => new TimeSlotGroupedByDateDto(
                 kvp.Key,
                 kvp.Value.OrderBy(slot => slot.StartTime).ToList()
