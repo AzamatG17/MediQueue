@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.Common;
 using MediQueue.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace MediQueue.Infrastructure.Persistence.Repositories
 {
@@ -68,6 +69,11 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
         }
     }
 }
