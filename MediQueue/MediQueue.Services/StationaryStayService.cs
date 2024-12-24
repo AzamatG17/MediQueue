@@ -15,19 +15,25 @@ public class StationaryStayService : IStationaryStayService
     private readonly ITariffRepository _tariffRepository;
     private readonly IWardPlaceRepository _wardPlaceRepository;
     private readonly INutritionRepository _utritionRepository;
+    private readonly IProcedureBookingRepository _procedureBookingRepository;
+    private readonly IProcedureRepository _procedureRepository;
 
     public StationaryStayService(
         IStationaryStayRepository repository,
         IQuestionnaireHistoryRepositoty questionnaireHistoryRepositoty,
         ITariffRepository tariffRepository,
         IWardPlaceRepository wardPlaceRepository,
-        INutritionRepository utritionRepository)
+        INutritionRepository utritionRepository,
+        IProcedureBookingRepository procedureBookingRepository,
+        IProcedureRepository procedureRepository)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _questionnaireHistoryRepositoty = questionnaireHistoryRepositoty ?? throw new ArgumentNullException(nameof(questionnaireHistoryRepositoty));
         _tariffRepository = tariffRepository ?? throw new ArgumentNullException(nameof(tariffRepository));
         _wardPlaceRepository = wardPlaceRepository ?? throw new ArgumentNullException(nameof(wardPlaceRepository));
         _utritionRepository = utritionRepository ?? throw new ArgumentNullException(nameof(utritionRepository));
+        _procedureBookingRepository = procedureBookingRepository ?? throw new ArgumentNullException(nameof(procedureBookingRepository));
+        _procedureRepository = procedureRepository ?? throw new ArgumentNullException(nameof(procedureRepository)); 
     }
 
     public async Task<IEnumerable<StationaryStayDto>> GetAllStationaryStaysAsync()
@@ -49,19 +55,22 @@ public class StationaryStayService : IStationaryStayService
 
     public async Task<StationaryStayDto> CreateStationaryStayAsync(StationaryStayForCreateDto stationaryStayForCreateDto)
     {
-        ArgumentNullException.ThrowIfNull(nameof(stationaryStayForCreateDto));
+        ArgumentNullException.ThrowIfNull(stationaryStayForCreateDto);
+
+        // Begin Transaction
+        using var transaction = await _repository.BeginTransactionAsync();
 
         var questionairyHistory = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(stationaryStayForCreateDto.QuestionnaireHistoryId)
-            ?? throw new ArgumentException($"Questionairyhistory with id: {stationaryStayForCreateDto.QuestionnaireHistoryId} does not exist.");
+            ?? throw new ArgumentException($"Questionnaire history with ID: {stationaryStayForCreateDto.QuestionnaireHistoryId} does not exist.");
 
         var tariff = await _tariffRepository.FindByIdAsync(stationaryStayForCreateDto.TariffId)
-            ?? throw new KeyNotFoundException($"Tariff with id: {stationaryStayForCreateDto.TariffId} does not exist.");
+            ?? throw new KeyNotFoundException($"Tariff with ID: {stationaryStayForCreateDto.TariffId} does not exist.");
 
         var wardPlace = await _wardPlaceRepository.FindByIdWardPlaceAsNoTrackingAsync(stationaryStayForCreateDto.WardPlaceId)
-            ?? throw new KeyNotFoundException($"WardPlace with id: {stationaryStayForCreateDto.WardPlaceId} does not exist.");
+            ?? throw new KeyNotFoundException($"WardPlace with ID: {stationaryStayForCreateDto.WardPlaceId} does not exist.");
 
         var nutrition = await _utritionRepository.FindByIdAsync(stationaryStayForCreateDto.NutritionId)
-            ?? throw new KeyNotFoundException($"Nutrition with id: {stationaryStayForCreateDto.NutritionId} does not exist.");
+            ?? throw new KeyNotFoundException($"Nutrition with ID: {stationaryStayForCreateDto.NutritionId} does not exist.");
 
         var stationaryStay = MapStationaryStayForCreateDtoToStationaryStay(stationaryStayForCreateDto, questionairyHistory.Id, wardPlace);
 
@@ -69,18 +78,25 @@ public class StationaryStayService : IStationaryStayService
             stationaryStay.NumberOfDays,
             tariff.PricePerDay,
             nutrition.CostPerDay
-            );
+        );
 
         stationaryStay.TotalPrice = totalCost;
-        stationaryStay.Amount = -1 * totalCost;
-        stationaryStay.IsPayed = -1 * totalCost >= 0;
+        stationaryStay.Amount = CalculateAmount(totalCost);
+        stationaryStay.IsPayed = stationaryStay.Amount >= 0;
 
         await _repository.CreateAsync(stationaryStay);
 
-        questionairyHistory.Balance += -1 * totalCost;
+        questionairyHistory.Balance += stationaryStay.Amount;
         questionairyHistory.IsPayed = questionairyHistory.Balance >= 0;
 
         await _questionnaireHistoryRepositoty.UpdateAsync(questionairyHistory);
+
+        if (stationaryStayForCreateDto.ProcedureBookings?.Any() == true)
+        {
+            await ProcessProcedureBookingsAsync(stationaryStayForCreateDto.ProcedureBookings, stationaryStay.Id);
+        }
+
+        await transaction.CommitAsync();
 
         return MapStationaryStayToStationaryStayDto(stationaryStay);
     }
@@ -133,6 +149,39 @@ public class StationaryStayService : IStationaryStayService
     {
         await _repository.DeleteAsync(id);
     }
+
+    private async Task ProcessProcedureBookingsAsync(List<ProcedureBookingsForCreateDto> procedureBookings, int stationaryStayId)
+    {
+        foreach (var bookingDto in procedureBookings)
+        {
+            var procedure = await _procedureRepository.FindByIdProcedureAsync(bookingDto.ProcedureId)
+                ?? throw new KeyNotFoundException($"Procedure with id: {bookingDto.ProcedureId} does not exist.");
+
+            var timeOnlyBooking = TimeOnly.FromDateTime(bookingDto.BookingDate);
+
+            var bookingsInSlot = procedure.ProcedureBookings
+                .Where(pb => pb.BookingDate.Date == bookingDto.BookingDate.Date &&
+                             TimeOnly.FromDateTime(pb.BookingDate) >= timeOnlyBooking &&
+                             TimeOnly.FromDateTime(pb.BookingDate) < timeOnlyBooking.AddMinutes(procedure.IntervalDuration))
+                .ToList();
+
+            if (bookingsInSlot.Count >= procedure.MaxPatients)
+            {
+                throw new InvalidOperationException("The selected time slot is fully booked.");
+            }
+
+            var procedureBooking = new ProcedureBooking
+            {
+                BookingDate = bookingDto.BookingDate,
+                ProcedureId = bookingDto.ProcedureId,
+                StationaryStayUsageId = stationaryStayId
+            };
+
+            await _procedureBookingRepository.CreateAsync(procedureBooking);
+        }
+    }
+
+    private static decimal CalculateAmount(decimal totalCost) => -1 * totalCost;
 
     private static decimal CalculateTotalCost(int? numberOfDays, decimal? pricePerDay, decimal? costPerDay)
     {

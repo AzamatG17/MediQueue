@@ -41,14 +41,25 @@ public class ProcedureBookingService : IProcedureBookingService
     {
         ArgumentNullException.ThrowIfNull(nameof(dto));
 
-        if (! await _procedureRepository.IsExistByIdAsync(dto.ProcedureId))
-        {
-            throw new KeyNotFoundException($"Procedure with id: {dto.ProcedureId} does not exist.");
-        }
-
         if (!await _stationaryStayRepository.IsExistByIdAsync(dto.StationaryStayUsageId))
         {
             throw new KeyNotFoundException($"StationaryStayUsage with id: {dto.StationaryStayUsageId} does not exist.");
+        }
+
+        var procedure = await _procedureRepository.FindByIdProcedureAsync(dto.ProcedureId)
+            ?? throw new KeyNotFoundException($"Procedure with id: {dto.ProcedureId} does not exist.");
+
+        var timeOnlyBooking = TimeOnly.FromDateTime(dto.BookingDate);
+
+        var bookingsInSlot = procedure.ProcedureBookings
+            .Where(pb => pb.BookingDate.Date == dto.BookingDate.Date &&
+                         TimeOnly.FromDateTime(pb.BookingDate) >= timeOnlyBooking &&
+                         TimeOnly.FromDateTime(pb.BookingDate) < timeOnlyBooking.AddMinutes(procedure.IntervalDuration))
+            .ToList();
+
+        if (bookingsInSlot.Count >= procedure.MaxPatients)
+        {
+            throw new InvalidOperationException("The selected time slot is fully booked.");
         }
 
         var procedureBooking = new ProcedureBooking
@@ -57,7 +68,7 @@ public class ProcedureBookingService : IProcedureBookingService
             ProcedureId = dto.ProcedureId,
             StationaryStayUsageId = dto.StationaryStayUsageId,
         };
-        
+
         await _repository.CreateAsync(procedureBooking);
 
         return MapToProcedureBookingDto(procedureBooking);
