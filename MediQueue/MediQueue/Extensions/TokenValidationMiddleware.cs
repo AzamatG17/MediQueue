@@ -77,6 +77,7 @@ public class TokenValidationMiddleware
             //}
 
             //await authorizationService.UpdateSessionActivity(session);
+
             await _next(context);
         }
         catch (SecurityTokenException ex)
@@ -94,23 +95,5 @@ public class TokenValidationMiddleware
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await context.Response.WriteAsync("An unexpected error occurred.");
         }
-    }
-
-    private string ExtractSessionIdFromCookie(string cookie)
-    {
-        if (string.IsNullOrEmpty(cookie))
-            return null;
-
-        var cookies = cookie.Split(';');
-        foreach (var c in cookies)
-        {
-            var parts = c.Trim().Split('=');
-            if (parts.Length == 2 && parts[0] == "Bearer")
-            {
-                return parts[1];
-            }
-        }
-
-        return null;
     }
 }
