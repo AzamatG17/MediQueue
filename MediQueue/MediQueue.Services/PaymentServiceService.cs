@@ -43,57 +43,54 @@ public class PaymentServiceService : IPaymentServiceService
     {
         ArgumentNullException.ThrowIfNull(nameof(paymentServiceHelperDto));
 
-        var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(paymentServiceHelperDto.QuestionnaireHistoryId)
-            ?? throw new KeyNotFoundException($"QuestionnaireHistory with ID {paymentServiceHelperDto.QuestionnaireHistoryId} not found");
+        using var transaction = await _repository.BeginTransactionAsync();
 
-        var createdPayments = new List<PaymentService>();
-
-        foreach (var payment in paymentServiceHelperDto.PaymentServiceForCreateDtos)
+        try
         {
-            if (payment.PaidAmount <= 0)
+            var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(paymentServiceHelperDto.QuestionnaireHistoryId)
+                ?? throw new KeyNotFoundException($"QuestionnaireHistory with ID {paymentServiceHelperDto.QuestionnaireHistoryId} not found");
+
+            var createdPayments = new List<PaymentService>();
+
+            foreach (var payment in paymentServiceHelperDto.PaymentServiceForCreateDtos)
             {
-                throw new InvalidOperationException($"The paid amount must be greater than zero. Provided: {payment.PaidAmount}.");
+                if (payment.PaidAmount <= 0)
+                {
+                    throw new InvalidOperationException($"The paid amount must be greater than zero. Provided: {payment.PaidAmount}.");
+                }
+
+                if (payment.MedicationType == MedicationType.Service)
+                {
+                    var paymentService = await PaymentForService(payment, questionnaireHistory);
+                    createdPayments.Add(paymentService);
+                }
+                else if (payment.MedicationType == MedicationType.Lekarstvo)
+                {
+                    var paymentLekarstvo = await PaymentForLekarstvo(payment, questionnaireHistory);
+                    createdPayments.Add(paymentLekarstvo);
+                }
+                else if (payment.MedicationType == MedicationType.Stationary)
+                {
+                    var paymentLekarstvo = await PaymentForStationaryStayUsage(payment, questionnaireHistory);
+                    createdPayments.Add(paymentLekarstvo);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Unsupported MedicationType: {payment.MedicationType}");
+                }
             }
 
-            if (payment.MedicationType == MedicationType.Service)
-            {
-                var paymentService = await PaymentForService(payment, questionnaireHistory);
-                createdPayments.Add(paymentService);
-            }
-            else if (payment.MedicationType == MedicationType.Lekarstvo)
-            {
-                var paymentLekarstvo = await PaymentForLekarstvo(payment, questionnaireHistory);
-                createdPayments.Add(paymentLekarstvo);
-            }
-            else if (payment.MedicationType == MedicationType.Stationary)
-            {
-                var paymentLekarstvo = await PaymentForStationaryStayUsage(payment, questionnaireHistory);
-                createdPayments.Add(paymentLekarstvo);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Unsupported MedicationType: {payment.MedicationType}");
-            }
+            await _questionnaireHistoryRepositoty.SaveChangeAsync();
+
+            await transaction.CommitAsync();
+
+            return createdPayments.Select(MapToPaymentServiceDto).ToList();
         }
-
-        await _questionnaireHistoryRepositoty.SaveChangeAsync();
-
-        return createdPayments.Select(p => new PaymentServiceDto(
-            p.Id,
-            p.TotalAmount,
-            p.PaidAmount,
-            p.OutstandingAmount,
-            p.PaymentDate,
-            p.PaymentType,
-            p.PaymentStatus,
-            p.MedicationType,
-            p.AccountId,
-            $"{p.Account?.LastName} {p.Account?.FirstName} {p.Account?.SurName}" ?? "",
-            p.ServiceId,
-            p.Service?.Name ?? "",
-            p.DoctorCabinetLekarstvoId,
-            p.DoctorCabinetLekarstvo?.Partiya?.Lekarstvo?.Name ?? "",
-            p.QuestionnaireHistoryId)).ToList();
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            throw new Exception(ex.Message, ex);
+        }
     }
 
     private async Task<PaymentService> PaymentForService(PaymentServiceForCreateDto payment, QuestionnaireHistory questionnaireHistory)
@@ -254,52 +251,49 @@ public class PaymentServiceService : IPaymentServiceService
     {
         ArgumentNullException.ThrowIfNull(paymentServiceForUpdateDto, nameof(paymentServiceForUpdateDto));
 
-        var existingPayment = await _repository.GetPaymentServiceByIdAsync(paymentServiceForUpdateDto.Id)
-            ?? throw new KeyNotFoundException($"PaymentService with ID {paymentServiceForUpdateDto.Id} not found");
+        using var transaction = await _repository.BeginTransactionAsync();
 
-        var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdQuestionnaireHistoryAsync(existingPayment.QuestionnaireHistoryId)
-            ?? throw new KeyNotFoundException($"QuestionnaireHistory with ID {existingPayment.QuestionnaireHistoryId} not found");
-
-        if (paymentServiceForUpdateDto.PaidAmount <= 0)
+        try
         {
-            throw new InvalidOperationException($"The paid amount must be greater than zero. Provided: {paymentServiceForUpdateDto.PaidAmount}.");
+            var existingPayment = await _repository.GetPaymentServiceByIdAsync(paymentServiceForUpdateDto.Id)
+                ?? throw new KeyNotFoundException($"PaymentService with ID {paymentServiceForUpdateDto.Id} not found");
+
+            var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdQuestionnaireHistoryAsync(existingPayment.QuestionnaireHistoryId)
+                ?? throw new KeyNotFoundException($"QuestionnaireHistory with ID {existingPayment.QuestionnaireHistoryId} not found");
+
+            if (paymentServiceForUpdateDto.PaidAmount <= 0)
+            {
+                throw new InvalidOperationException($"The paid amount must be greater than zero. Provided: {paymentServiceForUpdateDto.PaidAmount}.");
+            }
+
+            decimal adjustmentAmount = (decimal)(paymentServiceForUpdateDto.PaidAmount - existingPayment.PaidAmount);
+
+            if (existingPayment.MedicationType == MedicationType.Service)
+            {
+                await UpdatePaymentForService(existingPayment, questionnaireHistory, adjustmentAmount);
+            }
+            else if (existingPayment.MedicationType == MedicationType.Lekarstvo)
+            {
+                await UpdatePaymentForLekarstvo(existingPayment, questionnaireHistory, adjustmentAmount);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unsupported MedicationType: {existingPayment.MedicationType}");
+            }
+
+            await _repository.UpdateAsync(existingPayment);
+
+            await _questionnaireHistoryRepositoty.SaveChangeAsync();
+
+            await transaction.CommitAsync();
+
+            return MapToPaymentServiceDto(existingPayment);
         }
-
-        decimal adjustmentAmount = (decimal)(paymentServiceForUpdateDto.PaidAmount - existingPayment.PaidAmount);
-
-        if (existingPayment.MedicationType == MedicationType.Service)
+        catch
         {
-            await UpdatePaymentForService(existingPayment, questionnaireHistory, adjustmentAmount);
+            await transaction.RollbackAsync();
+            throw;
         }
-        else if (existingPayment.MedicationType == MedicationType.Lekarstvo)
-        {
-            await UpdatePaymentForLekarstvo(existingPayment, questionnaireHistory, adjustmentAmount);
-        }
-        else
-        {
-            throw new InvalidOperationException($"Unsupported MedicationType: {existingPayment.MedicationType}");
-        }
-
-        await _repository.UpdateAsync(existingPayment);
-
-        await _questionnaireHistoryRepositoty.SaveChangeAsync();
-
-        return new PaymentServiceDto(
-            existingPayment.Id,
-            existingPayment.TotalAmount,
-            existingPayment.PaidAmount,
-            existingPayment.OutstandingAmount,
-            existingPayment.PaymentDate,
-            existingPayment.PaymentType,
-            existingPayment.PaymentStatus,
-            existingPayment.MedicationType,
-            existingPayment.AccountId,
-            $"{existingPayment.Account?.LastName} {existingPayment.Account?.FirstName} {existingPayment.Account?.SurName}" ?? "",
-            existingPayment.ServiceId,
-            existingPayment.Service?.Name ?? "",
-            existingPayment.DoctorCabinetLekarstvoId,
-            existingPayment.DoctorCabinetLekarstvo?.Partiya?.Lekarstvo?.Name ?? "",
-            existingPayment.QuestionnaireHistoryId);
     }
 
     private async Task UpdatePaymentForService(PaymentService existingPayment, QuestionnaireHistory questionnaireHistory, decimal adjustmentAmount)
