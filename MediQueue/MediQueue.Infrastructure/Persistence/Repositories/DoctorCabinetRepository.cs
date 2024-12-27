@@ -18,10 +18,9 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(d => d.DoctorCabinetLekarstvos.Where(p => p.IsActive))
                     .ThenInclude(dp => dp.Partiya)
                     .ThenInclude(dl => dl.Lekarstvo)
-                .Include(d => d.DoctorCabinetLekarstvos.Where(p => p.IsActive))
-                    .ThenInclude(l => l.LekarstvoUsages.Where(p => p.IsActive))
                 .Where(x => x.IsActive)
                 .AsNoTracking()
+                .AsSplitQuery()
                 .ToListAsync();
         }
 
@@ -32,8 +31,6 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(d => d.DoctorCabinetLekarstvos.Where(p => p.IsActive))
                     .ThenInclude(dp => dp.Partiya)
                     .ThenInclude(dl => dl.Lekarstvo)
-                .Include(d => d.DoctorCabinetLekarstvos.Where(p => p.IsActive))
-                    .ThenInclude(l => l.LekarstvoUsages.Where(p => p.IsActive))
                 .Where(x => x.Id == id && x.IsActive)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
