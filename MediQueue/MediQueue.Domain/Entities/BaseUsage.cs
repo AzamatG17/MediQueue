@@ -9,5 +9,5 @@ public abstract class BaseUsage : EntityBase
     public decimal? Amount { get; set; }
     public bool? IsPayed { get; set; } = false;
     public int? QuestionnaireHistoryId { get; set; }
-    public QuestionnaireHistory? QuestionnaireHistory { get; set; }
+    public virtual QuestionnaireHistory? QuestionnaireHistory { get; set; }
 }

@@ -12,11 +12,11 @@ public class AnalysisResult : EntityBase
     public DateTime? ResultDate { get; set; }
 
     public int? FirstDoctorId { get; set; }
-    public Account? FirstDoctor { get; set; }
+    public virtual Account? FirstDoctor { get; set; }
     public int? SecondDoctorId { get; set; }
-    public Account? SecondDoctor { get; set; }
+    public virtual Account? SecondDoctor { get; set; }
     public int ServiceUsageId { get; set; }
-    public ServiceUsage ServiceUsage { get; set; }
+    public virtual ServiceUsage ServiceUsage { get; set; }
     public int? QuestionnaireHistoryId { get; set; }
     public QuestionnaireHistory? QuestionnaireHistory { get; set; }
 }

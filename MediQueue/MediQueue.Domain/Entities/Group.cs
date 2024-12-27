@@ -1,11 +1,10 @@
 ﻿using MediQueue.Domain.Common;
 
-namespace MediQueue.Domain.Entities
-{
-    public class Group : EntityBase
-    {
-        public string GroupName { get; set; }
+namespace MediQueue.Domain.Entities;
 
-        public virtual ICollection<Category>? Categories { get; set; }
-    }
+public class Group : EntityBase
+{
+    public string GroupName { get; set; }
+
+    public virtual ICollection<Category>? Categories { get; set; }
 }
