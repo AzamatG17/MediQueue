@@ -93,7 +93,7 @@ public class DoctorCabinetService : IDoctorCabinetService
             $"{d.Account?.LastName ?? ""} {d.Account?.FirstName ?? ""} {d.Account?.SurName ?? ""}".Trim(),
             d.DoctorCabinetLekarstvos != null
                 ? d.DoctorCabinetLekarstvos.Select(MapToDoctorCabinetLekarstvoDto).ToList()
-                : new List<DoctorCabinetLekarstvoDto>()
+                : []
             );
     }
 
