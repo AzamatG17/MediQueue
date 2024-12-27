@@ -8,5 +8,5 @@ public class Discount : EntityBase
     public decimal Percent { get; set; }
 
     public int? QuestionnaireHistoryId { get; set; }
-    public QuestionnaireHistory? QuestionnaireHistory { get; set; }
+    public virtual QuestionnaireHistory? QuestionnaireHistory { get; set; }
 }

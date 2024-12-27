@@ -13,9 +13,9 @@ public class QuestionnaireHistory : EntityBase
     public decimal? InitialBenefitPercentage { get; set; }
 
     public int? AccountId { get; set; }
-    public Account? Account { get; set; }
+    public virtual Account? Account { get; set; }
     public int? QuestionnaireId { get; set; }
-    public Questionnaire? Questionnaire { get; set; }
+    public virtual Questionnaire? Questionnaire { get; set; }
     public virtual ICollection<Discount>? Discounts { get; set; }
     public virtual ICollection<Benefit>? Benefits { get; set; }
     public virtual ICollection<ServiceUsage>? ServiceUsages { get; set; }

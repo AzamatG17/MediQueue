@@ -8,5 +8,5 @@ public class RolePermission : EntityBase
     public List<int> Permissions { get; set; } = new List<int>();
 
     public int AccountId { get; set; }
-    public Account Account { get; set; }
+    public virtual Account Account { get; set; }
 }

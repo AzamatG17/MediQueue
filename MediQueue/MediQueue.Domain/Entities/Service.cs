@@ -8,7 +8,7 @@ public class Service : EntityBase
     public decimal Amount { get; set; }
 
     public int? CategoryId { get; set; }
-    public Category? Category { get; set; }
+    public virtual Category? Category { get; set; }
 
     public virtual ICollection<ServiceUsage> ServiceUsages { get; set; }
     public virtual ICollection<Account> Accounts { get; set; }

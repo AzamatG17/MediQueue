@@ -11,10 +11,11 @@ public class Conclusion : EntityBase
     public bool IsFullyRecovered { get; set; } = false;
 
     public int? ServiceUsageId { get; set; }
-    public ServiceUsage? ServiceUsage { get; set; }
+    public virtual ServiceUsage? ServiceUsage { get; set; }
     public int? AccountId { get; set; }
-    public Account? Account { get; set; }
+    public virtual Account? Account { get; set; }
     public int? QuestionnaireHistoryId { get; set; }
-    public QuestionnaireHistory? QuestionnaireHistory { get; set; }
+    public virtual QuestionnaireHistory? QuestionnaireHistory { get; set; }
+
     public virtual ICollection<LekarstvoUsage>? LekarstvoUsages { get; set; }
 }

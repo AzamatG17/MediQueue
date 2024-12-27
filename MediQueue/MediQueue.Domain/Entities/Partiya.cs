@@ -13,8 +13,8 @@ public class Partiya : EntityBase
     public string? PhotoBase64 { get; set; }
 
     public int? LekarstvoId { get; set; }
-    public Lekarstvo? Lekarstvo { get; set; }
+    public virtual Lekarstvo? Lekarstvo { get; set; }
     public int? ScladId { get; set; }
-    public Sclad? Sclad { get; set; }
+    public virtual Sclad? Sclad { get; set; }
     public virtual ICollection<DoctorCabinetLekarstvo>? DoctorCabinetLekarstvos { get; set; }
 }

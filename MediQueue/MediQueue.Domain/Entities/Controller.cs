@@ -1,9 +1,8 @@
 ﻿using MediQueue.Domain.Common;
 
-namespace MediQueue.Domain.Entities
+namespace MediQueue.Domain.Entities;
+
+public class Controller : EntityBase
 {
-    public class Controller : EntityBase
-    {
-        public string ControllerName { get; set; }
-    }
+    public string ControllerName { get; set; }
 }

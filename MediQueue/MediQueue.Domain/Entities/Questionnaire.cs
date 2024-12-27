@@ -25,5 +25,5 @@ public class Questionnaire : EntityBase
     public string? AdvertisingChannel { get; set; }
     public string? PhotoBase64 { get; set; }
 
-    public ICollection<QuestionnaireHistory> QuestionnaireHistories { get; set; }
+    public virtual ICollection<QuestionnaireHistory> QuestionnaireHistories { get; set; }
 }
