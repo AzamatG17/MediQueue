@@ -2,16 +2,18 @@ using MediQueue.Extensions;
 using MediQueue.Helpers;
 using Serilog;
 
-namespace MediQueue;
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/logs_.txt", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day)
+    .WriteTo.File("logs/error_.txt", Serilog.Events.LogEventLevel.Error, rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
-public class Program
-{
-    public static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
-        var configuration = builder.Configuration;
+var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
-        builder.Services.AddCors(options =>
+builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowSpecificOrigins", policy =>
             {
@@ -20,51 +22,36 @@ public class Program
             });
         });
 
-        //Log.Logger = new LoggerConfiguration()
-        //    .MinimumLevel.Verbose()
-        //    .Enrich.FromLogContext()
-        //    .WriteTo.Console(new CustomJsonFormatter()).WriteTo.File("logs/HTTPLogging.txt", restrictedToMinimumLevel: LogEventLevel.Information, rollingInterval: RollingInterval.Day)
-        //    .WriteTo.File(new CustomJsonFormatter(), "logs/logs.txt", rollingInterval: RollingInterval.Day)
-        //    .WriteTo.File(new CustomJsonFormatter(), "logs/error_.txt", Serilog.Events.LogEventLevel.Error, rollingInterval: RollingInterval.Day)
-        //    .CreateLogger();
+builder.Host.UseSerilog();
 
-        builder.Host.UseSerilog();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+//DependencyInjection.ConfigureServices(builder.Services, configuration);
+builder.Services
+    .AddConfigurationOptions(configuration)
+    .ConfigureServices(configuration);
 
-        builder.Services.AddControllers();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-        //DependencyInjection.ConfigureServices(builder.Services, configuration);
-        builder.Services
-            .AddConfigurationOptions(configuration)
-            .ConfigureServices(configuration);
+builder.Services.AddHttpContextAccessor();
 
-        builder.Services.AddHttpContextAccessor();
+var app = builder.Build();
 
-        var app = builder.Build();
-
-        using (var scope = app.Services.CreateScope())
-        {
-            var services = scope.ServiceProvider;
-            builder.Services.SeedDatabase(services);
-        }
-
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
-
-        app.UseErrorHandler();
-        //app.UseHttpsRedirection();
-
-        app.UseCors("AllowAll");
-
-        app.UseMiddleware<TokenValidationMiddleware>();
-
-        app.UseAuthorization();
-
-        app.MapControllers();
-
-        app.Run();
-    }
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    builder.Services.SeedDatabase(services);
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseErrorHandler();
+app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
