@@ -2,6 +2,7 @@
 using MediQueue.Domain.DTOs.Lekarstvo;
 using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -26,7 +27,7 @@ public class CategoryLekarstvoService : ICategoryLekarstvoService
     public async Task<CategoryLekarstvoDto> GetCategoryLekarstvoByIdAsync(int id)
     {
         var categoryLekarstvo = await _categoryLekarstvoRepository.FindByIdCategoryLekarstvo(id)
-            ?? throw new KeyNotFoundException($"CategoryLekarstvo with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"CategoryLekarstvo with id: {id} does not exist.");
 
         return MapToCategoryLekarstvoDto(categoryLekarstvo);
     }

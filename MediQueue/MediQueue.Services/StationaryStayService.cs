@@ -3,6 +3,7 @@ using MediQueue.Domain.DTOs.StationaryStay;
 using MediQueue.Domain.DTOs.Tariff;
 using MediQueue.Domain.DTOs.WardPlace;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -48,7 +49,7 @@ public class StationaryStayService : IStationaryStayService
     public async Task<StationaryStayDto> GetStationaryStayByIdAsync(int id)
     {
         var stationaryStay = await _repository.FindByIdStationaryStayAsync(id)
-            ?? throw new KeyNotFoundException($"Stationary Stay with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Stationary Stay with id: {id} does not exist.");
 
         return MapStationaryStayToStationaryStayDto(stationaryStay);
     }
@@ -64,13 +65,13 @@ public class StationaryStayService : IStationaryStayService
             ?? throw new ArgumentException($"Questionnaire history with ID: {stationaryStayForCreateDto.QuestionnaireHistoryId} does not exist.");
 
         var tariff = await _tariffRepository.FindByIdAsync(stationaryStayForCreateDto.TariffId)
-            ?? throw new KeyNotFoundException($"Tariff with ID: {stationaryStayForCreateDto.TariffId} does not exist.");
+            ?? throw new EntityNotFoundException($"Tariff with ID: {stationaryStayForCreateDto.TariffId} does not exist.");
 
         var wardPlace = await _wardPlaceRepository.FindByIdWardPlaceAsNoTrackingAsync(stationaryStayForCreateDto.WardPlaceId)
-            ?? throw new KeyNotFoundException($"WardPlace with ID: {stationaryStayForCreateDto.WardPlaceId} does not exist.");
+            ?? throw new EntityNotFoundException($"WardPlace with ID: {stationaryStayForCreateDto.WardPlaceId} does not exist.");
 
         var nutrition = await _utritionRepository.FindByIdAsync(stationaryStayForCreateDto.NutritionId)
-            ?? throw new KeyNotFoundException($"Nutrition with ID: {stationaryStayForCreateDto.NutritionId} does not exist.");
+            ?? throw new EntityNotFoundException($"Nutrition with ID: {stationaryStayForCreateDto.NutritionId} does not exist.");
 
         var stationaryStay = MapStationaryStayForCreateDtoToStationaryStay(stationaryStayForCreateDto, questionairyHistory.Id, wardPlace);
 
@@ -106,19 +107,19 @@ public class StationaryStayService : IStationaryStayService
         ArgumentNullException.ThrowIfNull(nameof(stationaryStayForUpdateDto));
 
         var existingStationaryStay = await _repository.FindByIdStationaryAsync(stationaryStayForUpdateDto.Id)
-            ?? throw new KeyNotFoundException($"StationaryStay with ID {stationaryStayForUpdateDto.Id} not found.");
+            ?? throw new EntityNotFoundException($"StationaryStay with ID {stationaryStayForUpdateDto.Id} not found.");
 
         var questionairyHistory = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(stationaryStayForUpdateDto.QuestionnaireHistoryId)
             ?? throw new ArgumentException($"Questionairyhistory with id: {stationaryStayForUpdateDto.QuestionnaireHistoryId} does not exist.");
 
         var tariff = await _tariffRepository.FindByIdAsync(stationaryStayForUpdateDto.TariffId)
-            ?? throw new KeyNotFoundException($"Tariff with id: {stationaryStayForUpdateDto.TariffId} does not exist.");
+            ?? throw new EntityNotFoundException($"Tariff with id: {stationaryStayForUpdateDto.TariffId} does not exist.");
 
         var wardPlace = await _wardPlaceRepository.FindByIdWardPlaceAsNoTrackingAsync(stationaryStayForUpdateDto.WardPlaceId)
-            ?? throw new KeyNotFoundException($"WardPlace with id: {stationaryStayForUpdateDto.WardPlaceId} does not exist.");
+            ?? throw new EntityNotFoundException($"WardPlace with id: {stationaryStayForUpdateDto.WardPlaceId} does not exist.");
 
         var nutrition = await _utritionRepository.FindByIdAsync(stationaryStayForUpdateDto.NutritionId)
-            ?? throw new KeyNotFoundException($"Nutrition with id: {stationaryStayForUpdateDto.NutritionId} does not exist.");
+            ?? throw new EntityNotFoundException($"Nutrition with id: {stationaryStayForUpdateDto.NutritionId} does not exist.");
 
         questionairyHistory.Balance -= existingStationaryStay.TotalPrice;
 
@@ -155,7 +156,7 @@ public class StationaryStayService : IStationaryStayService
         foreach (var bookingDto in procedureBookings)
         {
             var procedure = await _procedureRepository.FindByIdProcedureAsync(bookingDto.ProcedureId)
-                ?? throw new KeyNotFoundException($"Procedure with id: {bookingDto.ProcedureId} does not exist.");
+                ?? throw new EntityNotFoundException($"Procedure with id: {bookingDto.ProcedureId} does not exist.");
 
             var timeOnlyBooking = TimeOnly.FromDateTime(bookingDto.BookingDate);
 
@@ -198,6 +199,7 @@ public class StationaryStayService : IStationaryStayService
             stationaryStay.StartTime,
             stationaryStay.NumberOfDays,
             stationaryStay.QuantityUsed,
+            stationaryStay.TotalPrice / stationaryStay.NumberOfDays,
             stationaryStay.TotalPrice,
             stationaryStay.Amount,
             stationaryStay.IsPayed,

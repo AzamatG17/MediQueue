@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Sample;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -29,7 +30,7 @@ public class SampleService : ISampleService
     public async Task<SampleDto> GetSampleByIdAsync(int id)
     {
         var sample = await _repository.FindByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Sample with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Sample with id: {id} does not exist.");
 
         if (sample == null) return null;
 
@@ -53,7 +54,7 @@ public class SampleService : ISampleService
 
         var sample = await _repository.FindByIdAsync(sampleForUpdate.Id);
 
-        if (sample == null) throw new KeyNotFoundException($"Sample with Id: {sampleForUpdate.Id} does not exist !");
+        if (sample == null) throw new EntityNotFoundException($"Sample with Id: {sampleForUpdate.Id} does not exist !");
 
         sample.Name = sampleForUpdate.Name ?? "";
         sample.Description = sampleForUpdate.Description ?? "";

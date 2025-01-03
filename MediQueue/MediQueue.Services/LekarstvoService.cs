@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.DTOs.Lekarstvo;
 using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Domain.ResourceParameters;
@@ -30,7 +31,7 @@ public class LekarstvoService : ILekarstvoService
     public async Task<LekarstvoDto> GetLekarstvoByIdAsync(int id)
     {
         var lekarstvo = await _repository.FindByIdLekarstvoAsync(id)
-            ?? throw new KeyNotFoundException($"Lekarstvo with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Lekarstvo with id: {id} does not exist.");
 
         return MapToLekarstvoDto(lekarstvo);
     }
@@ -57,7 +58,7 @@ public class LekarstvoService : ILekarstvoService
             throw new ArgumentException($"CategoryLekarstvo with id: {lekarstvoForUpdateDto.CategoryLekarstvoId} does not exist");
 
         var lekarstvo = await _repository.FindByIdAsync(lekarstvoForUpdateDto.Id)
-            ?? throw new KeyNotFoundException($"Lekarstov with id: {lekarstvoForUpdateDto.Id} does not exist.");
+            ?? throw new EntityNotFoundException($"Lekarstov with id: {lekarstvoForUpdateDto.Id} does not exist.");
 
         lekarstvo.Name = lekarstvoForUpdateDto.Name;
         lekarstvo.PhotoBase64 = lekarstvoForUpdateDto.PhotoBase64;

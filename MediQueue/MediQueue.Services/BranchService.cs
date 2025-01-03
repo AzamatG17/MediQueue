@@ -2,6 +2,7 @@
 using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.DTOs.Sclad;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -28,7 +29,7 @@ public class BranchService : IBranchService
     public async Task<BranchDto> GetBranchByIdAsync(int id)
     {
         var branch = await _repository.FindByIdBranch(id)
-            ?? throw new KeyNotFoundException($"Branch with {id} not found");
+            ?? throw new EntityNotFoundException($"Branch with {id} not found");
 
         return MapToBranchDto(branch);
     }

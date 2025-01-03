@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.DTOs.PaymentService;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Enums;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -34,7 +35,7 @@ public class PaymentServiceService : IPaymentServiceService
     public async Task<PaymentServiceDto> GetPaymentByIdAsync(int id)
     {
         var payment = await _repository.GetByIdPaymentServiceAsync(id)
-            ?? throw new KeyNotFoundException($"Payment Service with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Payment Service with id: {id} does not exist.");
 
         return MapToPaymentServiceDto(payment);
     }
@@ -48,7 +49,7 @@ public class PaymentServiceService : IPaymentServiceService
         try
         {
             var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(paymentServiceHelperDto.QuestionnaireHistoryId)
-                ?? throw new KeyNotFoundException($"QuestionnaireHistory with ID {paymentServiceHelperDto.QuestionnaireHistoryId} not found");
+                ?? throw new EntityNotFoundException($"QuestionnaireHistory with ID {paymentServiceHelperDto.QuestionnaireHistoryId} not found");
 
             var createdPayments = new List<PaymentService>();
 
@@ -99,7 +100,7 @@ public class PaymentServiceService : IPaymentServiceService
                        .FirstOrDefault(s => s.Id == payment.ServiceId && s.Amount < 0);
 
         if (serviceUsage == null)
-            throw new KeyNotFoundException($"Service with ID {payment.ServiceId} not found in QuestionnaireHistory.");
+            throw new EntityNotFoundException($"Service with ID {payment.ServiceId} not found in QuestionnaireHistory.");
 
         var existingPayments = serviceUsage.QuestionnaireHistory.PaymentServices
                                     .Where(p => p.ServiceId == serviceUsage.Id);
@@ -210,7 +211,7 @@ public class PaymentServiceService : IPaymentServiceService
                                         .FirstOrDefault(s => s.Id == payment.StationaryStayUsageId);
 
         if (stationaryStayUsage == null)
-            throw new KeyNotFoundException($"StationaryStayUsage with ID {payment.StationaryStayUsageId} not found.");
+            throw new EntityNotFoundException($"StationaryStayUsage with ID {payment.StationaryStayUsageId} not found.");
 
         var existingPayments = questionnaireHistory.PaymentServices
             .Where(p => p.StationaryStayUsageId == stationaryStayUsage.Id);
@@ -256,10 +257,10 @@ public class PaymentServiceService : IPaymentServiceService
         try
         {
             var existingPayment = await _repository.GetPaymentServiceByIdAsync(paymentServiceForUpdateDto.Id)
-                ?? throw new KeyNotFoundException($"PaymentService with ID {paymentServiceForUpdateDto.Id} not found");
+                ?? throw new EntityNotFoundException($"PaymentService with ID {paymentServiceForUpdateDto.Id} not found");
 
             var questionnaireHistory = await _questionnaireHistoryRepositoty.GetByIdQuestionnaireHistoryAsync(existingPayment.QuestionnaireHistoryId)
-                ?? throw new KeyNotFoundException($"QuestionnaireHistory with ID {existingPayment.QuestionnaireHistoryId} not found");
+                ?? throw new EntityNotFoundException($"QuestionnaireHistory with ID {existingPayment.QuestionnaireHistoryId} not found");
 
             if (paymentServiceForUpdateDto.PaidAmount <= 0)
             {
@@ -300,7 +301,7 @@ public class PaymentServiceService : IPaymentServiceService
     {
         var serviceUsage = questionnaireHistory.ServiceUsages
                            .FirstOrDefault(s => s.Id == existingPayment.ServiceId)
-            ?? throw new KeyNotFoundException($"Service with ID {existingPayment.ServiceId} not found in QuestionnaireHistory.");
+            ?? throw new EntityNotFoundException($"Service with ID {existingPayment.ServiceId} not found in QuestionnaireHistory.");
 
         var remainingAmount = serviceUsage.Amount ?? serviceUsage.TotalPrice -
                               questionnaireHistory.PaymentServices.Where(p => p.ServiceId == serviceUsage.Id && p.Id != existingPayment.Id)
@@ -327,7 +328,7 @@ public class PaymentServiceService : IPaymentServiceService
         var lekarstvoUsage = questionnaireHistory.Conclusions
                                    .SelectMany(c => c.LekarstvoUsages)
                                    .FirstOrDefault(l => l.Id == existingPayment.DoctorCabinetLekarstvoId)
-            ?? throw new KeyNotFoundException($"Lekarstvo with ID {existingPayment.DoctorCabinetLekarstvoId} not found.");
+            ?? throw new EntityNotFoundException($"Lekarstvo with ID {existingPayment.DoctorCabinetLekarstvoId} not found.");
 
         var remainingAmount = lekarstvoUsage.Amount ?? lekarstvoUsage.TotalPrice -
                               questionnaireHistory.PaymentServices.Where(p => p.DoctorCabinetLekarstvoId == lekarstvoUsage.Id && p.Id != existingPayment.Id)

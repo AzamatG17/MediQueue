@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.AnalysisResult;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -40,7 +41,7 @@ public class AnalysisResultService : IAnalysisResultService
     public async Task<AnalysisResultDto> GetAnalysisResultByIdAsync(int id)
     {
         var analysisResult = await _analysisResultRepository.FindAnalysisResultByIdAsync(id)
-            ?? throw new KeyNotFoundException($"AnalysisResult with {id} not found");
+            ?? throw new EntityNotFoundException($"AnalysisResult with {id} not found");
 
         return _mapper.Map<AnalysisResultDto>(analysisResult);
     }

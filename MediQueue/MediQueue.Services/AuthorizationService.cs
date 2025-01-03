@@ -2,6 +2,7 @@
 using MediQueue.Domain.DTOs.Account;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Auth;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.Persistence;
@@ -17,9 +18,9 @@ public class AuthorizationService : IAuthorizationService
 
     public AuthorizationService(MediQueueDbContext dbContext, IMapper mapper, IJwtProvider jwtProvider)
     {
-        _context = dbContext;
-        _mapper = mapper;
-        _jwtProvider = jwtProvider;
+        _context = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _jwtProvider = jwtProvider ?? throw new ArgumentNullException(nameof(jwtProvider));
     }
 
     public async Task<LoginResponse> Login(AccountForLoginDto accountForLoginDto)
@@ -30,10 +31,6 @@ public class AuthorizationService : IAuthorizationService
         }
 
         var user = await GetByEmailAsync(accountForLoginDto.login, accountForLoginDto.password);
-        if (user == null)
-        {
-            return null;
-        }
 
         var existingSession = await _context.AccountSessions
             .Where(s => s.AccountId == user.Id && !s.IsLoggedOut)
@@ -146,9 +143,11 @@ public class AuthorizationService : IAuthorizationService
 
         if (userEntity == null)
         {
-            return null;
+            throw new InvalidLoginRequestException("Invalid login or password.");
         }
-
-        return _mapper.Map<Account>(userEntity);
+        else
+        {
+            return _mapper.Map<Account>(userEntity);
+        }
     }
 }

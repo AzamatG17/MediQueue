@@ -2,6 +2,7 @@
 using MediQueue.Domain.DTOs.Ward;
 using MediQueue.Domain.DTOs.WardPlace;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -42,7 +43,7 @@ public class WardService : IWardService
 
         var tariffs = await _tariffRepository.FindByIdsAsync(wardForCreateDto.TariffIds);
         if (tariffs == null || !tariffs.Any())
-            throw new KeyNotFoundException($"Tariff does not exist.");
+            throw new EntityNotFoundException($"Tariff does not exist.");
 
         var ward = MapWardForCreateDtoToWard(wardForCreateDto, tariffs.ToList());
 
@@ -56,11 +57,11 @@ public class WardService : IWardService
         ArgumentNullException.ThrowIfNull(nameof(wardForUpdateDto));
 
         var existingWard = await _repository.FindByIdWardAsNoTrackingAsync(wardForUpdateDto.id)
-            ?? throw new KeyNotFoundException($"Ward with ID {wardForUpdateDto.id} not found.");
+            ?? throw new EntityNotFoundException($"Ward with ID {wardForUpdateDto.id} not found.");
 
         var tariffs = await _tariffRepository.FindByIdsAsync(wardForUpdateDto.TariffIds);
         if (tariffs == null || !tariffs.Any())
-            throw new KeyNotFoundException($"Tariff does not exist.");
+            throw new EntityNotFoundException($"Tariff does not exist.");
 
         existingWard.WardPlaces.Clear();
         existingWard.Tariffs.Clear();

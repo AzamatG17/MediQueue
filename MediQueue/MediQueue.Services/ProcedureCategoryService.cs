@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.ProcedureCategory;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -26,7 +27,7 @@ public class ProcedureCategoryService : IProcedureCategoryService
     public async Task<ProcedureCategoryDto> GetProcedureCategoryByIdAsync(int id)
     {
         var procedureCategory = await _repository.FindByIdProcedureCategoryAsync(id)
-            ?? throw new KeyNotFoundException($"ProcedureCategory with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"ProcedureCategory with id: {id} does not exist.");
 
         return MapToProcedureCategoryDto(procedureCategory);
     }
@@ -50,7 +51,7 @@ public class ProcedureCategoryService : IProcedureCategoryService
         ArgumentNullException.ThrowIfNull(nameof(dto));
 
         var procedureCategory = await _repository.FindByIdAsync(dto.Id)
-            ?? throw new KeyNotFoundException($"ProcedureCategory with id: {dto.Id} does not exist.");
+            ?? throw new EntityNotFoundException($"ProcedureCategory with id: {dto.Id} does not exist.");
 
         procedureCategory.Name = dto.Name;
 

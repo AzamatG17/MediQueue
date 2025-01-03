@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.ServiceUsage;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Domain.ResourceParameters;
@@ -37,7 +38,7 @@ public class ServiceUsageService : IServiceUsageService
     public async Task<ServiceUsageDto> GetServiceUsageByIdAsync(int id)
     {
         var serviceUsage = await _repository.FindByIdServiceUsage(id) 
-            ?? throw new KeyNotFoundException($"ServiceUsage with Id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"ServiceUsage with Id: {id} does not exist.");
         
         return MapToServiceUsageDto(serviceUsage);
     }
@@ -82,7 +83,7 @@ public class ServiceUsageService : IServiceUsageService
         ArgumentNullException.ThrowIfNull(serviceUsageForUpdate);
 
         var existingServiceUsage = await _repository.FindByIdAsync(serviceUsageForUpdate.Id)
-            ?? throw new KeyNotFoundException($"ServiceUsage with Id: {serviceUsageForUpdate.Id} does not exist.");
+            ?? throw new EntityNotFoundException($"ServiceUsage with Id: {serviceUsageForUpdate.Id} does not exist.");
         
         if (!await _accountRepository.IsExistByIdAsync(serviceUsageForUpdate.AccountId))
         {

@@ -4,6 +4,7 @@ using MediQueue.Domain.DTOs.QuestionnaireHistory;
 using MediQueue.Domain.DTOs.ServiceUsage;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Domain.ResourceParameters;
@@ -35,7 +36,7 @@ public class QuestionnaireService : IQuestionnaireService
     public async Task<QuestionnaireDto> GetQuestionnaireByIdAsync(int id)
     {
         var quest = await _questionnaireRepository.GetByIdWithQuestionnaireHistory(id)
-            ?? throw new KeyNotFoundException($"Questionnaire with {id} not found");
+            ?? throw new EntityNotFoundException($"Questionnaire with {id} not found");
 
         return MapToQuestionnaireDto(quest);
     }

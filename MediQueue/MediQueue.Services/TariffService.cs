@@ -3,6 +3,7 @@ using MediQueue.Domain.DTOs.Tariff;
 using MediQueue.Domain.DTOs.Ward;
 using MediQueue.Domain.DTOs.WardPlace;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -31,7 +32,7 @@ public class TariffService : ITariffService
     public async Task<TariffDto> GetTariffByIdAsync(int id)
     {
         var tariff = await _repository.FindByIdTariffAsync(id)
-            ?? throw new KeyNotFoundException($"Tariff with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Tariff with id: {id} does not exist.");
 
         return MapTariffToTariffDto(tariff);
     }
@@ -52,7 +53,7 @@ public class TariffService : ITariffService
         ArgumentNullException.ThrowIfNull(nameof(tariffForUpdateDto));
 
         var tariff = await _repository.FindByIdAsync(tariffForUpdateDto.Id)
-            ?? throw new KeyNotFoundException($"Tariff with id: {tariffForUpdateDto.Id} does not exist.");
+            ?? throw new EntityNotFoundException($"Tariff with id: {tariffForUpdateDto.Id} does not exist.");
 
         tariff.Name = tariffForUpdateDto.Name;
         tariff.PricePerDay = tariffForUpdateDto.PricePerDay;

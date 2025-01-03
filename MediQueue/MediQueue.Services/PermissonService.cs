@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Permission;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.Persistence;
@@ -35,7 +36,7 @@ public class PermissonService : IPermissionService
     public async Task<PermissionDto> GetPermissionByIdAsync(int id)
     {
         var permission = await _permissionRepository.FindByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Permission with {id} not found");
+            ?? throw new EntityNotFoundException($"Permission with {id} not found");
 
         return _mapper.Map<PermissionDto>(permission);
     }

@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.DoctorCabinetLekarstvo;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -30,7 +31,7 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
     public async Task<DoctorCabinetLekarstvoDto> GetDoctorCabinetLekarstvoByIdAsync(int id)
     {
         var cabinetLekarstvo = await _repository.FindByIdDoctorCabinetLekarstvoAsync(id)
-            ?? throw new KeyNotFoundException($"Doctor Cabinet Lekarstvo with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Doctor Cabinet Lekarstvo with id: {id} does not exist.");
 
         return MapToDoctorCabinetLekarstvoDto(cabinetLekarstvo);
     }
@@ -143,7 +144,7 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
     public async Task UseLekarstvoAsync(int id, decimal amount)
     {
         var lekarstvo = await _repository.FindByIdDoctorCabinetLekarstvoAsync(id)
-            ?? throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
+            ?? throw new EntityNotFoundException($"Lekarstvo with id {id} not found.");
 
         if (amount <= 0)
             throw new ArgumentException("Quantity must be included.");
@@ -159,7 +160,7 @@ public class DoctorCabinetLekarstvoService : IDoctorCabinetLekarstvoService
     public async Task AddLekarstvoQuantityAsync(int id, decimal amount)
     {
         var lekarstvo = await _repository.FindByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Lekarstvo with id {id} not found.");
+            ?? throw new EntityNotFoundException($"Lekarstvo with id {id} not found.");
         
         if (amount <= 0)
             throw new ArgumentException("Quantity must be included.");

@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Role;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using System.Data;
@@ -30,7 +31,7 @@ public class RoleService : IRoleService
     public async Task<RoleDto> GetRoleByIdAsync(int id)
     {
         var role = await _roleRepository.FindByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Role with {id} not found");
+            ?? throw new EntityNotFoundException($"Role with {id} not found");
 
         var roleDto = new RoleDto(
             role.Id,

@@ -3,6 +3,7 @@ using MediQueue.Domain.DTOs.Group;
 using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -31,7 +32,7 @@ public class GroupService : IGroupService
     public async Task<GroupForAllDateDto> GetGroupByIdAsync(int id)
     {
         var group = await _groupRepository.FindByIdWithGroupAsync(id)
-            ?? throw new KeyNotFoundException($"Group with {id} not found");
+            ?? throw new EntityNotFoundException($"Group with {id} not found");
 
         return MapToGroupAllDateDto(group);
     }
@@ -52,7 +53,7 @@ public class GroupService : IGroupService
         ArgumentNullException.ThrowIfNull(groupForUpdateDto);
 
         var group = await _groupRepository.FindByIdWithGroupAsync(groupForUpdateDto.Id)
-            ?? throw new KeyNotFoundException($"Group with {groupForUpdateDto.Id} not found");
+            ?? throw new EntityNotFoundException($"Group with {groupForUpdateDto.Id} not found");
 
         group.GroupName = groupForUpdateDto.GroupName;
 

@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.DTOs.Sclad;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.Persistence;
@@ -40,7 +41,7 @@ public class ScladService : IScladService
     public async Task<ScladDto> GetScladByIdAsync(int id)
     {
         var sclad = await _cladRepository.FindbyIdScladAsync(id)
-            ?? throw new KeyNotFoundException($"Sclad with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Sclad with id: {id} does not exist.");
 
         return await MapToScladDto(sclad);
     }

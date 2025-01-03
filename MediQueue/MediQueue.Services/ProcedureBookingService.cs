@@ -2,6 +2,7 @@
 using MediQueue.Domain.DTOs.ProcedureBooking;
 using MediQueue.Domain.DTOs.StationaryStay;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -32,7 +33,7 @@ public class ProcedureBookingService : IProcedureBookingService
     public async Task<ProcedureBookingDto> GetProcedureBookingByIdAsync(int id)
     {
         var procedureBooking = await _repository.FindByIdProcedureBookingAsync(id)
-            ?? throw new KeyNotFoundException($"ProcedureBooking with {id} not found");
+            ?? throw new EntityNotFoundException($"ProcedureBooking with {id} not found");
 
         return MapToProcedureBookingDto(procedureBooking);
     }
@@ -43,11 +44,11 @@ public class ProcedureBookingService : IProcedureBookingService
 
         if (!await _stationaryStayRepository.IsExistByIdAsync(dto.StationaryStayUsageId))
         {
-            throw new KeyNotFoundException($"StationaryStayUsage with id: {dto.StationaryStayUsageId} does not exist.");
+            throw new EntityNotFoundException($"StationaryStayUsage with id: {dto.StationaryStayUsageId} does not exist.");
         }
 
         var procedure = await _procedureRepository.FindByIdProcedureAsync(dto.ProcedureId)
-            ?? throw new KeyNotFoundException($"Procedure with id: {dto.ProcedureId} does not exist.");
+            ?? throw new EntityNotFoundException($"Procedure with id: {dto.ProcedureId} does not exist.");
 
         var timeOnlyBooking = TimeOnly.FromDateTime(dto.BookingDate);
 
@@ -79,16 +80,16 @@ public class ProcedureBookingService : IProcedureBookingService
         ArgumentNullException.ThrowIfNull(nameof(dto));
 
         var procedureBooking = await _repository.FindByIdAsync(dto.Id)
-            ?? throw new KeyNotFoundException($"ProcedureBooking with id: {dto.Id} does not exist.");
+            ?? throw new EntityNotFoundException($"ProcedureBooking with id: {dto.Id} does not exist.");
 
         if (!await _procedureRepository.IsExistByIdAsync(dto.ProcedureId))
         {
-            throw new KeyNotFoundException($"Procedure with id: {dto.ProcedureId} does not exist.");
+            throw new EntityNotFoundException($"Procedure with id: {dto.ProcedureId} does not exist.");
         }
 
         if (!await _stationaryStayRepository.IsExistByIdAsync(dto.StationaryStayUsageId))
         {
-            throw new KeyNotFoundException($"StationaryStayUsage with id: {dto.StationaryStayUsageId} does not exist.");
+            throw new EntityNotFoundException($"StationaryStayUsage with id: {dto.StationaryStayUsageId} does not exist.");
         }
 
         procedureBooking.BookingDate = dto.BookingDate;
@@ -126,6 +127,7 @@ public class ProcedureBookingService : IProcedureBookingService
                 p.StationaryStayUsage.StartTime,
                 p.StationaryStayUsage.NumberOfDays,
                 p.StationaryStayUsage.QuantityUsed,
+                p.StationaryStayUsage.TotalPrice / p.StationaryStayUsage.NumberOfDays,
                 p.StationaryStayUsage.TotalPrice,
                 p.StationaryStayUsage.Amount,
                 p.StationaryStayUsage.IsPayed,

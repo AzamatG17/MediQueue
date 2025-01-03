@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediQueue.Domain.DTOs.Nutrition;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -29,7 +30,7 @@ public class NutritionService : INutritionService
     public async Task<NutritionDto> GetNutritionByIdAsync(int id)
     {
         var nutrition = await _repository.FindByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Nutrition with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Nutrition with id: {id} does not exist.");
 
         return _mapper.Map<NutritionDto>(nutrition);
     }
@@ -50,7 +51,7 @@ public class NutritionService : INutritionService
         ArgumentNullException.ThrowIfNull(nameof(nutritionForUpdateDto));
 
         var nutrition = await _repository.FindByIdAsync(nutritionForUpdateDto.Id)
-            ?? throw new KeyNotFoundException($"Nutrition with id: {nutritionForUpdateDto.Id} does not exist.");
+            ?? throw new EntityNotFoundException($"Nutrition with id: {nutritionForUpdateDto.Id} does not exist.");
 
         nutrition.MealPlan = nutritionForUpdateDto.MealPlan;
         nutrition.CostPerDay = nutritionForUpdateDto.CostPerDay;
