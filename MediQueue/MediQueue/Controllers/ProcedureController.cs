@@ -24,39 +24,18 @@ public class ProcedureController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync([FromQuery] ProcedureResourceParameters procedureResourceParameters)
     {
-        try
-        {
-            var accounts = await _service.GetAllProceduresAsync(procedureResourceParameters);
+        var accounts = await _service.GetAllProceduresAsync(procedureResourceParameters);
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(35, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _service.GetProcedureByIdAsync(id);
+        var account = await _service.GetProcedureByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Procedure with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Procedure not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(35, 3)]
@@ -68,19 +47,13 @@ public class ProcedureController : BaseController
             return BadRequest(CreateErrorResponse("Procedure data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _service.CreateProcedureAsync(procedureForCreateDto);
-            return Ok(CreateSuccessResponse("Procedure successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.CreateProcedureAsync(procedureForCreateDto);
+
+        return Ok(CreateSuccessResponse("Procedure successfully created."));
     }
 
     [PermissionAuthorize(35, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] ProcedureForUpdateDto procedureForUpdateDto)
     {
         if (procedureForUpdateDto == null)
@@ -94,37 +67,17 @@ public class ProcedureController : BaseController
                 $"Route id: {id} does not match with parameter id: {procedureForUpdateDto.Id}."));
         }
 
-        try
-        {
-            var updatedAccount = await _service.UpdateProcedureAsync(procedureForUpdateDto);
-            return Ok(CreateSuccessResponse("Procedure successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Procedure not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.UpdateProcedureAsync(procedureForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Procedure successfully updated."));
     }
 
     [PermissionAuthorize(35, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _service.DeleteProcedureAsync(id);
-            return Ok(CreateSuccessResponse("Procedure successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Procedure not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.DeleteProcedureAsync(id);
+
+        return Ok(CreateSuccessResponse("Procedure successfully deleted."));
     }
 }

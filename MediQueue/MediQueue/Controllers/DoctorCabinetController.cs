@@ -23,39 +23,18 @@ public class DoctorCabinetController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _service.GetAllDoctorCabinetsAsync();
+        var accounts = await _service.GetAllDoctorCabinetsAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(19, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _service.GetDoctorCabinetByIdAsync(id);
+        var account = await _service.GetDoctorCabinetByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Doctor Cabinet with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Doctor Cabinet not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(19, 3)]
@@ -67,19 +46,13 @@ public class DoctorCabinetController : BaseController
             return BadRequest(CreateErrorResponse("Doctor Cabinet data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _service.CreateDoctorCabinetAsync(doctorCabinet);
-            return Ok(CreateSuccessResponse("Doctor Cabinet successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.CreateDoctorCabinetAsync(doctorCabinet);
+
+        return Ok(CreateSuccessResponse("Doctor Cabinet successfully created."));
     }
 
     [PermissionAuthorize(19, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] DoctorCabinetForUpdate doctorCabinet)
     {
         if (doctorCabinet == null)
@@ -92,37 +65,18 @@ public class DoctorCabinetController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {doctorCabinet.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _service.UpdateDoctorCabinetAsync(doctorCabinet);
-            return Ok(CreateSuccessResponse("Doctor Cabinet successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Doctor Cabinet not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _service.UpdateDoctorCabinetAsync(doctorCabinet);
+
+        return Ok(CreateSuccessResponse("Doctor Cabinet successfully updated."));
     }
 
     [PermissionAuthorize(19, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _service.DeleteDoctorCabinetAsync(id);
-            return Ok(CreateSuccessResponse("Doctor Cabinet successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Doctor Cabinet not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.DeleteDoctorCabinetAsync(id);
+
+        return Ok(CreateSuccessResponse("Doctor Cabinet successfully deleted."));
     }
 }

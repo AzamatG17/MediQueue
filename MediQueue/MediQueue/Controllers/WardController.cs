@@ -23,38 +23,18 @@ public class WardController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var wards = await _wardService.GetAllWardsAsync();
-            return Ok(wards);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        var wards = await _wardService.GetAllWardsAsync();
+
+        return Ok(wards);
     }
 
     [PermissionAuthorize(31, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var ward = await _wardService.GetWardByIdAsync(id);
+        var ward = await _wardService.GetWardByIdAsync(id);
 
-            if (ward is null)
-                return NotFound(CreateErrorResponse($"Ward with id: {id} does not exist."));
-
-            return Ok(ward);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Ward not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(ward);
     }
 
     [PermissionAuthorize(31, 3)]
@@ -66,19 +46,13 @@ public class WardController : BaseController
             return BadRequest(CreateErrorResponse("Ward data is null."));
         }
 
-        try
-        {
-            var createdWard = await _wardService.CreateWardAsync(wardForCreateDto);
-            return Ok(CreateSuccessResponse("Ward successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _wardService.CreateWardAsync(wardForCreateDto);
+
+        return Ok(CreateSuccessResponse("Ward successfully created."));
     }
 
     [PermissionAuthorize(31, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] WardForUpdateDto wardForUpdateDto)
     {
         if (wardForUpdateDto == null)
@@ -92,37 +66,17 @@ public class WardController : BaseController
                 $"Route id: {id} does not match with parameter id: {wardForUpdateDto.id}."));
         }
 
-        try
-        {
-            var updatedWard = await _wardService.UpdateWardAsync(wardForUpdateDto);
-            return Ok(CreateSuccessResponse("Ward successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Ward not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _wardService.UpdateWardAsync(wardForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Ward successfully updated."));
     }
 
     [PermissionAuthorize(31, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _wardService.DeleteWardAsync(id);
-            return Ok(CreateSuccessResponse("Ward successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Ward not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _wardService.DeleteWardAsync(id);
+
+        return Ok(CreateSuccessResponse("Ward successfully deleted."));
     }
 }

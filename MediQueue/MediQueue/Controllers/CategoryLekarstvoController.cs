@@ -24,39 +24,18 @@ public class CategoryLekarstvoController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _categoryLekarstvoService.GetAllCategoryLekarstvosAsync();
+        var accounts = await _categoryLekarstvoService.GetAllCategoryLekarstvosAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(4, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _categoryLekarstvoService.GetCategoryLekarstvoByIdAsync(id);
+        var account = await _categoryLekarstvoService.GetCategoryLekarstvoByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"CategoryLekarstvo with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", CategoryLekarstvo not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(4, 3)]
@@ -68,19 +47,13 @@ public class CategoryLekarstvoController : BaseController
             return BadRequest(CreateErrorResponse("CategoryLekarstvo data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _categoryLekarstvoService.CreateCategoryLekarstvoAsync(categoryLekarstvoForCreateDto);
-            return Ok(CreateSuccessResponse("CategoryLekarstvo successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _categoryLekarstvoService.CreateCategoryLekarstvoAsync(categoryLekarstvoForCreateDto);
+
+        return Ok(CreateSuccessResponse("CategoryLekarstvo successfully created."));
     }
 
     [PermissionAuthorize(4, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] CategoryLekarstvoForUpdateDto categoryLekarstvoForUpdateDto)
     {
         if (categoryLekarstvoForUpdateDto == null)
@@ -93,37 +66,18 @@ public class CategoryLekarstvoController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {categoryLekarstvoForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _categoryLekarstvoService.UpdateCategoryLekarstvoAsync(categoryLekarstvoForUpdateDto);
-            return Ok(CreateSuccessResponse("CategoryLekarstvo successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", CategoryLekarstvo not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _categoryLekarstvoService.UpdateCategoryLekarstvoAsync(categoryLekarstvoForUpdateDto);
+
+        return Ok(CreateSuccessResponse("CategoryLekarstvo successfully updated."));
     }
 
     [PermissionAuthorize(4, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _categoryLekarstvoService.DeleteCategoryLekarstvoAsync(id);
-            return Ok(CreateSuccessResponse("CategoryLekarstvo successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", CategoryLekarstvo not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _categoryLekarstvoService.DeleteCategoryLekarstvoAsync(id);
+
+        return Ok(CreateSuccessResponse("CategoryLekarstvo successfully deleted."));
     }
 }

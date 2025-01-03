@@ -36,14 +36,8 @@ public class ConclusionController : BaseController
             return BadRequest(CreateErrorResponse("Conclusion data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _conclusionService.CreateConclusionAsync(conclusionForCreatreDto);
-            return Ok(CreateSuccessResponse("Conclusion successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _conclusionService.CreateConclusionAsync(conclusionForCreatreDto);
+
+        return Ok(CreateSuccessResponse("Conclusion successfully created."));
     }
 }

@@ -2,7 +2,6 @@
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Infrastructure.JwtToken;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediQueue.Controllers;
@@ -24,39 +23,18 @@ public class RoleController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _roleService.GetAllRolesAsync();
+        var accounts = await _roleService.GetAllRolesAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(11, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _roleService.GetRoleByIdAsync(id);
+        var account = await _roleService.GetRoleByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Role with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Role not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(11, 3)]
@@ -68,19 +46,13 @@ public class RoleController : BaseController
             return BadRequest(CreateErrorResponse("Role data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _roleService.CreateRoleAsync(roleForCreateDto);
-            return Ok(CreateSuccessResponse("Role successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _roleService.CreateRoleAsync(roleForCreateDto);
+
+        return Ok(CreateSuccessResponse("Role successfully created."));
     }
 
     [PermissionAuthorize(11, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] RoleForUpdateDto roleForUpdateDto)
     {
         if (roleForUpdateDto == null)
@@ -93,37 +65,18 @@ public class RoleController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {roleForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _roleService.UpdateRoleAsync(roleForUpdateDto);
-            return Ok(CreateSuccessResponse("Role successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Role not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _roleService.UpdateRoleAsync(roleForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Role successfully updated."));
     }
 
     [PermissionAuthorize(11, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _roleService.DeleteRoleAsync(id);
-            return Ok(CreateSuccessResponse("Role successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Role not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _roleService.DeleteRoleAsync(id);
+
+        return Ok(CreateSuccessResponse("Role successfully deleted."));
     }
 }

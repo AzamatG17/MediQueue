@@ -23,38 +23,18 @@ public class StationaryStayController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var stationaryStays = await _stationaryStayService.GetAllStationaryStaysAsync();
-            return Ok(stationaryStays);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        var stationaryStays = await _stationaryStayService.GetAllStationaryStaysAsync();
+
+        return Ok(stationaryStays);
     }
 
     [PermissionAuthorize(28, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var stationaryStay = await _stationaryStayService.GetStationaryStayByIdAsync(id);
+        var stationaryStay = await _stationaryStayService.GetStationaryStayByIdAsync(id);
 
-            if (stationaryStay is null)
-                return NotFound(CreateErrorResponse($"StationaryStay with id: {id} does not exist."));
-
-            return Ok(stationaryStay);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", StationaryStay not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(stationaryStay);
     }
 
     [PermissionAuthorize(28, 3)]
@@ -66,19 +46,13 @@ public class StationaryStayController : BaseController
             return BadRequest(CreateErrorResponse("StationaryStay data is null."));
         }
 
-        try
-        {
-            var createdStationaryStay = await _stationaryStayService.CreateStationaryStayAsync(stationaryStayForCreateDto);
-            return Ok(CreateSuccessResponse("StationaryStay successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _stationaryStayService.CreateStationaryStayAsync(stationaryStayForCreateDto);
+
+        return Ok(CreateSuccessResponse("StationaryStay successfully created."));
     }
 
     [PermissionAuthorize(28, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] StationaryStayForUpdateDto stationaryStayForUpdateDto)
     {
         if (stationaryStayForUpdateDto == null)
@@ -92,37 +66,17 @@ public class StationaryStayController : BaseController
                 $"Route id: {id} does not match with parameter id: {stationaryStayForUpdateDto.Id}."));
         }
 
-        try
-        {
-            var updatedStationaryStay = await _stationaryStayService.UpdateStationaryStayAsync(stationaryStayForUpdateDto);
-            return Ok(CreateSuccessResponse("StationaryStay successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", StationaryStay not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _stationaryStayService.UpdateStationaryStayAsync(stationaryStayForUpdateDto);
+
+        return Ok(CreateSuccessResponse("StationaryStay successfully updated."));
     }
 
     [PermissionAuthorize(28, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _stationaryStayService.DeleteStationaryStayAsync(id);
-            return Ok(CreateSuccessResponse("StationaryStay successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", StationaryStay not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _stationaryStayService.DeleteStationaryStayAsync(id);
+
+        return Ok(CreateSuccessResponse("StationaryStay successfully deleted."));
     }
 }

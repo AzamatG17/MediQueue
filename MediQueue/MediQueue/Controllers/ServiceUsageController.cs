@@ -24,39 +24,18 @@ public class ServiceUsageController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync([FromQuery] ServiceUsageResourceParametrs serviceUsageResourceParametrs)
     {
-        try
-        {
-            var accounts = await _service.GetAllServiceUsagesAsync(serviceUsageResourceParametrs);
+        var accounts = await _service.GetAllServiceUsagesAsync(serviceUsageResourceParametrs);
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(26, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _service.GetServiceUsageByIdAsync(id);
+        var account = await _service.GetServiceUsageByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"ServiceUsage with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", ServiceUsage not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(26, 3)]
@@ -68,19 +47,13 @@ public class ServiceUsageController : BaseController
             return BadRequest(CreateErrorResponse("ServiceUsage data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _service.CreateServiceUsageAsync(serviceUsageForCreateDto);
-            return Ok(CreateSuccessResponse("ServiceUsage successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.CreateServiceUsageAsync(serviceUsageForCreateDto);
+
+        return Ok(CreateSuccessResponse("ServiceUsage successfully created."));
     }
 
     [PermissionAuthorize(26, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] ServiceUsageForUpdateDto serviceUsageForUpdateDto)
     {
         if (serviceUsageForUpdateDto == null)
@@ -93,37 +66,18 @@ public class ServiceUsageController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {serviceUsageForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _service.UpdateServiceUsageAsync(serviceUsageForUpdateDto);
-            return Ok(CreateSuccessResponse("ServiceUsage successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", ServiceUsage not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _service.UpdateServiceUsageAsync(serviceUsageForUpdateDto);
+
+        return Ok(CreateSuccessResponse("ServiceUsage successfully updated."));
     }
 
     [PermissionAuthorize(26, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _service.DeleteServiceUsageAsync(id);
-            return Ok(CreateSuccessResponse("ServiceUsage successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", ServiceUsage not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.DeleteServiceUsageAsync(id);
+
+        return Ok(CreateSuccessResponse("ServiceUsage successfully deleted."));
     }
 }

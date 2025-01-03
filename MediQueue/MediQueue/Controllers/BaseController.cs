@@ -14,7 +14,6 @@ public abstract class BaseController : ControllerBase
         return Ok(CreateErrorResponse(customMessage ?? message));
     }
 
-    // Helper method for consistent success response
     protected ReturnResponse CreateSuccessResponse(string message)
     {
         return new ReturnResponse
@@ -25,7 +24,6 @@ public abstract class BaseController : ControllerBase
         };
     }
 
-    // Helper method for consistent error response
     protected ReturnResponse CreateErrorResponse(string message)
     {
         return new ReturnResponse

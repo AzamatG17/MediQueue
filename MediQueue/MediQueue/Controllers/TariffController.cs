@@ -23,38 +23,18 @@ public class TariffController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var tariffs = await _tariffService.GetAllTariffsAsync();
-            return Ok(tariffs);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        var tariffs = await _tariffService.GetAllTariffsAsync();
+
+        return Ok(tariffs);
     }
 
     [PermissionAuthorize(29, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var tariff = await _tariffService.GetTariffByIdAsync(id);
+        var tariff = await _tariffService.GetTariffByIdAsync(id);
 
-            if (tariff is null)
-                return NotFound(CreateErrorResponse($"Tariff with id: {id} does not exist."));
-
-            return Ok(tariff);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Tariff not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(tariff);
     }
 
     [PermissionAuthorize(29, 3)]
@@ -66,19 +46,13 @@ public class TariffController : BaseController
             return BadRequest(CreateErrorResponse("Tariff data is null."));
         }
 
-        try
-        {
-            var createdTariff = await _tariffService.CreateTariffAsync(tariffForCreateDto);
-            return Ok(CreateSuccessResponse("Tariff successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _tariffService.CreateTariffAsync(tariffForCreateDto);
+
+        return Ok(CreateSuccessResponse("Tariff successfully created."));
     }
 
     [PermissionAuthorize(29, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] TariffForUpdateDto tariffForUpdateDto)
     {
         if (tariffForUpdateDto == null)
@@ -92,37 +66,17 @@ public class TariffController : BaseController
                 $"Route id: {id} does not match with parameter id: {tariffForUpdateDto.Id}."));
         }
 
-        try
-        {
-            var updatedTariff = await _tariffService.UpdateTariffAsync(tariffForUpdateDto);
-            return Ok(CreateSuccessResponse("Tariff successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Tariff not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _tariffService.UpdateTariffAsync(tariffForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Tariff successfully updated."));
     }
 
     [PermissionAuthorize(29, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _tariffService.DeleteTariffAsync(id);
-            return Ok(CreateSuccessResponse("Tariff successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Tariff not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _tariffService.DeleteTariffAsync(id);
+
+        return Ok(CreateSuccessResponse("Tariff successfully deleted."));
     }
 }

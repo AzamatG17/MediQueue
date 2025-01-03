@@ -23,39 +23,18 @@ public class GroupController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _groupService.GetAllGroupsAsync();
+        var accounts = await _groupService.GetAllGroupsAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(5, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _groupService.GetGroupByIdAsync(id);
+        var account = await _groupService.GetGroupByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Group with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Group not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(5, 3)]
@@ -67,19 +46,13 @@ public class GroupController : BaseController
             return BadRequest(CreateErrorResponse("Group data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _groupService.CreateGroupAsync(groupForCreateDto);
-            return Ok(CreateSuccessResponse("Group successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _groupService.CreateGroupAsync(groupForCreateDto);
+
+        return Ok(CreateSuccessResponse("Group successfully created."));
     }
 
     [PermissionAuthorize(5, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] GroupForUpdateDto groupForUpdateDto)
     {
         if (groupForUpdateDto == null)
@@ -92,37 +65,18 @@ public class GroupController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {groupForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _groupService.UpdateGroupAsync(groupForUpdateDto);
-            return Ok(CreateSuccessResponse("Group successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Group not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _groupService.UpdateGroupAsync(groupForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Group successfully updated."));
     }
 
     [PermissionAuthorize(5, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _groupService.DeleteGroupAsync(id);
-            return Ok(CreateSuccessResponse("Group successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Group not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _groupService.DeleteGroupAsync(id);
+
+        return Ok(CreateSuccessResponse("Group successfully deleted."));
     }
 }

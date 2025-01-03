@@ -21,38 +21,17 @@ public class PermissionController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _permissionService.GetAllPermissionsAsync();
+        var accounts = await _permissionService.GetAllPermissionsAsync();
 
-            return Ok(new { Controllers = accounts.Item1, Permissions = accounts.Item2 });
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(new { Controllers = accounts.Item1, Permissions = accounts.Item2 });
     }
 
     [PermissionAuthorize(8, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _permissionService.GetPermissionByIdAsync(id);
+        var account = await _permissionService.GetPermissionByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Permission with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Permission not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 }

@@ -23,39 +23,18 @@ public class SampleController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _service.GetAllSamplesAsync();
+        var accounts = await _service.GetAllSamplesAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(23, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _service.GetSampleByIdAsync(id);
+        var account = await _service.GetSampleByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Sample with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Sample not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(23, 3)]
@@ -67,19 +46,13 @@ public class SampleController : BaseController
             return BadRequest(CreateErrorResponse("Sample data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _service.CreateSampleAsync(sampleForCreateDto);
-            return Ok(CreateSuccessResponse("Sample successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.CreateSampleAsync(sampleForCreateDto);
+
+        return Ok(CreateSuccessResponse("Sample successfully created."));
     }
 
     [PermissionAuthorize(23, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] SampleForUpdateDto sampleForUpdateDto)
     {
         if (sampleForUpdateDto == null)
@@ -92,37 +65,18 @@ public class SampleController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {sampleForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _service.UpdateSampleAsync(sampleForUpdateDto);
-            return Ok(CreateSuccessResponse("Sample successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Sample not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _service.UpdateSampleAsync(sampleForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Sample successfully updated."));
     }
 
     [PermissionAuthorize(23, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _service.DeleteSampleAsync(id);
-            return Ok(CreateSuccessResponse("Sample successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Sample not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.DeleteSampleAsync(id);
+
+        return Ok(CreateSuccessResponse("Sample successfully deleted."));
     }
 }

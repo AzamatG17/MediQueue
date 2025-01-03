@@ -19,60 +19,46 @@ public class AuthorizationController : BaseController
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login(AccountForLoginDto accountForLogin)
     {
-        try
+        var token = await _authorizationService.Login(accountForLogin);
+
+        if (token == null)
         {
-            var token = await _authorizationService.Login(accountForLogin);
-
-            if (token == null)
-            {
-                return Ok(CreateErrorResponse("Invalid login or password"));
-            }
-
-            HttpContext.Response.Cookies.Append("Authorization", token.Token);
-
-            return Ok(token);
+            return Ok(CreateErrorResponse("Invalid login or password"));
         }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        HttpContext.Response.Cookies.Append("Authorization", token.Token);
+
+        return Ok(token);
     }
 
     [HttpPost("refresh")]
     public async Task<ActionResult> Refresh()
     {
-        try
+        var authorizationHeader = Request.Headers["Cookie"].ToString();
+
+        if (string.IsNullOrEmpty(authorizationHeader))
         {
-            var authorizationHeader = Request.Headers["Cookie"].ToString();
+            return BadRequest(CreateErrorResponse("Access token is missing or invalid."));
+        }
 
-            if (string.IsNullOrEmpty(authorizationHeader))
-            {
-                return BadRequest(CreateErrorResponse("Access token is missing or invalid."));
-            }
-
-            var tokenCookie = authorizationHeader.Split(';')
+        var tokenCookie = authorizationHeader.Split(';')
             .FirstOrDefault(c => c.Trim().StartsWith("mediks-cookies="));
 
-            if (tokenCookie == null)
-            {
-                return BadRequest(CreateErrorResponse("Access token not found in Cookie."));
-            }
-
-            var accessToken = tokenCookie.Substring("mediks-cookies=".Length).Trim();
-
-            var newToken = await _authorizationService.RefreshToken(accessToken);
-
-            if (newToken == null)
-            {
-                return BadRequest(CreateErrorResponse("Access token not found."));
-            }
-
-            return Ok(newToken);
-        }
-        catch (Exception ex)
+        if (tokenCookie == null)
         {
-            return HandleError(ex);
+            return BadRequest(CreateErrorResponse("Access token not found in Cookie."));
         }
+
+        var accessToken = tokenCookie.Substring("mediks-cookies=".Length).Trim();
+
+        var newToken = await _authorizationService.RefreshToken(accessToken);
+
+        if (newToken == null)
+        {
+            return BadRequest(CreateErrorResponse("Access token not found."));
+        }
+
+        return Ok(newToken);
     }
 
     [Authorize]
@@ -95,34 +81,16 @@ public class AuthorizationController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _authorizationService.FindAllAccountSession();
+        var accounts = await _authorizationService.FindAllAccountSession();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(22, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult<ReturnResponse>> DeleteAsync(string id)
     {
-        try
-        {
-            await _authorizationService.Logout(id);
-            return Ok(CreateSuccessResponse("Account Session successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Account Session not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _authorizationService.Logout(id);
+        return Ok(CreateSuccessResponse("Account Session successfully deleted."));
     }
 }

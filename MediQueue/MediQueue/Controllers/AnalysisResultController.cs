@@ -25,39 +25,18 @@ public class AnalysisResultController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var analysisResults = await _analysisResultService.GetAllAnalysisResultsAsync();
+        var analysisResults = await _analysisResultService.GetAllAnalysisResultsAsync();
 
-            return Ok(analysisResults);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(analysisResults);
     }
 
     [PermissionAuthorize(1, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var analysisResult = await _analysisResultService.GetAnalysisResultByIdAsync(id);
+        var analysisResult = await _analysisResultService.GetAnalysisResultByIdAsync(id);
 
-            if (analysisResult is null)
-                return NotFound(CreateErrorResponse($"AnalysisReslut with id: {id} does not exist."));
-
-            return Ok(analysisResult);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", AnalysisResult not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(analysisResult);
     }
 
     [PermissionAuthorize(1, 3)]
@@ -74,19 +53,13 @@ public class AnalysisResultController : BaseController
         if (analysisResultForCreateDto == null)
             return BadRequest(CreateErrorResponse("AnalysisResult data is null."));
 
-        try
-        {
-            await _analysisResultService.CreateAnalysisResultAsync(analysisResultForCreateDto);
-            return Ok(CreateSuccessResponse("AnalysisResult successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _analysisResultService.CreateAnalysisResultAsync(analysisResultForCreateDto);
+
+        return Ok(CreateSuccessResponse("AnalysisResult successfully created."));
     }
 
     [PermissionAuthorize(1, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult<ReturnResponse>> PutAsync(int id, [FromBody] AnalysisResultForUpdateDto analysisResultForUpdateDto)
     {
         if (analysisResultForUpdateDto == null)
@@ -95,37 +68,17 @@ public class AnalysisResultController : BaseController
         if (id != analysisResultForUpdateDto.Id)
             return BadRequest(CreateErrorResponse($"Route id: {id} does not match with parameter id: {analysisResultForUpdateDto.Id}."));
 
-        try
-        {
-            await _analysisResultService.UpdateAnalysisResultAsync(analysisResultForUpdateDto);
-            return Ok(CreateSuccessResponse("AnalysisResult successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", AnalysisResult not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _analysisResultService.UpdateAnalysisResultAsync(analysisResultForUpdateDto);
+
+        return Ok(CreateSuccessResponse("AnalysisResult successfully updated."));
     }
 
     [PermissionAuthorize(1, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult<ReturnResponse>> DeleteAsync(int id)
     {
-        try
-        {
-            await _analysisResultService.DeleteAnalysisResultAsync(id);
-            return Ok(CreateSuccessResponse("AnalysisResult successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", AnalysisResult not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _analysisResultService.DeleteAnalysisResultAsync(id);
+
+        return Ok(CreateSuccessResponse("AnalysisResult successfully deleted."));
     }
 }

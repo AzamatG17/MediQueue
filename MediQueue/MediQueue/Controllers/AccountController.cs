@@ -24,39 +24,18 @@ public class AccountController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _accountService.GetAllAccountsAsync();
+        var accounts = await _accountService.GetAllAccountsAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
     
     [PermissionAuthorize(1, 2)]
     [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _accountService.GetAccountByIdAsync(id);
+        var account = await _accountService.GetAccountByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Account with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Account not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(1, 3)]
@@ -66,19 +45,13 @@ public class AccountController : BaseController
         if (accountForCreateDto == null)
             return BadRequest(CreateErrorResponse("Account data is null."));
 
-        try
-        {
-            await _accountService.CreateAccountAsync(accountForCreateDto);
-            return Ok(CreateSuccessResponse("Account successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _accountService.CreateAccountAsync(accountForCreateDto);
+
+        return Ok(CreateSuccessResponse("Account successfully created."));
     }
 
     [PermissionAuthorize(1, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult<ReturnResponse>> PutAsync(int id, [FromBody] AccountForUpdateDto accountForUpdateDto)
     {
         if (accountForUpdateDto == null)
@@ -87,37 +60,17 @@ public class AccountController : BaseController
         if (id != accountForUpdateDto.Id)
             return BadRequest(CreateErrorResponse($"Route id: {id} does not match with parameter id: {accountForUpdateDto.Id}."));
 
-        try
-        {
-            await _accountService.UpdateAccountAsync(accountForUpdateDto);
-            return Ok(CreateSuccessResponse("Account successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Account not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _accountService.UpdateAccountAsync(accountForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Account successfully updated."));
     }
 
     [PermissionAuthorize(1, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult<ReturnResponse>> DeleteAsync(int id)
     {
-        try
-        {
-            await _accountService.DeleteAccountAsync(id);
-            return Ok(CreateSuccessResponse("Account successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Account not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _accountService.DeleteAccountAsync(id);
+
+        return Ok(CreateSuccessResponse("Account successfully deleted."));
     }
 }
