@@ -8,11 +8,13 @@ public class TokenValidationMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ILogger<TokenValidationMiddleware> _logger;
 
-    public TokenValidationMiddleware(RequestDelegate next, IServiceScopeFactory scopeFactory)
+    public TokenValidationMiddleware(RequestDelegate next, IServiceScopeFactory scopeFactory, ILogger<TokenValidationMiddleware> logger)
     {
         _next = next;
         _scopeFactory = scopeFactory;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -50,6 +52,7 @@ public class TokenValidationMiddleware
             //}
             //catch (SecurityTokenException)
             //{
+            //    _logger.LogError("Invalid JWT token.");
             //    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             //    await context.Response.WriteAsync("Invalid JWT token.");
             //    return;
@@ -60,6 +63,7 @@ public class TokenValidationMiddleware
 
             //if (string.IsNullOrEmpty(sessionId))
             //{
+            //    _logger.LogError("Session ID claim is missing in the token.");
             //    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             //    await context.Response.WriteAsync("Session ID claim is missing in the token.");
             //    return;
@@ -71,6 +75,7 @@ public class TokenValidationMiddleware
             //var session = await authorizationService.GetSessionById(sessionId);
             //if (session == null || session.IsLoggedOut || session.AccessToken != tokenWithoutBearer)
             //{
+            //    _logger.LogWarning("Unauthorized: Invalid or logged-out session.");
             //    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             //    await context.Response.WriteAsync("Unauthorized: Invalid or logged-out session.");
             //    return;
@@ -82,16 +87,19 @@ public class TokenValidationMiddleware
         }
         catch (SecurityTokenException ex)
         {
+            _logger.LogError("Token validation failed: {Message}", ex.Message);
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             await context.Response.WriteAsync("Token validation failed.");
         }
         catch (InvalidOperationException ex)
         {
+            _logger.LogError("Error occurred in token validation logic: {Message}", ex.Message);
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             await context.Response.WriteAsync("An error occurred in token validation logic.");
         }
         catch (Exception ex)
         {
+            _logger.LogError("Unexpected error occurred: {Message}", ex.Message);
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await context.Response.WriteAsync("An unexpected error occurred.");
         }
