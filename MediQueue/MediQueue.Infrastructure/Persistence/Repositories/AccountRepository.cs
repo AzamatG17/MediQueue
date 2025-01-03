@@ -19,8 +19,9 @@ namespace MediQueue.Infrastructure.Persistence.Repositories
                 .Include(x => x.Role)
                 .Include(x => x.DoctorCabinet)
                 .Include(x => x.Services.Where(p => p.IsActive))
-                .ThenInclude(xc => xc.Category)
+                    .ThenInclude(xc => xc.Category)
                 .AsNoTracking()
+                .AsSplitQuery()
                 .ToListAsync();
         }
 
