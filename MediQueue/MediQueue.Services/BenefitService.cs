@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Benefit;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -26,7 +27,7 @@ public class BenefitService : IBenefitService
     public async Task<BenefitDto> GetBenefitByIdAsync(int id)
     {
         var benefit = await _repository.FindByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Benefit with {id} not found");
+            ?? throw new EntityNotFoundException($"Benefit with {id} not found");
 
         return MapToBenefitDto(benefit);
     }
@@ -62,7 +63,7 @@ public class BenefitService : IBenefitService
 
         var benefit = await _repository.FindByIdAsync(benefitForUpdateDto.Id);
         if (benefit == null)
-            throw new KeyNotFoundException($"Benefit with id: {benefitForUpdateDto.Id} does not exist!");
+            throw new EntityNotFoundException($"Benefit with id: {benefitForUpdateDto.Id} does not exist!");
 
         benefit.Name = benefitForUpdateDto.Name;
         benefit.Percent = benefitForUpdateDto.Percent;

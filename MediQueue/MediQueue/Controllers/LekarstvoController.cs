@@ -24,39 +24,18 @@ public class LekarstvoController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync([FromQuery] LekarstvoResourceParametrs lekarstvoResourceParametrs)
     {
-        try
-        {
-            var accounts = await _lekarstvoService.GetAllLekarstvosAsync(lekarstvoResourceParametrs);
+        var accounts = await _lekarstvoService.GetAllLekarstvosAsync(lekarstvoResourceParametrs);
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(6, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _lekarstvoService.GetLekarstvoByIdAsync(id);
+        var account = await _lekarstvoService.GetLekarstvoByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Lekarstvo with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Lekarstvo not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(6, 3)]
@@ -68,19 +47,13 @@ public class LekarstvoController : BaseController
             return BadRequest(CreateErrorResponse("Lekarstvo data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _lekarstvoService.CreateLekarstvoAsync(lekarstvoForCreateDto);
-            return Ok(CreateSuccessResponse("Lekarstvo successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _lekarstvoService.CreateLekarstvoAsync(lekarstvoForCreateDto);
+
+        return Ok(CreateSuccessResponse("Lekarstvo successfully created."));
     }
 
     [PermissionAuthorize(6, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] LekarstvoForUpdateDto lekarstvoForUpdateDto)
     {
         if (lekarstvoForUpdateDto == null)
@@ -93,37 +66,18 @@ public class LekarstvoController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {lekarstvoForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _lekarstvoService.UpdateLekarstvoAsync(lekarstvoForUpdateDto);
-            return Ok(CreateSuccessResponse("Lekarstvo successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Lekarstvo not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _lekarstvoService.UpdateLekarstvoAsync(lekarstvoForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Lekarstvo successfully updated."));
     }
 
     [PermissionAuthorize(6, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _lekarstvoService.DeleteLekarstvoAsync(id);
-            return Ok(CreateSuccessResponse("Lekarstvo successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Lekarstvo not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _lekarstvoService.DeleteLekarstvoAsync(id);
+
+        return Ok(CreateSuccessResponse("Lekarstvo successfully deleted."));
     }
 }

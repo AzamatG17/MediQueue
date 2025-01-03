@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.DTOs.DoctorCabinet;
 using MediQueue.Domain.DTOs.DoctorCabinetLekarstvo;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -29,7 +30,7 @@ public class DoctorCabinetService : IDoctorCabinetService
     public async Task<DoctorCabinetDto> GetDoctorCabinetByIdAsync(int id)
     {
         var doctorCabinet = await _repository.FindByIdDoctorCabinetAsync(id)
-            ?? throw new KeyNotFoundException($"Doctor Cabinet with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Doctor Cabinet with id: {id} does not exist.");
 
         return MapToDoctorCabinetDto(doctorCabinet);
     }
@@ -60,7 +61,7 @@ public class DoctorCabinetService : IDoctorCabinetService
 
         if (!await _repository.IsExistByIdAsync(doctorCabinetForUpdate.Id))
         {
-            throw new KeyNotFoundException($"DoctorCabinet with id: {doctorCabinetForUpdate.Id} does not exist");
+            throw new EntityNotFoundException($"DoctorCabinet with id: {doctorCabinetForUpdate.Id} does not exist");
         }
 
         if (!await _accountRepository.IsExistByIdAsync(doctorCabinetForUpdate.AccountId))
@@ -69,7 +70,7 @@ public class DoctorCabinetService : IDoctorCabinetService
         }
 
         var doctorCabinet = await _repository.FindByIdAsync(doctorCabinetForUpdate.Id)
-            ?? throw new KeyNotFoundException($"Doctor Cabinet with id: {doctorCabinetForUpdate.Id} does not exist.");
+            ?? throw new EntityNotFoundException($"Doctor Cabinet with id: {doctorCabinetForUpdate.Id} does not exist.");
 
         doctorCabinet.RoomNumber = doctorCabinetForUpdate?.RoomNumber;
         doctorCabinet.AccountId = doctorCabinetForUpdate?.AccountId;

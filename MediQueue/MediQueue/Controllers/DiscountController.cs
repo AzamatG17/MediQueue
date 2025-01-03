@@ -23,39 +23,18 @@ public class DiscountController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _service.GetAllDiscountsAsync();
+        var accounts = await _service.GetAllDiscountsAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(24, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _service.GetDiscountByIdAsync(id);
+        var account = await _service.GetDiscountByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Discount with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Discount not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(24, 3)]
@@ -67,19 +46,13 @@ public class DiscountController : BaseController
             return BadRequest(CreateErrorResponse("Discount data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _service.CreateDiscountAsync(discountForCreateDto);
-            return Ok(CreateSuccessResponse("Discount successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.CreateDiscountAsync(discountForCreateDto);
+
+        return Ok(CreateSuccessResponse("Discount successfully created."));
     }
 
     [PermissionAuthorize(24, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] DiscountForUpdateDto discountForUpdateDto)
     {
         if (discountForUpdateDto == null)
@@ -92,37 +65,18 @@ public class DiscountController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {discountForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _service.UpdateDiscountAsync(discountForUpdateDto);
-            return Ok(CreateSuccessResponse("Discount successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Discount not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _service.UpdateDiscountAsync(discountForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Discount successfully updated."));
     }
 
     [PermissionAuthorize(24, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _service.DeleteDiscountAsync(id);
-            return Ok(CreateSuccessResponse("Discount successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Discount not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.DeleteDiscountAsync(id);
+
+        return Ok(CreateSuccessResponse("Discount successfully deleted."));
     }
 }

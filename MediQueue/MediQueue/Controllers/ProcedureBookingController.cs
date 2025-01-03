@@ -23,39 +23,18 @@ public class ProcedureBookingController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _service.GetAllProcedureBookingsAsync();
+        var accounts = await _service.GetAllProcedureBookingsAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(33, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _service.GetProcedureBookingByIdAsync(id);
+        var account = await _service.GetProcedureBookingByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"ProcedureBooking with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", ProcedureBooking not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(33, 3)]
@@ -67,19 +46,13 @@ public class ProcedureBookingController : BaseController
             return BadRequest(CreateErrorResponse("ProcedureBooking data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _service.CreateProcedureBookingAsync(procedureBookingForCreateDto);
-            return Ok(CreateSuccessResponse("ProcedureBooking successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.CreateProcedureBookingAsync(procedureBookingForCreateDto);
+
+        return Ok(CreateSuccessResponse("ProcedureBooking successfully created."));
     }
 
     [PermissionAuthorize(33, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] ProcedureBookingForUpdateDto procedureBookingForUpdateDto)
     {
         if (procedureBookingForUpdateDto == null)
@@ -93,37 +66,17 @@ public class ProcedureBookingController : BaseController
                 $"Route id: {id} does not match with parameter id: {procedureBookingForUpdateDto.Id}."));
         }
 
-        try
-        {
-            var updatedAccount = await _service.UpdateProcedureBookingAsync(procedureBookingForUpdateDto);
-            return Ok(CreateSuccessResponse("ProcedureBooking successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", ProcedureBooking not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.UpdateProcedureBookingAsync(procedureBookingForUpdateDto);
+
+        return Ok(CreateSuccessResponse("ProcedureBooking successfully updated."));
     }
 
     [PermissionAuthorize(33, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _service.DeleteProcedureBookingAsync(id);
-            return Ok(CreateSuccessResponse("ProcedureBooking successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", ProcedureBooking not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.DeleteProcedureBookingAsync(id);
+
+        return Ok(CreateSuccessResponse("ProcedureBooking successfully deleted."));
     }
 }

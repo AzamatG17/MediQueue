@@ -22,39 +22,18 @@ public class ScladController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _cladService.GetAllScladsAsync();
+        var accounts = await _cladService.GetAllScladsAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(12, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _cladService.GetScladByIdAsync(id);
+        var account = await _cladService.GetScladByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Sclad with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Sclad not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(12, 3)]
@@ -66,19 +45,13 @@ public class ScladController : BaseController
             return BadRequest(CreateErrorResponse("Sclad data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _cladService.CreateScladAsync(scladForCreateDto);
-            return Ok(CreateSuccessResponse("Sclad successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _cladService.CreateScladAsync(scladForCreateDto);
+
+        return Ok(CreateSuccessResponse("Sclad successfully created."));
     }
 
     [PermissionAuthorize(12, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] ScladForUpdateDto scladForUpdateDto)
     {
         if (scladForUpdateDto == null)
@@ -91,37 +64,18 @@ public class ScladController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {scladForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _cladService.UpdateScladAsync(scladForUpdateDto);
-            return Ok(CreateSuccessResponse("Sclad successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Sclad not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _cladService.UpdateScladAsync(scladForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Sclad successfully updated."));
     }
 
     [PermissionAuthorize(12, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _cladService.DeleteScladAsync(id);
-            return Ok(CreateSuccessResponse("Sclad successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Sclad not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _cladService.DeleteScladAsync(id);
+
+        return Ok(CreateSuccessResponse("Sclad successfully deleted."));
     }
 }

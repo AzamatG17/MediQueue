@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -33,7 +34,7 @@ public class ServicesService : IServicesService
     public async Task<ServiceDtos> GetServiceByIdAsync(int id)
     {
         var service = await _repository.GetByIdWithCategoryAsync(id) 
-            ?? throw new KeyNotFoundException($"Service with {id} not found");
+            ?? throw new EntityNotFoundException($"Service with {id} not found");
 
         return MapToServiceDto(service);
     }
@@ -43,7 +44,7 @@ public class ServicesService : IServicesService
         ArgumentNullException.ThrowIfNull(nameof(serviceForCreateDto));
 
         var category = await _categoryRepository.FindByIdAsync(serviceForCreateDto.CategoryId)
-            ?? throw new KeyNotFoundException($"Category with ID {serviceForCreateDto.CategoryId} not found.");
+            ?? throw new EntityNotFoundException($"Category with ID {serviceForCreateDto.CategoryId} not found.");
 
         var service = new Service
         {
@@ -72,7 +73,7 @@ public class ServicesService : IServicesService
         ArgumentNullException.ThrowIfNull(nameof(serviceForUpdateDto));
 
         var existingService = await _repository.GetByIdServiceAsync(serviceForUpdateDto.id)
-            ?? throw new KeyNotFoundException($"Service with ID {serviceForUpdateDto.id} not found.");
+            ?? throw new EntityNotFoundException($"Service with ID {serviceForUpdateDto.id} not found.");
 
         existingService.Name = serviceForUpdateDto.Name;
         existingService.Amount = serviceForUpdateDto.Amount;

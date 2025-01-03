@@ -1,6 +1,7 @@
 ﻿using MediQueue.Domain.DTOs.Procedure;
 using MediQueue.Domain.DTOs.ProcedureBooking;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Domain.ResourceParameters;
@@ -37,7 +38,7 @@ public class ProcedureService : IProcedureService
     public async Task<ProcedureDto> GetProcedureByIdAsync(int id)
     {
         var procedure = await _repository.FindByIdProcedureAsync(id)
-            ?? throw new KeyNotFoundException($"Procedure with id: {id} does not found.");
+            ?? throw new EntityNotFoundException($"Procedure with id: {id} does not found.");
 
         var timeSlots = GenerateTimeSlots(procedure, DateTime.Today, DateTime.Today);
         return MapToProcedureDto(procedure, timeSlots);
@@ -52,7 +53,7 @@ public class ProcedureService : IProcedureService
 
         if (! await _categoryRepository.IsExistByIdAsync(dto.ProcedureCategoryId))
         {
-            throw new KeyNotFoundException($"Procedure Category with id: {dto.ProcedureCategoryId} does not exist.");
+            throw new EntityNotFoundException($"Procedure Category with id: {dto.ProcedureCategoryId} does not exist.");
         }
 
         var procedure = new Procedure
@@ -80,11 +81,11 @@ public class ProcedureService : IProcedureService
         if (dto.BreakDuration < 0) throw new ArgumentException("Break duration cannot be negative.");
 
         var procedure = await _repository.FindByIdAsync(dto.Id)
-            ?? throw new KeyNotFoundException($"Procedure with id: {dto.Id} does not exist");
+            ?? throw new EntityNotFoundException($"Procedure with id: {dto.Id} does not exist");
 
         if (!await _categoryRepository.IsExistByIdAsync(dto.ProcedureCategoryId))
         {
-            throw new KeyNotFoundException($"Procedure Category with id: {dto.ProcedureCategoryId} does not exist.");
+            throw new EntityNotFoundException($"Procedure Category with id: {dto.ProcedureCategoryId} does not exist.");
         }
 
         procedure.Name = dto.Name;

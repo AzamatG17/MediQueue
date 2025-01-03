@@ -38,7 +38,7 @@ public class AccountService : IAccountService
     public async Task<AccountDto> GetAccountByIdAsync(int id)
     {
         var account = await _accountRepository.FindByIdWithRoleAsync(id)
-            ?? throw new KeyNotFoundException($"Account with id {id} not found.");
+            ?? throw new EntityNotFoundException($"Account with id {id} not found.");
 
         return MapToAccountDto(account);
     }

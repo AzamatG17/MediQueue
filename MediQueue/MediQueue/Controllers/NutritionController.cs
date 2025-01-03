@@ -23,38 +23,18 @@ public class NutritionController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var nutritions = await _nutritionService.GetAllNutritionsAsync();
-            return Ok(nutritions);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        var nutritions = await _nutritionService.GetAllNutritionsAsync();
+
+        return Ok(nutritions);
     }
 
     [PermissionAuthorize(27, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var nutrition = await _nutritionService.GetNutritionByIdAsync(id);
+        var nutrition = await _nutritionService.GetNutritionByIdAsync(id);
 
-            if (nutrition is null)
-                return NotFound(CreateErrorResponse($"Nutrition with id: {id} does not exist."));
-
-            return Ok(nutrition);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Nutrition not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(nutrition);
     }
 
     [PermissionAuthorize(27, 3)]
@@ -66,19 +46,13 @@ public class NutritionController : BaseController
             return BadRequest(CreateErrorResponse("Nutrition data is null."));
         }
 
-        try
-        {
-            var createdNutrition = await _nutritionService.CreateNutritionAsync(nutritionForCreateDto);
-            return Ok(CreateSuccessResponse("Nutrition successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _nutritionService.CreateNutritionAsync(nutritionForCreateDto);
+
+        return Ok(CreateSuccessResponse("Nutrition successfully created."));
     }
 
     [PermissionAuthorize(27, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] NutritionForUpdateDto nutritionForUpdateDto)
     {
         if (nutritionForUpdateDto == null)
@@ -92,37 +66,17 @@ public class NutritionController : BaseController
                 $"Route id: {id} does not match with parameter id: {nutritionForUpdateDto.Id}."));
         }
 
-        try
-        {
-            var updatedNutrition = await _nutritionService.UpdateNutritionAsync(nutritionForUpdateDto);
-            return Ok(CreateSuccessResponse("Nutrition successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Nutrition not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _nutritionService.UpdateNutritionAsync(nutritionForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Nutrition successfully updated."));
     }
 
     [PermissionAuthorize(27, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _nutritionService.DeleteNutritionAsync(id);
-            return Ok(CreateSuccessResponse("Nutrition successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Nutrition not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _nutritionService.DeleteNutritionAsync(id);
+
+        return Ok(CreateSuccessResponse("Nutrition successfully deleted."));
     }
 }

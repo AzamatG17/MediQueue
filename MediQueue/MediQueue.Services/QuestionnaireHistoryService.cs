@@ -9,6 +9,7 @@ using MediQueue.Domain.DTOs.StationaryStay;
 using MediQueue.Domain.DTOs.Tariff;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 using MediQueue.Domain.ResourceParameters;
@@ -56,7 +57,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
     public async Task<QuestionnaireHistoryDto> GetQuestionnaireHistoryByIdAsync(int id)
     {
         var questionn = await _questionnaireHistoryRepositoty.GetQuestionnaireHistoryByQuestionnaireIdAsync(id)
-            ?? throw new KeyNotFoundException($"QuestionnaireHistory with {id} not found");
+            ?? throw new EntityNotFoundException($"QuestionnaireHistory with {id} not found");
 
         return await MapToQuestionnaireHistoryDto(questionn);
     }
@@ -66,7 +67,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         ArgumentNullException.ThrowIfNull(questionnaireHistoryForCreateDto);
 
         var questionnaire = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForCreateDto.QuestionnaireId)
-            ?? throw new KeyNotFoundException($"Questionnairy Id: {questionnaireHistoryForCreateDto.QuestionnaireId} does not exist!");
+            ?? throw new EntityNotFoundException($"Questionnairy Id: {questionnaireHistoryForCreateDto.QuestionnaireId} does not exist!");
 
         var questionnaireHistory = await MapToQuestionnaryHistory(questionnaireHistoryForCreateDto);
 
@@ -84,10 +85,10 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
         ArgumentNullException.ThrowIfNull(questionnaireHistoryForUpdateDto);
 
         var existingHistory = await _questionnaireHistoryRepositoty.GetByIdAsync(questionnaireHistoryForUpdateDto.Historyid)
-            ?? throw new KeyNotFoundException($"QuestionnaireHistory with {questionnaireHistoryForUpdateDto.Historyid} not found");
+            ?? throw new EntityNotFoundException($"QuestionnaireHistory with {questionnaireHistoryForUpdateDto.Historyid} not found");
 
         var questionnaire = await _questionnaireRepository.GetByQuestionnaireIdAsync(questionnaireHistoryForUpdateDto.QuestionnaireId)
-            ?? throw new KeyNotFoundException($"Questionnairy Id: {questionnaireHistoryForUpdateDto.QuestionnaireId} does not exist!");
+            ?? throw new EntityNotFoundException($"Questionnairy Id: {questionnaireHistoryForUpdateDto.QuestionnaireId} does not exist!");
 
         var updatedHistory = await MapToQuestionnaireHistoryForUpdate(questionnaireHistoryForUpdateDto, existingHistory, questionnaire.Id);
 
@@ -184,6 +185,7 @@ public class QuestionnaireHistoryService : IQuestionnaireHistoryService
             b.StartTime,
             b.NumberOfDays,
             b.QuantityUsed,
+            b.TotalPrice / b.NumberOfDays,
             b.TotalPrice,
             b.Amount,
             b.IsPayed,

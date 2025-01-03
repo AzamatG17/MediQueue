@@ -24,39 +24,18 @@ public class QuestionnaireHistoryController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync([FromQuery] QuestionnaireHistoryResourceParametrs questionnaireHistoryResourceParametrs)
     {
-        try
-        {
-            var accounts = await _questionnaireHistoryService.GetAllQuestionnaireHistoriessAsync(questionnaireHistoryResourceParametrs);
+        var accounts = await _questionnaireHistoryService.GetAllQuestionnaireHistoriessAsync(questionnaireHistoryResourceParametrs);
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(10, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _questionnaireHistoryService.GetQuestionnaireHistoryByIdAsync(id);
+        var account = await _questionnaireHistoryService.GetQuestionnaireHistoryByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"QuestionnaireHistory with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", QuestionnaireHistory not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(10, 3)]
@@ -68,19 +47,13 @@ public class QuestionnaireHistoryController : BaseController
             return BadRequest(CreateErrorResponse("QuestionnaireHistory data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _questionnaireHistoryService.CreateQuestionnaireHistoryAsync(questionnaireHistoryForCreateDto);
-            return Ok(CreateSuccessResponse("QuestionnaireHistory successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _questionnaireHistoryService.CreateQuestionnaireHistoryAsync(questionnaireHistoryForCreateDto);
+
+        return Ok(CreateSuccessResponse("QuestionnaireHistory successfully created."));
     }
 
     [PermissionAuthorize(10, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] QuestionnaireHistoryForUpdateDto questionnaireHistoryForUpdateDto)
     {
         if (questionnaireHistoryForUpdateDto == null)
@@ -93,37 +66,18 @@ public class QuestionnaireHistoryController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {questionnaireHistoryForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _questionnaireHistoryService.UpdateQuestionnaireHistoryAsync(questionnaireHistoryForUpdateDto);
-            return Ok(CreateSuccessResponse("QuestionnaireHistory successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", QuestionnaireHistory not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _questionnaireHistoryService.UpdateQuestionnaireHistoryAsync(questionnaireHistoryForUpdateDto);
+
+        return Ok(CreateSuccessResponse("QuestionnaireHistory successfully updated."));
     }
 
     [PermissionAuthorize(10, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _questionnaireHistoryService.DeleteQuestionnaireHistoryAsync(id);
-            return Ok(CreateSuccessResponse("QuestionnaireHistory successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", QuestionnaireHistory not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _questionnaireHistoryService.DeleteQuestionnaireHistoryAsync(id);
+
+        return Ok(CreateSuccessResponse("QuestionnaireHistory successfully deleted."));
     }
 }

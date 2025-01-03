@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.WardPlace;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -48,7 +49,7 @@ public class WardPlaceService : IWardPlaceService
         ArgumentNullException.ThrowIfNull(nameof(wardPlaceForUpdateDto));
 
         var existingWardPlace = await _repository.FindByIdWardPlaceAsync(wardPlaceForUpdateDto.Id)
-            ?? throw new KeyNotFoundException($"WardPlace with ID {wardPlaceForUpdateDto.Id} not found.");
+            ?? throw new EntityNotFoundException($"WardPlace with ID {wardPlaceForUpdateDto.Id} not found.");
 
         existingWardPlace.WardPlaceName = wardPlaceForUpdateDto.WardPlaceName;
         existingWardPlace.WardId = wardPlaceForUpdateDto.WardId;

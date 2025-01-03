@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Partiya;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -30,7 +31,7 @@ public class PartiyaService : IPartiyaService
     public async Task<PartiyaDto> GetPartiyaByIdAsync(int id)
     {
         var partiya = await _repository.FindByIdPartiyaAsync(id)
-            ?? throw new KeyNotFoundException($"Partiya with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Partiya with id: {id} does not exist.");
 
         return MapToPartiyaDto(partiya);
     }

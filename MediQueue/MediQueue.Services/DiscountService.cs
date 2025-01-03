@@ -1,5 +1,6 @@
 ﻿using MediQueue.Domain.DTOs.Discount;
 using MediQueue.Domain.Entities;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -26,7 +27,7 @@ public class DiscountService : IDiscountService
     public async Task<DiscountDto> GetDiscountByIdAsync(int id)
     {
         var discount = await _repository.FindByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Discount with id: {id} does not exist.");
+            ?? throw new EntityNotFoundException($"Discount with id: {id} does not exist.");
 
         return MapToDiscountDto(discount);
     }
@@ -62,7 +63,7 @@ public class DiscountService : IDiscountService
 
         var discount = await _repository.FindByIdAsync(discountForUpdateDto.Id);
 
-        if (discount == null) throw new KeyNotFoundException($"Discount with id: {discount} does not exist!");
+        if (discount == null) throw new EntityNotFoundException($"Discount with id: {discount} does not exist!");
 
         discount.Name = discountForUpdateDto.Name;
         discount.Percent = discountForUpdateDto.Percent;

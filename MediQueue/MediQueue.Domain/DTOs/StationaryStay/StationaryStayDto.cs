@@ -9,6 +9,7 @@ public record StationaryStayDto(
     DateTime? StartTime,
     int? NumberOfDays,
     decimal? QuantityUsed,
+    decimal? PricePerDay,
     decimal? TotalPrice,
     decimal? Amount,
     bool? IsPayed,

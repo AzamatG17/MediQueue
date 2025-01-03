@@ -23,39 +23,18 @@ public class PartiyaController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _service.GetAllPartiyastvosAsync();
+        var accounts = await _service.GetAllPartiyastvosAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(19, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _service.GetPartiyaByIdAsync(id);
+        var account = await _service.GetPartiyaByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Partiya with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Partiya not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(19, 3)]
@@ -67,19 +46,13 @@ public class PartiyaController : BaseController
             return BadRequest(CreateErrorResponse("Partiya data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _service.CreatePartiyaAsync(partiyaForCreateDto);
-            return Ok(CreateSuccessResponse("Partiya successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.CreatePartiyaAsync(partiyaForCreateDto);
+
+        return Ok(CreateSuccessResponse("Partiya successfully created."));
     }
 
     [PermissionAuthorize(19, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] PartiyaForUpdateDto partiyaForUpdateDto)
     {
         if (partiyaForUpdateDto == null)
@@ -92,37 +65,18 @@ public class PartiyaController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {partiyaForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _service.UpdatePartiyaAsync(partiyaForUpdateDto);
-            return Ok(CreateSuccessResponse("Partiya successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Partiya not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _service.UpdatePartiyaAsync(partiyaForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Partiya successfully updated."));
     }
 
     [PermissionAuthorize(19, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _service.DeletePartiyaAsync(id);
-            return Ok(CreateSuccessResponse("Partiya successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Partiya not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.DeletePartiyaAsync(id);
+
+        return Ok(CreateSuccessResponse("Partiya successfully deleted."));
     }
 }

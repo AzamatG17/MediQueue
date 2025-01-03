@@ -2,6 +2,7 @@
 using MediQueue.Domain.DTOs.Service;
 using MediQueue.Domain.Entities;
 using MediQueue.Domain.Entities.Responses;
+using MediQueue.Domain.Exceptions;
 using MediQueue.Domain.Interfaces.Repositories;
 using MediQueue.Domain.Interfaces.Services;
 
@@ -30,7 +31,7 @@ public class CategoriesService : ICategoryService
     public async Task<CategoryDto> GetCategoryByIdAsync(int id)
     {
         var category = await _categoryRepository.FindByIdWithGroupAsync(id)
-            ?? throw new KeyNotFoundException($"Category with {id} not found");
+            ?? throw new EntityNotFoundException($"Category with {id} not found");
 
         return MapToCategoryDto(category);
     }
@@ -51,7 +52,7 @@ public class CategoriesService : ICategoryService
         ArgumentNullException.ThrowIfNull(categoryForUpdateDto);
 
         var category = await _categoryRepository.FindByIdCategoryAsync(categoryForUpdateDto.Id)
-            ?? throw new KeyNotFoundException($"Category with {categoryForUpdateDto.Id} not found");
+            ?? throw new EntityNotFoundException($"Category with {categoryForUpdateDto.Id} not found");
         
         category.CategoryName = categoryForUpdateDto.CategoryName;
 

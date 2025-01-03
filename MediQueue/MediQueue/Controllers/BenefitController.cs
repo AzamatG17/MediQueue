@@ -23,39 +23,18 @@ public class BenefitController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _service.GetAllBenefitsAsync();
+        var accounts = await _service.GetAllBenefitsAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(25, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _service.GetBenefitByIdAsync(id);
+        var account = await _service.GetBenefitByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Benefit with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Benefit not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(25, 3)]
@@ -67,19 +46,13 @@ public class BenefitController : BaseController
             return BadRequest(CreateErrorResponse("Benefit data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _service.CreateBenefitAsync(benefitForCreateDto);
-            return Ok(CreateSuccessResponse("Benefit successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.CreateBenefitAsync(benefitForCreateDto);
+
+        return Ok(CreateSuccessResponse("Benefit successfully created."));
     }
 
     [PermissionAuthorize(25, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] BenefitForUpdateDto benefitForUpdateDto)
     {
         if (benefitForUpdateDto == null)
@@ -92,37 +65,18 @@ public class BenefitController : BaseController
             return BadRequest(CreateErrorResponse(
                 $"Route id: {id} does not match with parameter id: {benefitForUpdateDto.Id}."));
         }
-        try
-        {
-            var updatedAccount = await _service.UpdateBenefitAsync(benefitForUpdateDto);
-            return Ok(CreateSuccessResponse("Benefit successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Benefit not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+
+        await _service.UpdateBenefitAsync(benefitForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Benefit successfully updated."));
     }
 
     [PermissionAuthorize(25, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _service.DeleteBenefitAsync(id);
-            return Ok(CreateSuccessResponse("Benefit successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Benefit not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.DeleteBenefitAsync(id);
+
+        return Ok(CreateSuccessResponse("Benefit successfully deleted."));
     }
 }

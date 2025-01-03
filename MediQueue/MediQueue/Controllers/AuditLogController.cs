@@ -23,15 +23,8 @@ public class AuditLogController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync([FromQuery] AuditLogResourceParameters auditLogResourceParameters)
     {
-        try
-        {
-            var accounts = await _service.GetAllAuditLogAsync(auditLogResourceParameters);
+        var accounts = await _service.GetAllAuditLogAsync(auditLogResourceParameters);
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 }

@@ -23,38 +23,18 @@ public class WardPlaceController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var wardPlaces = await _wardPlaceService.GetAllWardPlacesAsync();
-            return Ok(wardPlaces);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        var wardPlaces = await _wardPlaceService.GetAllWardPlacesAsync();
+
+        return Ok(wardPlaces);
     }
 
     [PermissionAuthorize(30, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var wardPlace = await _wardPlaceService.GetWardPlaceByIdAsync(id);
+        var wardPlace = await _wardPlaceService.GetWardPlaceByIdAsync(id);
 
-            if (wardPlace is null)
-                return NotFound(CreateErrorResponse($"WardPlace with id: {id} does not exist."));
-
-            return Ok(wardPlace);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", WardPlace not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(wardPlace);
     }
 
     [PermissionAuthorize(30, 3)]
@@ -66,19 +46,13 @@ public class WardPlaceController : BaseController
             return BadRequest(CreateErrorResponse("WardPlace data is null."));
         }
 
-        try
-        {
-            var createdWardPlace = await _wardPlaceService.CreateWardPlaceAsync(wardPlaceForCreateDto);
-            return Ok(CreateSuccessResponse("WardPlace successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _wardPlaceService.CreateWardPlaceAsync(wardPlaceForCreateDto);
+
+        return Ok(CreateSuccessResponse("WardPlace successfully created."));
     }
 
     [PermissionAuthorize(30, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] WardPlaceForUpdateDto wardPlaceForUpdateDto)
     {
         if (wardPlaceForUpdateDto == null)
@@ -92,37 +66,17 @@ public class WardPlaceController : BaseController
                 $"Route id: {id} does not match with parameter id: {wardPlaceForUpdateDto.Id}."));
         }
 
-        try
-        {
-            var updatedWardPlace = await _wardPlaceService.UpdateWardPlaceAsync(wardPlaceForUpdateDto);
-            return Ok(CreateSuccessResponse("WardPlace successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", WardPlace not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _wardPlaceService.UpdateWardPlaceAsync(wardPlaceForUpdateDto);
+
+        return Ok(CreateSuccessResponse("WardPlace successfully updated."));
     }
 
     [PermissionAuthorize(30, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _wardPlaceService.DeleteWardPlaceAsync(id);
-            return Ok(CreateSuccessResponse("WardPlace successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", WardPlace not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _wardPlaceService.DeleteWardPlaceAsync(id);
+
+        return Ok(CreateSuccessResponse("WardPlace successfully deleted."));
     }
 }

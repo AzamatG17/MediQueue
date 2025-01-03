@@ -18,7 +18,7 @@ public class MedicineController : BaseController
     }
 
     [PermissionAuthorize(14, 1)]
-    [HttpPost("{id}/use")]
+    [HttpPost("{id:int:min(1)}/use")]
     public async Task<ActionResult> PostAsync(int id, [FromBody] decimal amount)
     {
         if (amount <= 0)
@@ -26,27 +26,12 @@ public class MedicineController : BaseController
             return BadRequest(CreateErrorResponse("Amount must be positive."));
         }
 
-        try
-        {
-            //await _lekarstvoService.UseLekarstvoAsync(id, amount);
-            return Ok(CreateSuccessResponse("Lekarstvo successfully used."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Lekarstvo not found."));
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(CreateErrorResponse(ex.Message));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        //await _lekarstvoService.UseLekarstvoAsync(id, amount);
+        return Ok(CreateSuccessResponse("Lekarstvo successfully used."));
     }
 
     [PermissionAuthorize(14, 2)]
-    [HttpPost("{id}/add")]
+    [HttpPost("{id:int:min(1)}/add")]
     public async Task<ActionResult> Post(int id, [FromBody] decimal amount)
     {
         if (amount <= 0)
@@ -54,18 +39,7 @@ public class MedicineController : BaseController
             return BadRequest(CreateErrorResponse("Amount must be positive."));
         }
 
-        try
-        {
-            //await _lekarstvoService.AddLekarstvoQuantityAsync(id, amount);
-            return Ok(CreateSuccessResponse("Quantity successfully added to Lekarstvo."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Lekarstvo not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        //await _lekarstvoService.AddLekarstvoQuantityAsync(id, amount);
+        return Ok(CreateSuccessResponse("Quantity successfully added to Lekarstvo."));
     }
 }

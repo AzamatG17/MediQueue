@@ -23,39 +23,18 @@ public class ProcedureCategoryController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _service.GetAllProcedureCategoresAsync();
+        var accounts = await _service.GetAllProcedureCategoresAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(34, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _service.GetProcedureCategoryByIdAsync(id);
+        var account = await _service.GetProcedureCategoryByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"ProcedureCategory with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", ProcedureCategory not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(34, 3)]
@@ -67,19 +46,13 @@ public class ProcedureCategoryController : BaseController
             return BadRequest(CreateErrorResponse("ProcedureCategory data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _service.CreateProcedureCategoryAsync(procedureCategoryForCreateDto);
-            return Ok(CreateSuccessResponse("ProcedureCategory successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.CreateProcedureCategoryAsync(procedureCategoryForCreateDto);
+
+        return Ok(CreateSuccessResponse("ProcedureCategory successfully created."));
     }
 
     [PermissionAuthorize(34, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] ProcedureCategoryForUpdateDto procedureCategoryForUpdateDto)
     {
         if (procedureCategoryForUpdateDto == null)
@@ -93,37 +66,17 @@ public class ProcedureCategoryController : BaseController
                 $"Route id: {id} does not match with parameter id: {procedureCategoryForUpdateDto.Id}."));
         }
 
-        try
-        {
-            var updatedAccount = await _service.UpdateProcedureCategoryAsync(procedureCategoryForUpdateDto);
-            return Ok(CreateSuccessResponse("ProcedureCategory successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", ProcedureCategory not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.UpdateProcedureCategoryAsync(procedureCategoryForUpdateDto);
+
+        return Ok(CreateSuccessResponse("ProcedureCategory successfully updated."));
     }
 
     [PermissionAuthorize(34, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _service.DeleteProcedureCategoryAsync(id);
-            return Ok(CreateSuccessResponse("ProcedureCategory successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", ProcedureCategory not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _service.DeleteProcedureCategoryAsync(id);
+
+        return Ok(CreateSuccessResponse("ProcedureCategory successfully deleted."));
     }
 }

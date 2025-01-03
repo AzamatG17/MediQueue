@@ -23,39 +23,18 @@ public class PaymentServiceController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _paymentService.GetAllPaymentsAsync();
+        var accounts = await _paymentService.GetAllPaymentsAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(7, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _paymentService.GetPaymentByIdAsync(id);
+        var account = await _paymentService.GetPaymentByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Payment with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Payment not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(7, 3)]
@@ -67,19 +46,13 @@ public class PaymentServiceController : BaseController
             return BadRequest(CreateErrorResponse("Payment data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _paymentService.CreatePaymentAsync(paymentServiceHelperDto);
-            return Ok(CreateSuccessResponse("Payment successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _paymentService.CreatePaymentAsync(paymentServiceHelperDto);
+
+        return Ok(CreateSuccessResponse("Payment successfully created."));
     }
 
     [PermissionAuthorize(7, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] PaymentServiceForUpdateDto paymentServiceForUpdateDto)
     {
         if (paymentServiceForUpdateDto == null)
@@ -93,37 +66,17 @@ public class PaymentServiceController : BaseController
                 $"Route id: {id} does not match with parameter id: {paymentServiceForUpdateDto.Id}."));
         }
 
-        try
-        {
-            var updatedAccount = await _paymentService.UpdatePaymentAsync(paymentServiceForUpdateDto);
-            return Ok(CreateSuccessResponse("Payment successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Payment not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _paymentService.UpdatePaymentAsync(paymentServiceForUpdateDto);
+
+        return Ok(CreateSuccessResponse("Payment successfully updated."));
     }
 
     [PermissionAuthorize(7, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _paymentService.DeletePaymentAsync(id);
-            return Ok(CreateSuccessResponse("Payment successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Payment not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _paymentService.DeletePaymentAsync(id);
+
+        return Ok(CreateSuccessResponse("Payment successfully deleted."));
     }
 }

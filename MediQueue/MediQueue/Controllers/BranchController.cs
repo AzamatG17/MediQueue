@@ -22,39 +22,18 @@ public class BranchController : BaseController
     [HttpGet]
     public async Task<ActionResult> GetAsync()
     {
-        try
-        {
-            var accounts = await _branchService.GetAllBranchsAsync();
+        var accounts = await _branchService.GetAllBranchsAsync();
 
-            return Ok(accounts);
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(accounts);
     }
 
     [PermissionAuthorize(2, 2)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int:min(1)}")]
     public async Task<ActionResult> GetByIdAsync(int id)
     {
-        try
-        {
-            var account = await _branchService.GetBranchByIdAsync(id);
+        var account = await _branchService.GetBranchByIdAsync(id);
 
-            if (account is null)
-                return NotFound(CreateErrorResponse($"Branch with id: {id} does not exist."));
-
-            return Ok(account);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Branch not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        return Ok(account);
     }
 
     [PermissionAuthorize(2, 3)]
@@ -66,19 +45,13 @@ public class BranchController : BaseController
             return BadRequest(CreateErrorResponse("Branch data is null."));
         }
 
-        try
-        {
-            var createdAccount = await _branchService.CreateBranchAsync(branchForCreateDto);
-            return Ok(CreateSuccessResponse("Branch successfully created."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _branchService.CreateBranchAsync(branchForCreateDto);
+
+        return Ok(CreateSuccessResponse("Branch successfully created."));
     }
 
     [PermissionAuthorize(2, 4)]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] BranchForUpdatreDto branchForUpdatreDto)
     {
         if (branchForUpdatreDto == null)
@@ -92,37 +65,17 @@ public class BranchController : BaseController
                 $"Route id: {id} does not match with parameter id: {branchForUpdatreDto.Id}."));
         }
 
-        try
-        {
-            var updatedAccount = await _branchService.UpdateBranchAsync(branchForUpdatreDto);
-            return Ok(CreateSuccessResponse("Branch successfully updated."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Branch not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _branchService.UpdateBranchAsync(branchForUpdatreDto);
+
+        return Ok(CreateSuccessResponse("Branch successfully updated."));
     }
 
     [PermissionAuthorize(2, 5)]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int:min(1)}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            await _branchService.DeleteBranchAsync(id);
-            return Ok(CreateSuccessResponse("Branch successfully deleted."));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(CreateErrorResponse(ex.Message + ", Branch not found."));
-        }
-        catch (Exception ex)
-        {
-            return HandleError(ex);
-        }
+        await _branchService.DeleteBranchAsync(id);
+
+        return Ok(CreateSuccessResponse("Branch successfully deleted."));
     }
 }
